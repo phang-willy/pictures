@@ -1,0 +1,84 @@
+services:
+  front:
+    container_name: frontend
+    build:
+      context: ./apps/frontend
+      dockerfile: Dockerfile
+      target: dev
+    env_file:
+      - ./.env
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
+    ports:
+      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+    volumes:
+      - ./apps/frontend:/app
+      - front_node_modules:/app/node_modules
+      - front_next:/app/.next
+    depends_on:
+      back:
+        condition: service_started
+    restart: unless-stopped
+
+  back:
+    container_name: backend
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+      target: dev
+    env_file:
+      - ./.env
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+      CHOKIDAR_INTERVAL: "1000"
+      WATCHPACK_POLLING: "true"
+      TSC_WATCHFILE: "UsePolling"
+      TSC_WATCHDIRECTORY: "UsePolling"
+    ports:
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
+    volumes:
+      - ./apps/backend:/app
+      - back_node_modules:/app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    container_name: database
+    image: postgres:17-alpine
+    env_file:
+      - ./.env
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  adminer:
+    container_name: adminer
+    image: adminer:latest
+    env_file:
+      - ./.env
+    ports:
+      - "${ADMINER_PORT}:${ADMINER_PORT}"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  front_node_modules:
+  front_next:
+  back_node_modules:

@@ -1,0 +1,45 @@
+name: Commit message check
+
+on:
+  pull_request:
+    branches:
+      - dev
+      - pre-prod
+      - main
+
+jobs:
+  check-commits:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Validate commit messages
+        run: |
+          git fetch origin ${{ github.base_ref }} --depth=100
+
+          COMMITS=$(git log --format=%s --no-merges origin/${{ github.base_ref }}..HEAD)
+
+          echo "Commits to validate:"
+          echo "$COMMITS"
+
+          # Regex dans une variable : sinon bash interprète le ")" de [^)] comme fin de [[ ... ]]
+          re='^(feat|fix|chore|docs|refactor|remove)(\([^)]+\))?:\ .+'
+
+          while IFS= read -r message; do
+            [ -z "$message" ] && continue
+
+            if [[ ! "$message" =~ $re ]] && [[ ! "$message" =~ ^[iI]nit.* ]]; then
+              echo "❌ Invalid commit message: $message"
+              echo "Expected format: feat: ..., fix: ..., chore: ..., chore(scope): ..., docs: ..., refactor: ..."
+              exit 1
+            fi
+          done <<< "$COMMITS"
+
+          echo "✅ All commit messages are valid"
