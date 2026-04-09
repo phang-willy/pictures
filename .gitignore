@@ -1,0 +1,7 @@
+**/node_modules
+**/coverage
+**/.deps-lock-hash
+**/.env
+**/.next
+
+.DS_Store

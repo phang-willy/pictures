@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - dev
+      - pre-prod
+      - main
+    paths-ignore:
+      - "**.md"
+  pull_request:
+    branches:
+      - dev
+      - pre-prod
+      - main
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint / Type-check / Build
+    runs-on: ubuntu-latest
+    env:
+      # Actions JS runtime (checkout/setup-node) — align with Node 24 before default switch
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+          cache-dependency-path: |
+            apps/backend/package-lock.json
+            apps/frontend/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm ci
+        working-directory: apps/backend
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: apps/frontend
+
+      - name: Lint backend
+        run: npm run lint
+        working-directory: apps/backend
+
+      - name: Lint frontend
+        run: npm run lint
+        working-directory: apps/frontend
+
+      - name: Type-check backend
+        run: npm run type-check
+        working-directory: apps/backend
+
+      - name: Type-check frontend
+        run: npm run type-check
+        working-directory: apps/frontend
+
+      - name: Build backend
+        run: npm run build
+        working-directory: apps/backend
+
+      - name: Build frontend
+        run: npm run build
+        working-directory: apps/frontend
