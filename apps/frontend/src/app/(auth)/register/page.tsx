@@ -66,7 +66,8 @@ const RegisterPage = () => {
       for (const issue of parsed.error.issues) {
         const path = issue.path[0];
         if (path === "email" || path === "password" || path === "confirmPassword") {
-          nextErrors[path] = nextErrors[path] ?? issue.message;
+          const key: keyof RegisterErrors = path;
+          nextErrors[key] = nextErrors[key] ?? issue.message;
         }
         messages.push(issue.message);
       }

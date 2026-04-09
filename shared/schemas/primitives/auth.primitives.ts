@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z, type RefinementCtx } from "zod";
 
 export const emailSchema = z.email("Adresse email invalide");
 
@@ -9,7 +9,7 @@ export const passwordSchema = z
   .string()
   .min(12, "Le mot de passe doit contenir au moins 12 caracteres")
   .max(255, "Le mot de passe est trop long")
-  .superRefine((val, ctx) => {
+  .superRefine((val: string, ctx: RefinementCtx) => {
     if (!PASSWORD_CHARS.test(val)) {
       ctx.addIssue({
         code: "custom",

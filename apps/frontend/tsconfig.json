@@ -24,7 +24,9 @@
       "@/*": ["./src/*"],
       "@shared/schemas": ["../../shared/schemas/index.ts"],
       "@shared/schemas/*": ["../../shared/schemas/*"],
-      "@shared/*": ["../../shared/*"]
+      "@shared/*": ["../../shared/*"],
+      "zod": ["./node_modules/zod"],
+      "zod/*": ["./node_modules/zod/*"]
     }
   },
   "include": [
