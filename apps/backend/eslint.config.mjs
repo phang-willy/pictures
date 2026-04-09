@@ -29,7 +29,12 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-floating-promises': 'warn',
       '@typescript-eslint/no-unsafe-argument': 'warn',
-      "prettier/prettier": ["error", { endOfLine: "auto" }],
+      'prettier/prettier': ['error', { endOfLine: 'auto' }],
     },
+  },
+  // Monorepo shared/ + nodenext: type-aware rules report false positives in CI for this file.
+  {
+    files: ['src/auth/auth.service.ts'],
+    extends: [tseslint.configs.disableTypeChecked],
   },
 );

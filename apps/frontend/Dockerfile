@@ -4,9 +4,10 @@ WORKDIR /app
 FROM base AS dev
 RUN apk add --no-cache libc6-compat bash
 COPY scripts/dev-entrypoint.sh /usr/local/bin/dev-entrypoint.sh
+RUN sed -i 's/\r$//' /usr/local/bin/dev-entrypoint.sh
 RUN chmod +x /usr/local/bin/dev-entrypoint.sh
 EXPOSE 3000
-CMD ["dev-entrypoint.sh"]
+CMD ["/usr/local/bin/dev-entrypoint.sh"]
 
 FROM base AS builder
 RUN apk add --no-cache libc6-compat

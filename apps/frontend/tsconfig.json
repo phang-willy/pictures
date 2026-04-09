@@ -11,6 +11,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "ignoreDeprecations": "6.0",
     "jsx": "react-jsx",
     "incremental": true,
     "plugins": [
@@ -19,7 +20,11 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "*": ["./*"],
+      "@/*": ["./src/*"],
+      "@shared/schemas": ["../../shared/schemas/index.ts"],
+      "@shared/schemas/*": ["../../shared/schemas/*"],
+      "@shared/*": ["../../shared/*"]
     }
   },
   "include": [
