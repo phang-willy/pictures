@@ -17,7 +17,7 @@ import {
   registerRequestSchema,
   resendTwoFactorRequestSchema,
   verifyTwoFactorRequestSchema,
-} from '../../../../shared/schemas/index.js';
+} from '@shared/schemas';
 import { MailService } from '@/auth/mail.service';
 import { lookupIpGeo } from '@/auth/ip-geo.lookup';
 

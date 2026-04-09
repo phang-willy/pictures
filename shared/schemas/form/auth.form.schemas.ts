@@ -12,10 +12,14 @@ export const registerFormSchema = z
     password: passwordSchema,
     confirmPassword: z.string().min(1, "Confirme ton mot de passe"),
   })
-  .refine((data) => data.password === data.confirmPassword, {
-    path: ["confirmPassword"],
-    message: "Les mots de passe ne correspondent pas",
-  });
+  .refine(
+    (data: { email: string; password: string; confirmPassword: string }) =>
+      data.password === data.confirmPassword,
+    {
+      path: ["confirmPassword"],
+      message: "Les mots de passe ne correspondent pas",
+    },
+  );
 
 export const twoFactorFormSchema = z.object({
   code: otpCodeSchema,

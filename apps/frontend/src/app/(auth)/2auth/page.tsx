@@ -6,6 +6,7 @@ import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import type { ZodIssue } from "zod";
 import { twoFactorFormSchema } from "@shared/schemas";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { apiUrl } from "@/lib/api";
@@ -43,7 +44,9 @@ const TwoAuthPage = () => {
 
     const parsed = twoFactorFormSchema.safeParse({ code });
     if (!parsed.success) {
-      const codeError = parsed.error.issues.find((issue) => issue.path[0] === "code")?.message;
+      const codeError = parsed.error.issues.find(
+        (issue: ZodIssue) => issue.path[0] === "code",
+      )?.message;
       notify("destructive", codeError ?? "Code invalide.");
       return;
     }

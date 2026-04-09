@@ -8,6 +8,7 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import type { ZodIssue } from "zod";
 import { loginFormSchema } from "@shared/schemas";
 import { apiUrl } from "@/lib/api";
 import { consumePendingAuthFeedback, stashAuthFeedbackForNextPage } from "@/lib/auth-feedback-handoff";
@@ -50,8 +51,12 @@ const LoginPage = () => {
 
     const parsed = loginFormSchema.safeParse(form);
     if (!parsed.success) {
-      const emailError = parsed.error.issues.find((issue) => issue.path[0] === "email")?.message;
-      const passwordError = parsed.error.issues.find((issue) => issue.path[0] === "password")?.message;
+      const emailError = parsed.error.issues.find(
+        (issue: ZodIssue) => issue.path[0] === "email",
+      )?.message;
+      const passwordError = parsed.error.issues.find(
+        (issue: ZodIssue) => issue.path[0] === "password",
+      )?.message;
       setErrors({
         email: emailError,
         password: passwordError,

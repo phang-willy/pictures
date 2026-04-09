@@ -1,5 +1,8 @@
 import type { NextConfig } from "next";
 
+/** Relatif à `apps/frontend/next.config.ts` → racine du dépôt. */
+const monorepoRoot = "../..";
+
 const allowedDevOrigins = process.env.ALLOWED_DEV_ORIGINS?.split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
@@ -18,6 +21,14 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_REGISTER_ON: publicRegisterOn,
   },
   ...(allowedDevOrigins?.length ? { allowedDevOrigins } : {}),
+  turbopack: {
+    root: monorepoRoot,
+    resolveAlias: {
+      "@shared/schemas": `${monorepoRoot}/shared/schemas`,
+      "@shared": `${monorepoRoot}/shared`,
+    },
+  },
+  outputFileTracingRoot: monorepoRoot,
 };
 
 export default nextConfig;
