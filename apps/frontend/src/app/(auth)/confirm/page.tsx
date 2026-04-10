@@ -7,7 +7,9 @@ type PageProps = {
   searchParams: Promise<{ type?: string; token?: string }>;
 };
 
-export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  searchParams,
+}: PageProps): Promise<Metadata> {
   const params = await searchParams;
   const isAccount = params.type === "account";
   const titleSegment = isAccount ? "Confirmation du compte" : "Confirmation";

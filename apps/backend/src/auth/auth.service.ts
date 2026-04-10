@@ -6,13 +6,18 @@ import {
   hashPassword,
   hashTwoFactorCode,
   signAccessToken,
+  signForgotPasswordResetToken,
   signTwoFaLoginToken,
   verifyAccessToken,
+  verifyForgotPasswordResetToken,
   verifyPassword,
   verifyTwoFactorCode,
   verifyTwoFaLoginToken,
 } from '@/auth/auth.utils';
 import {
+  changePasswordRequestSchema,
+  forgotPasswordRequestSchema,
+  forgotPasswordResetRequestSchema,
   loginRequestSchema,
   registerRequestSchema,
   resendTwoFactorRequestSchema,
@@ -22,10 +27,14 @@ import { MailService } from '@/auth/mail.service';
 import { lookupIpGeo } from '@/auth/ip-geo.lookup';
 
 const CONFIRM_TOKEN_TTL_MS = 60 * 60 * 1000;
+const FORGOT_PASSWORD_TTL_MS = 60 * 60 * 1000;
 const TWOFA_STEP_TTL_MS = 10 * 60 * 1000;
 const TWOFA_CODE_TTL_MS = 10 * 60 * 1000;
 const ACCESS_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_CODE_ATTEMPTS = 5;
+const LOCK_15_MIN_MS = 15 * 60 * 1000;
+const LOCK_1_H_MS = 60 * 60 * 1000;
+const LOCK_PERMANENT_MS = 100 * 365.25 * 24 * 60 * 60 * 1000;
 
 type RegisterResult =
   | { ok: true; userId: string }
@@ -54,6 +63,26 @@ type MeResult =
   | { ok: true; email: string; role: string }
   | { ok: false; message: string };
 
+type ForgotRequestResult =
+  | { ok: true; message: string }
+  | { ok: false; message: string };
+
+type ForgotResetResult =
+  | { ok: true }
+  | {
+      ok: false;
+      field?: 'email' | 'password' | 'confirmPassword';
+      message: string;
+    };
+
+type ChangePasswordResult =
+  | { ok: true }
+  | {
+      ok: false;
+      field?: 'oldPassword' | 'newPassword' | 'confirmPassword';
+      message: string;
+    };
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -68,6 +97,30 @@ export class AuthService {
       process.env.AUTH_CONFIRM_SECRET?.trim() ||
       process.env.AUTH_HMAC_SECRET?.trim();
     return s && s.length >= 16 ? s : null;
+  }
+
+  private frontendBaseUrl(): string {
+    return (
+      process.env.FRONTEND_BASE_URL ??
+      process.env.CORS_ORIGIN ??
+      'http://localhost:3000'
+    );
+  }
+
+  private contactPageUrl(): string {
+    const explicit = process.env.CONTACT_PAGE_URL?.trim();
+    if (explicit) {
+      return explicit;
+    }
+    return `${this.frontendBaseUrl().replace(/\/$/, '')}/contact`;
+  }
+
+  private formatParis(dt: Date): string {
+    return `${dt.toLocaleString('fr-FR', {
+      timeZone: 'Europe/Paris',
+      dateStyle: 'full',
+      timeStyle: 'medium',
+    })} (heure de Paris)`;
   }
 
   async register(input: unknown): Promise<RegisterResult> {
@@ -103,25 +156,28 @@ export class AuthService {
       };
     }
 
-    const password = await hashPassword(parsed.data.password);
+    const passwordHash = await hashPassword(parsed.data.password);
     const rawToken = generateAccountConfirmationToken();
     const tokenExpiresAt = new Date(Date.now() + CONFIRM_TOKEN_TTL_MS);
 
-    const user = await this.prisma.user.create({
-      data: {
-        email,
-        password,
-        role: 'USER',
-        token: rawToken,
-        tokenExpiresAt,
-      },
-      select: { id: true, email: true },
+    const user = await this.prisma.$transaction(async (tx) => {
+      const u = await tx.user.create({
+        data: {
+          email,
+          role: 'USER',
+          token: rawToken,
+          tokenExpiresAt,
+          loginAttempt: 0,
+        },
+        select: { id: true, email: true },
+      });
+      await tx.password.create({
+        data: { userId: u.id, password: passwordHash },
+      });
+      return u;
     });
 
-    const frontendUrl =
-      process.env.FRONTEND_BASE_URL ??
-      process.env.CORS_ORIGIN ??
-      'http://localhost:3000';
+    const frontendUrl = this.frontendBaseUrl();
     const confirmUrl = `${frontendUrl}/confirm?type=account&token=${encodeURIComponent(rawToken)}`;
 
     try {
@@ -228,7 +284,7 @@ export class AuthService {
     return { ok: true };
   }
 
-  async login(input: unknown): Promise<LoginResult> {
+  async login(input: unknown, clientIp: string): Promise<LoginResult> {
     const secret = this.authSecret();
     if (!secret) {
       return {
@@ -257,7 +313,18 @@ export class AuthService {
     const email = parsed.data.email.trim().toLowerCase();
     const user = await this.prisma.user.findUnique({
       where: { email },
-      select: { id: true, password: true, verifiedAt: true, isActive: true },
+      select: {
+        id: true,
+        verifiedAt: true,
+        isActive: true,
+        loginAttempt: true,
+        lockUntil: true,
+        passwords: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+          select: { password: true },
+        },
+      },
     });
 
     if (!user) {
@@ -266,6 +333,15 @@ export class AuthService {
         field: 'email',
         message:
           "Aucun compte n'est associé à cet e-mail. Vérifiez l'adresse ou inscrivez-vous pour créer un compte.",
+      };
+    }
+
+    const now = new Date();
+    if (user.lockUntil && user.lockUntil > now) {
+      return {
+        ok: false,
+        field: 'email',
+        message: `Compte temporairement indisponible. Réessayez après le ${this.formatParis(user.lockUntil)}.`,
       };
     }
 
@@ -287,17 +363,81 @@ export class AuthService {
       };
     }
 
-    const passwordOk = await verifyPassword(
-      parsed.data.password,
-      user.password,
-    );
+    const latestHash = user.passwords[0]?.password;
+    if (!latestHash) {
+      return {
+        ok: false,
+        field: 'password',
+        message:
+          'Impossible de vérifier le mot de passe pour ce compte. Contactez le support.',
+      };
+    }
+
+    const passwordOk = await verifyPassword(parsed.data.password, latestHash);
     if (!passwordOk) {
+      const lockResult = await this.prisma.$transaction(async (tx) => {
+        const u = await tx.user.findUnique({
+          where: { id: user.id },
+          select: { loginAttempt: true },
+        });
+        if (!u) {
+          return null;
+        }
+        const nextAttempt = u.loginAttempt + 1;
+        let lockUntil: Date | null | undefined;
+        if (nextAttempt === 3) {
+          lockUntil = new Date(Date.now() + LOCK_15_MIN_MS);
+        } else if (nextAttempt === 5) {
+          lockUntil = new Date(Date.now() + LOCK_1_H_MS);
+        } else if (nextAttempt === 10) {
+          lockUntil = new Date(Date.now() + LOCK_PERMANENT_MS);
+        }
+        const data: { loginAttempt: number; lockUntil?: Date | null } = {
+          loginAttempt: nextAttempt,
+        };
+        if (lockUntil !== undefined) {
+          data.lockUntil = lockUntil;
+        }
+        await tx.user.update({
+          where: { id: user.id },
+          data,
+        });
+        return {
+          nextAttempt,
+          lockUntil: lockUntil ?? null,
+          triggeredLock: lockUntil !== undefined,
+        };
+      });
+
+      if (lockResult?.triggeredLock && lockResult.lockUntil) {
+        const at = new Date();
+        const geo = await lookupIpGeo(clientIp);
+        const permanent = lockResult.nextAttempt >= 10;
+        await this.mailService.sendLoginLockNotice(email, {
+          ip: clientIp,
+          country: geo.country,
+          region: geo.region,
+          city: geo.city,
+          atIso: at.toISOString(),
+          atDisplayFr: this.formatParis(at),
+          attemptCount: lockResult.nextAttempt,
+          unlockDisplayFr: this.formatParis(lockResult.lockUntil),
+          permanentLock: permanent,
+          contactUrl: this.contactPageUrl(),
+        });
+      }
+
       return {
         ok: false,
         field: 'password',
         message: 'Veuillez vérifier vos identifiants.',
       };
     }
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { loginAttempt: 0, lockUntil: null },
+    });
 
     await this.prisma.userTwoFactorCode.deleteMany({
       where: { userId: user.id, usedAt: null },
@@ -550,5 +690,315 @@ export class AuthService {
     }
 
     return { ok: true, email: user.email, role: user.role };
+  }
+
+  async forgotPasswordRequest(input: unknown): Promise<ForgotRequestResult> {
+    const secret = this.authSecret();
+    if (!secret) {
+      return { ok: false, message: 'Service indisponible.' };
+    }
+
+    const parsed = forgotPasswordRequestSchema.safeParse(input);
+    if (!parsed.success) {
+      return {
+        ok: false,
+        message: parsed.error.issues[0]?.message ?? 'Adresse e-mail invalide.',
+      };
+    }
+
+    const email = parsed.data.email.trim().toLowerCase();
+    const softOkMessage =
+      'Si un compte est bien associé à cette adresse, vous recevrez sous peu un e-mail avec un lien sécurisé. Pensez à vérifier vos courriers indésirables : parfois il se cache là.';
+
+    const holder = await this.prisma.user.findUnique({
+      where: { email },
+      select: { id: true, email: true, isActive: true },
+    });
+
+    if (!holder?.isActive) {
+      return { ok: true, message: softOkMessage };
+    }
+
+    const expiredAt = new Date(Date.now() + FORGOT_PASSWORD_TTL_MS);
+    const row = await this.prisma.forgotPassword.create({
+      data: { email, expiredAt },
+    });
+
+    const token = signForgotPasswordResetToken(
+      row.id,
+      email,
+      expiredAt.getTime(),
+      secret,
+    );
+    const base = this.frontendBaseUrl().replace(/\/$/, '');
+    const resetUrl = `${base}/forgot-password?type=new&token=${encodeURIComponent(token)}`;
+
+    try {
+      await this.mailService.sendForgotPasswordResetLink(
+        holder.email,
+        resetUrl,
+        Math.round(FORGOT_PASSWORD_TTL_MS / 60_000),
+      );
+    } catch {
+      await this.prisma.forgotPassword
+        .delete({ where: { id: row.id } })
+        .catch(() => undefined);
+      return {
+        ok: false,
+        message:
+          "Nous n'avons pas pu envoyer l'e-mail pour le moment. Réessayez dans quelques minutes.",
+      };
+    }
+
+    return { ok: true, message: softOkMessage };
+  }
+
+  async forgotPasswordReset(
+    input: unknown,
+    clientIp: string,
+  ): Promise<ForgotResetResult> {
+    const secret = this.authSecret();
+    if (!secret) {
+      return { ok: false, message: 'Service indisponible.' };
+    }
+
+    const parsed = forgotPasswordResetRequestSchema.safeParse(input);
+    if (!parsed.success) {
+      const first = parsed.error.issues[0];
+      const path = first?.path[0];
+      return {
+        ok: false,
+        field:
+          path === 'email'
+            ? 'email'
+            : path === 'password'
+              ? 'password'
+              : path === 'confirmPassword'
+                ? 'confirmPassword'
+                : undefined,
+        message: first?.message ?? 'Données invalides.',
+      };
+    }
+
+    const tokenPayload = verifyForgotPasswordResetToken(
+      parsed.data.token,
+      secret,
+    );
+    if (!tokenPayload) {
+      return {
+        ok: false,
+        message: 'Ce lien est invalide ou a expiré. Demandez un nouvel e-mail.',
+      };
+    }
+
+    const email = parsed.data.email.trim().toLowerCase();
+    if (email !== tokenPayload.email.trim().toLowerCase()) {
+      return {
+        ok: false,
+        field: 'email',
+        message:
+          "L'e-mail saisi ne correspond pas à celui du lien de réinitialisation.",
+      };
+    }
+
+    const fp = await this.prisma.forgotPassword.findUnique({
+      where: { id: tokenPayload.fpId },
+    });
+
+    const now = new Date();
+    if (
+      !fp ||
+      fp.consumedAt !== null ||
+      fp.email !== email ||
+      fp.expiredAt <= now
+    ) {
+      return {
+        ok: false,
+        message: 'Ce lien est invalide, expiré ou déjà utilisé.',
+      };
+    }
+
+    const account = await this.prisma.user.findUnique({
+      where: { email },
+      select: { id: true, isActive: true },
+    });
+
+    if (!account?.isActive) {
+      return {
+        ok: false,
+        message: 'Ce compte est indisponible.',
+      };
+    }
+
+    const recentHashes = await this.prisma.password.findMany({
+      where: { userId: account.id },
+      orderBy: { createdAt: 'desc' },
+      take: 5,
+      select: { password: true },
+    });
+
+    for (const h of recentHashes) {
+      const same = await verifyPassword(parsed.data.password, h.password);
+      if (same) {
+        return {
+          ok: false,
+          field: 'password',
+          message:
+            'Votre nouveau mot de passe doit être différent de vos cinq derniers mots de passe.',
+        };
+      }
+    }
+
+    const newHash = await hashPassword(parsed.data.password);
+
+    await this.prisma.$transaction([
+      this.prisma.forgotPassword.update({
+        where: { id: fp.id },
+        data: { consumedAt: now },
+      }),
+      this.prisma.password.create({
+        data: { userId: account.id, password: newHash },
+      }),
+      this.prisma.user.update({
+        where: { id: account.id },
+        data: { loginAttempt: 0, lockUntil: null },
+      }),
+    ]);
+
+    const at = new Date();
+    const geo = await lookupIpGeo(clientIp);
+    await this.mailService.sendPasswordChangedConfirmation(email, {
+      ip: clientIp,
+      country: geo.country,
+      region: geo.region,
+      city: geo.city,
+      atIso: at.toISOString(),
+      atDisplayFr: this.formatParis(at),
+    });
+
+    return { ok: true };
+  }
+
+  async changePassword(
+    input: unknown,
+    authorization: string | undefined,
+    clientIp: string,
+  ): Promise<ChangePasswordResult> {
+    const secret = this.authSecret();
+    if (!secret) {
+      return { ok: false, message: 'Service indisponible.' };
+    }
+
+    const raw = authorization?.startsWith('Bearer ')
+      ? authorization.slice(7).trim()
+      : '';
+    if (!raw) {
+      return { ok: false, message: 'Non authentifié.' };
+    }
+
+    const payload = verifyAccessToken(raw, secret);
+    if (!payload) {
+      return { ok: false, message: 'Session invalide ou expirée.' };
+    }
+
+    const parsed = changePasswordRequestSchema.safeParse(input);
+    if (!parsed.success) {
+      const first = parsed.error.issues[0];
+      const path = first?.path[0];
+      return {
+        ok: false,
+        field:
+          path === 'oldPassword'
+            ? 'oldPassword'
+            : path === 'newPassword'
+              ? 'newPassword'
+              : path === 'confirmPassword'
+                ? 'confirmPassword'
+                : undefined,
+        message: first?.message ?? 'Données invalides.',
+      };
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.sub },
+      select: {
+        id: true,
+        email: true,
+        isActive: true,
+        verifiedAt: true,
+      },
+    });
+
+    if (!user?.verifiedAt || !user.isActive) {
+      return { ok: false, message: 'Compte non disponible.' };
+    }
+
+    const recentHashes = await this.prisma.password.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: 'desc' },
+      take: 5,
+      select: { password: true },
+    });
+
+    const latestHash = recentHashes[0]?.password;
+    if (!latestHash) {
+      return {
+        ok: false,
+        field: 'oldPassword',
+        message:
+          'Impossible de vérifier le mot de passe pour ce compte. Contactez le support.',
+      };
+    }
+
+    const oldOk = await verifyPassword(parsed.data.oldPassword, latestHash);
+    if (!oldOk) {
+      return {
+        ok: false,
+        field: 'oldPassword',
+        message: "L'ancien mot de passe est incorrect.",
+      };
+    }
+
+    for (const h of recentHashes) {
+      const same = await verifyPassword(parsed.data.newPassword, h.password);
+      if (same) {
+        return {
+          ok: false,
+          field: 'newPassword',
+          message:
+            'Votre nouveau mot de passe doit être différent de vos cinq derniers mots de passe.',
+        };
+      }
+    }
+
+    const newHash = await hashPassword(parsed.data.newPassword);
+
+    await this.prisma.$transaction([
+      this.prisma.password.create({
+        data: { userId: user.id, password: newHash },
+      }),
+      this.prisma.user.update({
+        where: { id: user.id },
+        data: { loginAttempt: 0, lockUntil: null },
+      }),
+      this.prisma.userTwoFactorCode.deleteMany({
+        where: { userId: user.id, usedAt: null },
+      }),
+    ]);
+
+    const at = new Date();
+    const geo = await lookupIpGeo(clientIp);
+    await this.mailService.sendPasswordChangedConfirmation(user.email, {
+      ip: clientIp,
+      country: geo.country,
+      region: geo.region,
+      city: geo.city,
+      atIso: at.toISOString(),
+      atDisplayFr: this.formatParis(at),
+      contextMessage:
+        'Votre mot de passe a été modifié depuis votre espace connecté (page profil). Pour votre sécurité, votre session a été fermée : reconnectez-vous avec le nouveau mot de passe.',
+    });
+
+    return { ok: true };
   }
 }

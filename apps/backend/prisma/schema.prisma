@@ -14,18 +14,45 @@ enum UserRole {
 model User {
   id             String               @id @default(uuid())
   email          String               @unique
-  password       String
+  loginAttempt   Int                  @default(0)
+  lockUntil      DateTime?
   token          String?              @unique
   tokenExpiresAt DateTime?
   role           UserRole             @default(USER)
   verifiedAt     DateTime?
   isActive       Boolean              @default(true)
   twoFactorCodes UserTwoFactorCode[]
+  passwords      Password[]
   photos         Photo[]
   createdAt      DateTime             @default(now())
   updatedAt      DateTime             @updatedAt
 
   @@index([role])
+}
+
+/// Historique des hachages de mot de passe (le dernier `createdAt` est le mot de passe actuel).
+model Password {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, createdAt])
+  @@map("Password")
+}
+
+model ForgotPassword {
+  id          String    @id @default(uuid())
+  email       String
+  expiredAt   DateTime
+  consumedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([email, createdAt])
+  @@map("ForgotPassword")
 }
 
 model UserTwoFactorCode {

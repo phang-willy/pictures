@@ -10,7 +10,9 @@ import { stashAuthFeedbackForNextPage } from "@/lib/auth-feedback-handoff";
 import { FloatingAuthAlert } from "@/components/floating-auth-alert";
 import { useAuthFeedback } from "@/hooks/use-auth-feedback";
 
-type FormSubmitEvent = Parameters<NonNullable<React.ComponentProps<"form">["onSubmit"]>>[0];
+type FormSubmitEvent = Parameters<
+  NonNullable<React.ComponentProps<"form">["onSubmit"]>
+>[0];
 
 export function ConfirmPageClient() {
   const router = useRouter();
@@ -19,7 +21,9 @@ export function ConfirmPageClient() {
   const searchParams = useSearchParams();
 
   const isAccountConfirm = searchParams.get("type") === "account";
-  const cardTitle = isAccountConfirm ? "Confirmation du compte" : "Confirmation";
+  const cardTitle = isAccountConfirm
+    ? "Confirmation du compte"
+    : "Confirmation";
 
   const handleSubmit = async (event: FormSubmitEvent) => {
     event.preventDefault();
@@ -46,12 +50,18 @@ export function ConfirmPageClient() {
       };
 
       if (!response.ok) {
-        notify("destructive", payload.message ?? "Impossible de confirmer ton compte.");
+        notify(
+          "destructive",
+          payload.message ?? "Impossible de confirmer ton compte.",
+        );
         return;
       }
 
       if (payload.success === false) {
-        notify("destructive", payload.message ?? "Lien de confirmation invalide ou déjà utilisé.");
+        notify(
+          "destructive",
+          payload.message ?? "Lien de confirmation invalide ou déjà utilisé.",
+        );
         return;
       }
 
@@ -69,7 +79,11 @@ export function ConfirmPageClient() {
 
   return (
     <>
-      <FloatingAuthAlert feedback={feedback} placement="top" onDismiss={dismiss} />
+      <FloatingAuthAlert
+        feedback={feedback}
+        placement="top"
+        onDismiss={dismiss}
+      />
       <section className="w-full container mx-auto p-4 xl:p-8">
         <Card>
           <CardHeader>

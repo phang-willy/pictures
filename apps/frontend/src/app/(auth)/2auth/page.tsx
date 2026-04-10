@@ -5,12 +5,19 @@ import { useRouter } from "next/navigation";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 import type { ZodIssue } from "zod";
 import { twoFactorFormSchema } from "@shared/schemas";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { apiUrl } from "@/lib/api";
-import { consumePendingAuthFeedback, stashAuthFeedbackForNextPage } from "@/lib/auth-feedback-handoff";
+import {
+  consumePendingAuthFeedback,
+  stashAuthFeedbackForNextPage,
+} from "@/lib/auth-feedback-handoff";
 import {
   clearTwoFactorLoginToken,
   getTwoFactorLoginToken,
@@ -19,7 +26,9 @@ import {
 import { FloatingAuthAlert } from "@/components/floating-auth-alert";
 import { useAuthFeedback } from "@/hooks/use-auth-feedback";
 
-type FormSubmitEvent = Parameters<NonNullable<React.ComponentProps<"form">["onSubmit"]>>[0];
+type FormSubmitEvent = Parameters<
+  NonNullable<React.ComponentProps<"form">["onSubmit"]>
+>[0];
 
 const TwoAuthPage = () => {
   const router = useRouter();
@@ -75,7 +84,10 @@ const TwoAuthPage = () => {
       };
 
       if (!response.ok) {
-        notify("destructive", payload.message ?? "Impossible de contacter le serveur, réessayez.");
+        notify(
+          "destructive",
+          payload.message ?? "Impossible de contacter le serveur, réessayez.",
+        );
         return;
       }
 
@@ -84,7 +96,11 @@ const TwoAuthPage = () => {
         return;
       }
 
-      if (payload.success !== true || typeof payload.accessToken !== "string" || !payload.accessToken) {
+      if (
+        payload.success !== true ||
+        typeof payload.accessToken !== "string" ||
+        !payload.accessToken
+      ) {
         notify("destructive", "Réponse inattendue du serveur.");
         return;
       }
@@ -123,12 +139,18 @@ const TwoAuthPage = () => {
       };
 
       if (!response.ok) {
-        notify("destructive", payload.message ?? "Impossible de contacter le serveur, réessayez.");
+        notify(
+          "destructive",
+          payload.message ?? "Impossible de contacter le serveur, réessayez.",
+        );
         return;
       }
 
       if (payload.success === false) {
-        notify("destructive", payload.message ?? "Impossible de renvoyer le code pour le moment.");
+        notify(
+          "destructive",
+          payload.message ?? "Impossible de renvoyer le code pour le moment.",
+        );
         return;
       }
 
@@ -145,7 +167,11 @@ const TwoAuthPage = () => {
 
   return (
     <>
-      <FloatingAuthAlert feedback={feedback} placement="top" onDismiss={dismiss} />
+      <FloatingAuthAlert
+        feedback={feedback}
+        placement="top"
+        onDismiss={dismiss}
+      />
       <section className="w-full container mx-auto p-4 xl:p-8">
         <Card>
           <CardHeader>
@@ -175,10 +201,17 @@ const TwoAuthPage = () => {
                 </Field>
 
                 <div className="flex items-center justify-between gap-3">
-                  <Button type="submit" disabled={isSubmitting || code.length !== 6}>
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting || code.length !== 6}
+                  >
                     {isSubmitting ? "Vérification..." : "Vérifier"}
                   </Button>
-                  <Button type="button" variant="outline" onClick={handleResendCode}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleResendCode}
+                  >
                     Renvoyer le code
                   </Button>
                 </div>

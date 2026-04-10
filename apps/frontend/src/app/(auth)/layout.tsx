@@ -31,7 +31,9 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
           <nav className="flex justify-between items-center">
             <ul className="flex items-center gap-4">
               <li>
-                <Link href="/" className="text-2xl font-bold">{appName}</Link>
+                <Link href="/" className="text-2xl font-bold">
+                  {appName}
+                </Link>
               </li>
             </ul>
             <ul className="flex items-center gap-4">

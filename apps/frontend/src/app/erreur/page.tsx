@@ -17,7 +17,9 @@ function parseStatus(raw: string | undefined): number | null {
   return n;
 }
 
-export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  searchParams,
+}: PageProps): Promise<Metadata> {
   const params = await searchParams;
   const status = parseStatus(params.code) ?? 400;
   return {

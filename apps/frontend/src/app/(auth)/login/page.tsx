@@ -7,16 +7,27 @@ import Link from "next/link";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import type { ZodIssue } from "zod";
 import { loginFormSchema } from "@shared/schemas";
 import { apiUrl } from "@/lib/api";
-import { consumePendingAuthFeedback, stashAuthFeedbackForNextPage } from "@/lib/auth-feedback-handoff";
+import {
+  consumePendingAuthFeedback,
+  stashAuthFeedbackForNextPage,
+} from "@/lib/auth-feedback-handoff";
 import { setTwoFactorLoginToken } from "@/lib/auth-session";
 import { FloatingAuthAlert } from "@/components/floating-auth-alert";
 import { useAuthFeedback } from "@/hooks/use-auth-feedback";
 
-type FormSubmitEvent = Parameters<NonNullable<React.ComponentProps<"form">["onSubmit"]>>[0];
+type FormSubmitEvent = Parameters<
+  NonNullable<React.ComponentProps<"form">["onSubmit"]>
+>[0];
 
 const LoginPage = () => {
   const router = useRouter();
@@ -30,7 +41,9 @@ const LoginPage = () => {
     }
   }, [notify]);
   const [form, setForm] = useState({ email: "", password: "" });
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+    {},
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,7 +75,12 @@ const LoginPage = () => {
         password: passwordError,
       });
       const parts = [emailError, passwordError].filter(Boolean) as string[];
-      notify("destructive", parts.length > 0 ? parts.join(" ") : "Veuillez corriger les champs du formulaire.");
+      notify(
+        "destructive",
+        parts.length > 0
+          ? parts.join(" ")
+          : "Veuillez corriger les champs du formulaire.",
+      );
       return;
     }
 
@@ -83,28 +101,48 @@ const LoginPage = () => {
       };
 
       if (!response.ok) {
-        notify("destructive", payload.message ?? "Impossible de contacter le serveur, réessayez.");
+        notify(
+          "destructive",
+          payload.message ?? "Impossible de contacter le serveur, réessayez.",
+        );
         return;
       }
 
       if (payload.success === false) {
         if (payload.field === "email") {
-          setErrors({ email: payload.message ?? "Veuillez vérifier vos identifiants." });
-          notify("destructive", payload.message ?? "Veuillez vérifier vos identifiants.");
+          setErrors({
+            email: payload.message ?? "Veuillez vérifier vos identifiants.",
+          });
+          notify(
+            "destructive",
+            payload.message ?? "Veuillez vérifier vos identifiants.",
+          );
           return;
         }
 
         if (payload.field === "password") {
-          setErrors({ password: payload.message ?? "Veuillez vérifier vos identifiants." });
-          notify("destructive", payload.message ?? "Veuillez vérifier vos identifiants.");
+          setErrors({
+            password: payload.message ?? "Veuillez vérifier vos identifiants.",
+          });
+          notify(
+            "destructive",
+            payload.message ?? "Veuillez vérifier vos identifiants.",
+          );
           return;
         }
 
-        notify("destructive", payload.message ?? "Impossible de se connecter, réessayez.");
+        notify(
+          "destructive",
+          payload.message ?? "Impossible de se connecter, réessayez.",
+        );
         return;
       }
 
-      if (payload.success !== true || typeof payload.twoFactorToken !== "string" || !payload.twoFactorToken) {
+      if (
+        payload.success !== true ||
+        typeof payload.twoFactorToken !== "string" ||
+        !payload.twoFactorToken
+      ) {
         notify("destructive", "Réponse inattendue du serveur.");
         return;
       }
@@ -116,7 +154,10 @@ const LoginPage = () => {
       setTwoFactorLoginToken(payload.twoFactorToken);
       router.push("/2auth");
     } catch {
-      notify("destructive", "Erreur réseau, veuillez vérifier votre connexion puis réessayer.");
+      notify(
+        "destructive",
+        "Erreur réseau, veuillez vérifier votre connexion puis réessayer.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -124,7 +165,11 @@ const LoginPage = () => {
 
   return (
     <>
-      <FloatingAuthAlert feedback={feedback} placement="top" onDismiss={dismiss} />
+      <FloatingAuthAlert
+        feedback={feedback}
+        placement="top"
+        onDismiss={dismiss}
+      />
       <section className="w-full container mx-auto p-4 xl:p-8">
         <Card>
           <CardHeader>
@@ -145,12 +190,19 @@ const LoginPage = () => {
                     onChange={handleChange}
                     autoComplete="email"
                   />
-                  {errors.email ? <p className="mt-1 text-sm text-red-500">{errors.email}</p> : null}
+                  {errors.email ? (
+                    <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+                  ) : null}
                 </Field>
                 <Field>
                   <div className="flex items-center justify-between">
                     <FieldLabel htmlFor="password">Mot de passe</FieldLabel>
-                    <Link href="/forgot-password" className="text-sm text-muted-foreground hover:underline focus:underline">Mot de passe oublié ?</Link>
+                    <Link
+                      href="/forgot-password"
+                      className="text-sm text-muted-foreground hover:underline focus:underline"
+                    >
+                      Mot de passe oublié ?
+                    </Link>
                   </div>
                   <div className="relative">
                     <Input
@@ -171,12 +223,20 @@ const LoginPage = () => {
                       variant="ghost"
                       size="icon"
                       className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 dark:text-gray-400 focus:outline-none"
-                      aria-label={showPassword ? "Masquer mot de passe" : "Montrer mot de passe"}
+                      aria-label={
+                        showPassword
+                          ? "Masquer mot de passe"
+                          : "Montrer mot de passe"
+                      }
                     >
                       {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                     </Button>
                   </div>
-                  {errors.password ? <p className="mt-1 text-sm text-red-500">{errors.password}</p> : null}
+                  {errors.password ? (
+                    <p className="mt-1 text-sm text-red-500">
+                      {errors.password}
+                    </p>
+                  ) : null}
                 </Field>
                 <Button
                   type="submit"
@@ -191,7 +251,13 @@ const LoginPage = () => {
 
           <CardFooter>
             <p className="text-sm text-muted-foreground">
-              Pas encore de compte ? <Link href="/register" className="hover:underline focus:underline">Créer un compte</Link>
+              Pas encore de compte ?{" "}
+              <Link
+                href="/register"
+                className="hover:underline focus:underline"
+              >
+                Créer un compte
+              </Link>
             </p>
           </CardFooter>
         </Card>

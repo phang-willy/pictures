@@ -11,7 +11,9 @@ import { apiUrl } from "@/lib/api";
 import { FloatingAuthAlert } from "@/components/floating-auth-alert";
 import { useAuthFeedback } from "@/hooks/use-auth-feedback";
 
-type FormSubmitEvent = Parameters<NonNullable<React.ComponentProps<"form">["onSubmit"]>>[0];
+type FormSubmitEvent = Parameters<
+  NonNullable<React.ComponentProps<"form">["onSubmit"]>
+>[0];
 
 type RegisterErrors = {
   email?: string;
@@ -65,7 +67,11 @@ const RegisterPage = () => {
       const messages: string[] = [];
       for (const issue of parsed.error.issues) {
         const path = issue.path[0];
-        if (path === "email" || path === "password" || path === "confirmPassword") {
+        if (
+          path === "email" ||
+          path === "password" ||
+          path === "confirmPassword"
+        ) {
           const key: keyof RegisterErrors = path;
           nextErrors[key] = nextErrors[key] ?? issue.message;
         }
@@ -95,7 +101,10 @@ const RegisterPage = () => {
       };
 
       if (!response.ok) {
-        notify("destructive", payload.message ?? "Impossible de contacter le serveur, réessayez.");
+        notify(
+          "destructive",
+          payload.message ?? "Impossible de contacter le serveur, réessayez.",
+        );
         return;
       }
 
@@ -105,13 +114,19 @@ const RegisterPage = () => {
           return;
         }
 
-        if (payload.field === "password" || payload.field === "confirmPassword") {
+        if (
+          payload.field === "password" ||
+          payload.field === "confirmPassword"
+        ) {
           setErrors({ [payload.field]: payload.message ?? "Champ invalide" });
           notify("destructive", payload.message ?? "Une erreur est survenue.");
           return;
         }
 
-        notify("destructive", payload.message ?? "Impossible de créer le compte, réessayez.");
+        notify(
+          "destructive",
+          payload.message ?? "Impossible de créer le compte, réessayez.",
+        );
         return;
       }
 
@@ -125,7 +140,10 @@ const RegisterPage = () => {
         "Inscription enregistrée. Consultez vos e-mails pour confirmer votre compte avant de vous connecter.",
       );
     } catch {
-      notify("destructive", "Erreur réseau, veuillez vérifier votre connexion puis réessayer.");
+      notify(
+        "destructive",
+        "Erreur réseau, veuillez vérifier votre connexion puis réessayer.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -133,7 +151,11 @@ const RegisterPage = () => {
 
   return (
     <>
-      <FloatingAuthAlert feedback={feedback} placement="top" onDismiss={dismiss} />
+      <FloatingAuthAlert
+        feedback={feedback}
+        placement="top"
+        onDismiss={dismiss}
+      />
       <section className="w-full container mx-auto p-4 xl:p-8">
         <Card>
           <CardHeader>
@@ -154,7 +176,9 @@ const RegisterPage = () => {
                     onChange={handleChange}
                     autoComplete="email"
                   />
-                  {errors.email ? <p className="mt-1 text-sm text-red-500">{errors.email}</p> : null}
+                  {errors.email ? (
+                    <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+                  ) : null}
                 </Field>
 
                 <Field>
@@ -178,16 +202,26 @@ const RegisterPage = () => {
                       variant="ghost"
                       size="icon"
                       className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 dark:text-gray-400 focus:outline-none"
-                      aria-label={showPassword ? "Masquer mot de passe" : "Montrer mot de passe"}
+                      aria-label={
+                        showPassword
+                          ? "Masquer mot de passe"
+                          : "Montrer mot de passe"
+                      }
                     >
                       {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                     </Button>
                   </div>
-                  {errors.password ? <p className="mt-1 text-sm text-red-500">{errors.password}</p> : null}
+                  {errors.password ? (
+                    <p className="mt-1 text-sm text-red-500">
+                      {errors.password}
+                    </p>
+                  ) : null}
                 </Field>
 
                 <Field>
-                  <FieldLabel htmlFor="confirmPassword">Confirmer le mot de passe</FieldLabel>
+                  <FieldLabel htmlFor="confirmPassword">
+                    Confirmer le mot de passe
+                  </FieldLabel>
                   <div className="relative">
                     <Input
                       id="confirmPassword"
@@ -202,20 +236,30 @@ const RegisterPage = () => {
                     />
                     <Button
                       type="button"
-                      onClick={() => setShowConfirmPassword((previous) => !previous)}
+                      onClick={() =>
+                        setShowConfirmPassword((previous) => !previous)
+                      }
                       tabIndex={-1}
                       variant="ghost"
                       size="icon"
                       className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 dark:text-gray-400 focus:outline-none"
                       aria-label={
-                        showConfirmPassword ? "Masquer confirmation du mot de passe" : "Montrer confirmation du mot de passe"
+                        showConfirmPassword
+                          ? "Masquer confirmation du mot de passe"
+                          : "Montrer confirmation du mot de passe"
                       }
                     >
-                      {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      {showConfirmPassword ? (
+                        <EyeOff size={20} />
+                      ) : (
+                        <Eye size={20} />
+                      )}
                     </Button>
                   </div>
                   {errors.confirmPassword ? (
-                    <p className="mt-1 text-sm text-red-500">{errors.confirmPassword}</p>
+                    <p className="mt-1 text-sm text-red-500">
+                      {errors.confirmPassword}
+                    </p>
                   ) : null}
                 </Field>
 

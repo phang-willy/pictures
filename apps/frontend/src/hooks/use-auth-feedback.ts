@@ -10,9 +10,15 @@ export function useAuthFeedback() {
     setFeedback(null);
   }, []);
 
-  const notify = React.useCallback((variant: NonNullable<FloatingAuthFeedback>["variant"], message: string) => {
-    setFeedback({ variant, message });
-  }, []);
+  const notify = React.useCallback(
+    (
+      variant: NonNullable<FloatingAuthFeedback>["variant"],
+      message: string,
+    ) => {
+      setFeedback({ variant, message });
+    },
+    [],
+  );
 
   return { feedback, notify, dismiss };
 }

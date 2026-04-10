@@ -12,6 +12,10 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ConfirmLayout({ children }: { children: React.ReactNode }) {
+export default function ConfirmLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return children;
 }

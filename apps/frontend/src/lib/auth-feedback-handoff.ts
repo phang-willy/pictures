@@ -4,7 +4,9 @@ const STORAGE_KEY = "pictures.authFeedbackHandoff";
 
 export type StashedAuthFeedback = NonNullable<FloatingAuthFeedback>;
 
-export function stashAuthFeedbackForNextPage(feedback: StashedAuthFeedback): void {
+export function stashAuthFeedbackForNextPage(
+  feedback: StashedAuthFeedback,
+): void {
   try {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(feedback));
   } catch {
@@ -23,7 +25,10 @@ export function consumePendingAuthFeedback(): StashedAuthFeedback | null {
     if (!parsed || typeof parsed !== "object") {
       return null;
     }
-    const { variant, message } = parsed as { variant?: unknown; message?: unknown };
+    const { variant, message } = parsed as {
+      variant?: unknown;
+      message?: unknown;
+    };
     if (
       (variant === "default" ||
         variant === "destructive" ||
