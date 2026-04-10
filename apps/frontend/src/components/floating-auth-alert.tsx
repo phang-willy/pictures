@@ -103,17 +103,29 @@ export function FloatingAuthAlert({
       className={cn(
         "pointer-events-none fixed inset-x-0 z-100 flex justify-center px-4 transition-all duration-300 ease-out",
         placement === "top" ? "top-4" : "bottom-4",
-        visible ? "translate-y-0 opacity-100" : placement === "top" ? "-translate-y-3 opacity-0" : "translate-y-3 opacity-0",
+        visible
+          ? "translate-y-0 opacity-100"
+          : placement === "top"
+            ? "-translate-y-3 opacity-0"
+            : "translate-y-3 opacity-0",
       )}
       aria-live="polite"
     >
       <div className="pointer-events-auto w-full max-w-lg shadow-lg">
         <Alert
-          variant={isSuccess ? "success" : isDestructive ? "destructive" : "default"}
-          className={cn("shadow-md", "[&>svg]:size-6 [&>svg]:shrink-0 [&>svg]:translate-y-0.5")}
+          variant={
+            isSuccess ? "success" : isDestructive ? "destructive" : "default"
+          }
+          className={cn(
+            "shadow-md",
+            "[&>svg]:size-6 [&>svg]:shrink-0 [&>svg]:translate-y-0.5",
+          )}
         >
           {isSuccess ? (
-            <CheckCircle2 className="text-emerald-600 dark:text-emerald-400" aria-hidden />
+            <CheckCircle2
+              className="text-emerald-600 dark:text-emerald-400"
+              aria-hidden
+            />
           ) : isDestructive ? (
             <AlertCircle className="text-destructive" aria-hidden />
           ) : isInfo ? (
@@ -121,13 +133,28 @@ export function FloatingAuthAlert({
           ) : null}
           <div className="min-w-0 flex-1 space-y-2">
             <AlertTitle>
-              {isSuccess ? "Succès" : isDestructive ? "Erreur" : isInfo ? "Info" : "Information"}
+              {isSuccess
+                ? "Succès"
+                : isDestructive
+                  ? "Erreur"
+                  : isInfo
+                    ? "Info"
+                    : "Information"}
             </AlertTitle>
             <AlertDescription>{feedback.message}</AlertDescription>
-            <div className={cn("h-1 w-full overflow-hidden rounded-full", countdownTrackClass)} aria-hidden>
+            <div
+              className={cn(
+                "h-1 w-full overflow-hidden rounded-full",
+                countdownTrackClass,
+              )}
+              aria-hidden
+            >
               <div
                 key={countdownKey}
-                className={cn("h-full w-full origin-left rounded-full will-change-transform", countdownFillClass)}
+                className={cn(
+                  "h-full w-full origin-left rounded-full will-change-transform",
+                  countdownFillClass,
+                )}
                 style={{
                   animation: `floating-auth-alert-countdown ${autoHideMs}ms linear forwards`,
                 }}

@@ -26,6 +26,14 @@ export type AccessTokenPayload = {
   exp: number;
 };
 
+export type ForgotPasswordResetTokenPayload = {
+  v: typeof TOKEN_VERSION;
+  typ: 'forgot-reset';
+  email: string;
+  fpId: string;
+  exp: number;
+};
+
 async function bcryptHash(plain: string, rounds: number): Promise<string> {
   return bcrypt.hash(plain, rounds);
 }
@@ -182,4 +190,41 @@ export async function verifyTwoFactorCode(
 
 export function generateAccountConfirmationToken(): string {
   return randomBytes(32).toString('hex');
+}
+
+export function signForgotPasswordResetToken(
+  fpId: string,
+  email: string,
+  expiresAtMs: number,
+  secret: string,
+): string {
+  const payload: ForgotPasswordResetTokenPayload = {
+    v: TOKEN_VERSION,
+    typ: 'forgot-reset',
+    email,
+    exp: expiresAtMs,
+    fpId,
+  };
+  return signPayload(payload as unknown as Record<string, unknown>, secret);
+}
+
+export function verifyForgotPasswordResetToken(
+  token: string,
+  secret: string,
+): ForgotPasswordResetTokenPayload | null {
+  return verifySignedToken(
+    token,
+    secret,
+    (o): o is ForgotPasswordResetTokenPayload => {
+      return (
+        o.v === TOKEN_VERSION &&
+        o.typ === 'forgot-reset' &&
+        typeof o.email === 'string' &&
+        typeof o.fpId === 'string' &&
+        typeof o.exp === 'number' &&
+        o.email.length > 0 &&
+        o.fpId.length > 0
+      );
+    },
+  );
 }

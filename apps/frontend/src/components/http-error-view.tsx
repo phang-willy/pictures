@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 function defaultTitle(status: number): string {
   if (status === 404) return "Page introuvable";
@@ -42,11 +48,15 @@ export function HttpErrorView({ status, title, message }: HttpErrorViewProps) {
     <main className="flex min-h-[70vh] w-full flex-1 items-center justify-center p-4 xl:p-8">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <p className="text-muted-foreground font-mono text-7xl font-bold tabular-nums">{status}</p>
+          <p className="text-muted-foreground font-mono text-7xl font-bold tabular-nums">
+            {status}
+          </p>
           <CardTitle className="text-2xl">{resolvedTitle}</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground text-sm leading-relaxed">{resolvedMessage}</p>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            {resolvedMessage}
+          </p>
         </CardContent>
         <CardFooter className="flex gap-2 items-center justify-between">
           <Button asChild variant="default">

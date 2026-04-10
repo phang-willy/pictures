@@ -1,0 +1,6 @@
+---
+alwaysApply: true
+---
+
+pour chaque prompt : 
+- si à la racine il y a un dossier /editor, lire "instructions.md" d'abord

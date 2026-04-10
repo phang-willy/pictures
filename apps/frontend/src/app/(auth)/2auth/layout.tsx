@@ -11,6 +11,10 @@ export const metadata: Metadata = {
   },
 };
 
-export default function TwoAuthLayout({ children }: { children: React.ReactNode }) {
+export default function TwoAuthLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return children;
 }

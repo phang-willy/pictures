@@ -46,8 +46,12 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() body: unknown, @Res() response: Response) {
-    const result = await this.authService.login(body);
+  async login(
+    @Body() body: unknown,
+    @Req() req: Request,
+    @Res() response: Response,
+  ) {
+    const result = await this.authService.login(body, extractClientIp(req));
     if (!result.ok) {
       return response.status(HttpStatus.OK).json({
         success: false,
@@ -127,6 +131,69 @@ export class AuthController {
       return response.status(HttpStatus.OK).json({
         success: false,
         message: result.message,
+      });
+    }
+    return response.status(HttpStatus.OK).json({ success: true });
+  }
+
+  @Post('forgot-password/request')
+  @HttpCode(HttpStatus.OK)
+  async forgotPasswordRequest(
+    @Body() body: unknown,
+    @Res() response: Response,
+  ) {
+    const result = await this.authService.forgotPasswordRequest(body);
+    if (!result.ok) {
+      return response.status(HttpStatus.OK).json({
+        success: false,
+        message: result.message,
+      });
+    }
+    return response.status(HttpStatus.OK).json({
+      success: true,
+      message: result.message,
+    });
+  }
+
+  @Post('forgot-password/reset')
+  @HttpCode(HttpStatus.OK)
+  async forgotPasswordReset(
+    @Body() body: unknown,
+    @Req() req: Request,
+    @Res() response: Response,
+  ) {
+    const result = await this.authService.forgotPasswordReset(
+      body,
+      extractClientIp(req),
+    );
+    if (!result.ok) {
+      return response.status(HttpStatus.OK).json({
+        success: false,
+        message: result.message,
+        ...(result.field ? { field: result.field } : {}),
+      });
+    }
+    return response.status(HttpStatus.OK).json({ success: true });
+  }
+
+  @Post('password/change')
+  @HttpCode(HttpStatus.OK)
+  async changePassword(
+    @Headers('authorization') authorization: string | undefined,
+    @Body() body: unknown,
+    @Req() req: Request,
+    @Res() response: Response,
+  ) {
+    const result = await this.authService.changePassword(
+      body,
+      authorization,
+      extractClientIp(req),
+    );
+    if (!result.ok) {
+      return response.status(HttpStatus.OK).json({
+        success: false,
+        message: result.message,
+        ...(result.field ? { field: result.field } : {}),
       });
     }
     return response.status(HttpStatus.OK).json({ success: true });

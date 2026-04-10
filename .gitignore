@@ -4,4 +4,6 @@
 **/.env
 **/.next
 
+/editor
+
 .DS_Store

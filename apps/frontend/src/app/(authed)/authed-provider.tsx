@@ -1,11 +1,26 @@
 "use client";
 
 import * as React from "react";
-import { createContext, useCallback, useContext, useEffect, useRef, useState, startTransition } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  startTransition,
+} from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { apiUrl } from "@/lib/api";
-import { consumePendingAuthFeedback, stashAuthFeedbackForNextPage } from "@/lib/auth-feedback-handoff";
-import { clearAccessToken, clearTwoFactorLoginToken, getAccessToken } from "@/lib/auth-session";
+import {
+  consumePendingAuthFeedback,
+  stashAuthFeedbackForNextPage,
+} from "@/lib/auth-feedback-handoff";
+import {
+  clearAccessToken,
+  clearTwoFactorLoginToken,
+  getAccessToken,
+} from "@/lib/auth-session";
 import { FloatingAuthAlert } from "@/components/floating-auth-alert";
 import { useAuthFeedback } from "@/hooks/use-auth-feedback";
 
@@ -91,7 +106,10 @@ export function AuthedProvider({ children }: { children: React.ReactNode }) {
         });
         firstLoadDone.current = true;
       } catch (cause) {
-        if (signal.aborted || (cause instanceof DOMException && cause.name === "AbortError")) {
+        if (
+          signal.aborted ||
+          (cause instanceof DOMException && cause.name === "AbortError")
+        ) {
           return;
         }
         redirectToLogin();
@@ -160,7 +178,11 @@ export function AuthedProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthedContext.Provider value={value}>
-      <FloatingAuthAlert feedback={feedback} placement="top" onDismiss={dismiss} />
+      <FloatingAuthAlert
+        feedback={feedback}
+        placement="top"
+        onDismiss={dismiss}
+      />
       {children}
     </AuthedContext.Provider>
   );
