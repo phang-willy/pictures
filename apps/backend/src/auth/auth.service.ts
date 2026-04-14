@@ -513,7 +513,13 @@ export class AuthService {
     const email = tokenPayload.email.trim().toLowerCase();
     const user = await this.prisma.user.findUnique({
       where: { email },
-      select: { id: true, email: true, verifiedAt: true, isActive: true },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        verifiedAt: true,
+        isActive: true,
+      },
     });
 
     if (!user?.verifiedAt || !user.isActive) {
@@ -571,7 +577,13 @@ export class AuthService {
     });
 
     const accessExp = Date.now() + ACCESS_TOKEN_TTL_MS;
-    const accessToken = signAccessToken(user.id, user.email, accessExp, secret);
+    const accessToken = signAccessToken(
+      user.id,
+      user.email,
+      accessExp,
+      secret,
+      user.role,
+    );
 
     const at = new Date();
     const geo = await lookupIpGeo(clientIp);

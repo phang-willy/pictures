@@ -3,6 +3,7 @@ import "./globals.css";
 import { Inter, Outfit } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AuthFloatingProvider } from "@/components/auth-floating-provider";
 import { appName } from "@/lib/app-name";
 
 const outfitHeading = Outfit({
@@ -55,7 +56,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <AuthFloatingProvider>{children}</AuthFloatingProvider>
         </ThemeProvider>
       </body>
     </html>

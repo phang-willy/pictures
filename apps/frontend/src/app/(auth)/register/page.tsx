@@ -8,8 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { registerFormSchema } from "@shared/schemas";
 import { apiUrl } from "@/lib/api";
-import { FloatingAuthAlert } from "@/components/floating-auth-alert";
-import { useAuthFeedback } from "@/hooks/use-auth-feedback";
+import { useAuthFeedback } from "@/components/auth-floating-provider";
 
 type FormSubmitEvent = Parameters<
   NonNullable<React.ComponentProps<"form">["onSubmit"]>
@@ -36,7 +35,7 @@ function summarizeZodIssues(messages: string[]): string {
 }
 
 const RegisterPage = () => {
-  const { feedback, notify, dismiss } = useAuthFeedback();
+  const { notify } = useAuthFeedback();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [form, setForm] = useState({
@@ -150,13 +149,7 @@ const RegisterPage = () => {
   };
 
   return (
-    <>
-      <FloatingAuthAlert
-        feedback={feedback}
-        placement="top"
-        onDismiss={dismiss}
-      />
-      <section className="w-full container mx-auto p-4 xl:p-8">
+    <section className="w-full container mx-auto p-4 xl:p-8">
         <Card>
           <CardHeader>
             <CardTitle className="text-3xl">Inscription</CardTitle>
@@ -275,7 +268,6 @@ const RegisterPage = () => {
           </CardContent>
         </Card>
       </section>
-    </>
   );
 };
 

@@ -44,7 +44,7 @@ docker compose up -d --build
 3. Accéder aux services :
 - Frontend : `http://localhost:3000`
 - Backend (health) : `http://localhost:3001/api/health`
-- Swagger (uniquement hors production) : `http://localhost:3001/api`
+- Swagger : `http://localhost:3001/api/docs` (activation : section **Backend** → *Politique Swagger*)
 - Adminer : `http://localhost:8080`
 
 ## Configuration des variables d'environnement
@@ -95,6 +95,9 @@ docker compose logs -f back
 
 # Arrêter les services
 docker compose down
+
+# Rebuild une image et redémarre un service spécifique
+docker compose up -d --build NOM_DU_SERVICE
 ```
 
 ## Backend (`apps/backend`)
@@ -125,7 +128,7 @@ npx prisma db push
 
 ### Politique Swagger
 
-Swagger est activé uniquement si `NODE_ENV !== 'production'`.
+Swagger est **désactivé** en `NODE_ENV=production` (ou si `SWAGGER=false` / `0`). Sinon il est actif si `NODE_ENV` est vide, `development`, `dev` ou `test`, ou si `SWAGGER=true` / `1` (utile pour un environnement intermédiaire). L’UI est servie sous **`/api/docs`** (préfixe global `api`).
 
 ## Frontend (`apps/frontend`)
 

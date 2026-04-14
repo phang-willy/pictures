@@ -24,6 +24,8 @@ export type AccessTokenPayload = {
   email: string;
   typ: 'access';
   exp: number;
+  /** Présent sur les jetons émis après déploiement ; sinon quota « utilisateur ». */
+  role?: 'ADMIN' | 'USER';
 };
 
 export type ForgotPasswordResetTokenPayload = {
@@ -136,6 +138,7 @@ export function signAccessToken(
   email: string,
   expiresAtMs: number,
   secret: string,
+  role: 'ADMIN' | 'USER',
 ): string {
   const payload: AccessTokenPayload = {
     v: TOKEN_VERSION,
@@ -143,6 +146,7 @@ export function signAccessToken(
     email,
     typ: 'access',
     exp: expiresAtMs,
+    role,
   };
   return signPayload(payload as unknown as Record<string, unknown>, secret);
 }
@@ -152,12 +156,15 @@ export function verifyAccessToken(
   secret: string,
 ): AccessTokenPayload | null {
   return verifySignedToken(token, secret, (o): o is AccessTokenPayload => {
+    const roleOk =
+      o.role === undefined || o.role === 'ADMIN' || o.role === 'USER';
     return (
       o.v === TOKEN_VERSION &&
       typeof o.sub === 'string' &&
       typeof o.email === 'string' &&
       o.typ === 'access' &&
-      typeof o.exp === 'number'
+      typeof o.exp === 'number' &&
+      roleOk
     );
   });
 }

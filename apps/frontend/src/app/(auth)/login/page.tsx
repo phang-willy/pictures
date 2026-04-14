@@ -14,7 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { ZodIssue } from "zod";
+import type { core } from "zod";
 import { loginFormSchema } from "@shared/schemas";
 import { apiUrl } from "@/lib/api";
 import {
@@ -22,8 +22,7 @@ import {
   stashAuthFeedbackForNextPage,
 } from "@/lib/auth-feedback-handoff";
 import { setTwoFactorLoginToken } from "@/lib/auth-session";
-import { FloatingAuthAlert } from "@/components/floating-auth-alert";
-import { useAuthFeedback } from "@/hooks/use-auth-feedback";
+import { useAuthFeedback } from "@/components/auth-floating-provider";
 
 type FormSubmitEvent = Parameters<
   NonNullable<React.ComponentProps<"form">["onSubmit"]>
@@ -31,7 +30,7 @@ type FormSubmitEvent = Parameters<
 
 const LoginPage = () => {
   const router = useRouter();
-  const { feedback, notify, dismiss } = useAuthFeedback();
+  const { notify } = useAuthFeedback();
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
@@ -65,10 +64,10 @@ const LoginPage = () => {
     const parsed = loginFormSchema.safeParse(form);
     if (!parsed.success) {
       const emailError = parsed.error.issues.find(
-        (issue: ZodIssue) => issue.path[0] === "email",
+        (issue: core.$ZodIssue) => issue.path[0] === "email",
       )?.message;
       const passwordError = parsed.error.issues.find(
-        (issue: ZodIssue) => issue.path[0] === "password",
+        (issue: core.$ZodIssue) => issue.path[0] === "password",
       )?.message;
       setErrors({
         email: emailError,
@@ -164,13 +163,7 @@ const LoginPage = () => {
   };
 
   return (
-    <>
-      <FloatingAuthAlert
-        feedback={feedback}
-        placement="top"
-        onDismiss={dismiss}
-      />
-      <section className="w-full container mx-auto p-4 xl:p-8">
+    <section className="w-full container mx-auto p-4 xl:p-8">
         <Card>
           <CardHeader>
             <CardTitle className="text-3xl">Connexion</CardTitle>
@@ -262,7 +255,6 @@ const LoginPage = () => {
           </CardFooter>
         </Card>
       </section>
-    </>
   );
 };
 
