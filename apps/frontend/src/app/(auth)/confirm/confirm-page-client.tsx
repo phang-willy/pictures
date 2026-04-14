@@ -7,8 +7,7 @@ import { FieldGroup } from "@/components/ui/field";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { apiUrl } from "@/lib/api";
 import { stashAuthFeedbackForNextPage } from "@/lib/auth-feedback-handoff";
-import { FloatingAuthAlert } from "@/components/floating-auth-alert";
-import { useAuthFeedback } from "@/hooks/use-auth-feedback";
+import { useAuthFeedback } from "@/components/auth-floating-provider";
 
 type FormSubmitEvent = Parameters<
   NonNullable<React.ComponentProps<"form">["onSubmit"]>
@@ -16,7 +15,7 @@ type FormSubmitEvent = Parameters<
 
 export function ConfirmPageClient() {
   const router = useRouter();
-  const { feedback, notify, dismiss } = useAuthFeedback();
+  const { notify } = useAuthFeedback();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const searchParams = useSearchParams();
 
@@ -78,13 +77,7 @@ export function ConfirmPageClient() {
   };
 
   return (
-    <>
-      <FloatingAuthAlert
-        feedback={feedback}
-        placement="top"
-        onDismiss={dismiss}
-      />
-      <section className="w-full container mx-auto p-4 xl:p-8">
+    <section className="w-full container mx-auto p-4 xl:p-8">
         <Card>
           <CardHeader>
             <CardTitle className="text-3xl">{cardTitle}</CardTitle>
@@ -100,6 +93,5 @@ export function ConfirmPageClient() {
           </CardContent>
         </Card>
       </section>
-    </>
   );
 }

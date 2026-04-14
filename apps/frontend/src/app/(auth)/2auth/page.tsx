@@ -10,7 +10,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import type { ZodIssue } from "zod";
+import type { core } from "zod";
 import { twoFactorFormSchema } from "@shared/schemas";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { apiUrl } from "@/lib/api";
@@ -23,8 +23,7 @@ import {
   getTwoFactorLoginToken,
   setAccessToken,
 } from "@/lib/auth-session";
-import { FloatingAuthAlert } from "@/components/floating-auth-alert";
-import { useAuthFeedback } from "@/hooks/use-auth-feedback";
+import { useAuthFeedback } from "@/components/auth-floating-provider";
 
 type FormSubmitEvent = Parameters<
   NonNullable<React.ComponentProps<"form">["onSubmit"]>
@@ -32,7 +31,7 @@ type FormSubmitEvent = Parameters<
 
 const TwoAuthPage = () => {
   const router = useRouter();
-  const { feedback, notify, dismiss } = useAuthFeedback();
+  const { notify } = useAuthFeedback();
   const [code, setCode] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -54,7 +53,7 @@ const TwoAuthPage = () => {
     const parsed = twoFactorFormSchema.safeParse({ code });
     if (!parsed.success) {
       const codeError = parsed.error.issues.find(
-        (issue: ZodIssue) => issue.path[0] === "code",
+        (issue: core.$ZodIssue) => issue.path[0] === "code",
       )?.message;
       notify("destructive", codeError ?? "Code invalide.");
       return;
@@ -166,13 +165,7 @@ const TwoAuthPage = () => {
   };
 
   return (
-    <>
-      <FloatingAuthAlert
-        feedback={feedback}
-        placement="top"
-        onDismiss={dismiss}
-      />
-      <section className="w-full container mx-auto p-4 xl:p-8">
+    <section className="w-full container mx-auto p-4 xl:p-8">
         <Card>
           <CardHeader>
             <CardTitle className="text-3xl">Vérification 2FA</CardTitle>
@@ -220,7 +213,6 @@ const TwoAuthPage = () => {
           </CardContent>
         </Card>
       </section>
-    </>
   );
 };
 

@@ -21,8 +21,7 @@ import {
   clearTwoFactorLoginToken,
   getAccessToken,
 } from "@/lib/auth-session";
-import { FloatingAuthAlert } from "@/components/floating-auth-alert";
-import { useAuthFeedback } from "@/hooks/use-auth-feedback";
+import { useAuthFeedback } from "@/components/auth-floating-provider";
 
 export type AuthedUser = { email: string; role: string };
 
@@ -48,7 +47,7 @@ export function useAuthed(): AuthedContextValue {
 export function AuthedProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { feedback, notify, dismiss } = useAuthFeedback();
+  const { notify } = useAuthFeedback();
   const [user, setUser] = useState<AuthedUser | null>(null);
   const [status, setStatus] = useState<AuthedStatus>("loading");
   const firstLoadDone = useRef(false);
@@ -177,13 +176,6 @@ export function AuthedProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthedContext.Provider value={value}>
-      <FloatingAuthAlert
-        feedback={feedback}
-        placement="top"
-        onDismiss={dismiss}
-      />
-      {children}
-    </AuthedContext.Provider>
+    <AuthedContext.Provider value={value}>{children}</AuthedContext.Provider>
   );
 }

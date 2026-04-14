@@ -19,8 +19,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { apiUrl } from "@/lib/api";
-import { FloatingAuthAlert } from "@/components/floating-auth-alert";
-import { useAuthFeedback } from "@/hooks/use-auth-feedback";
+import { useAuthFeedback } from "@/components/auth-floating-provider";
 
 type ForgotPageMode =
   | { kind: "request" }
@@ -289,7 +288,7 @@ function cardTitleForMode(mode: ForgotPageMode): string {
 
 export function ForgotPasswordPageClient() {
   const searchParams = useSearchParams();
-  const { feedback, notify, dismiss } = useAuthFeedback();
+  const { notify } = useAuthFeedback();
 
   const mode = useMemo(
     () => resolveForgotPageMode(searchParams),
@@ -432,13 +431,7 @@ export function ForgotPasswordPageClient() {
   };
 
   return (
-    <>
-      <FloatingAuthAlert
-        feedback={feedback}
-        placement="top"
-        onDismiss={dismiss}
-      />
-      <section className="w-full container mx-auto p-4 xl:p-8">
+    <section className="w-full container mx-auto p-4 xl:p-8">
         <Card>
           <CardHeader>
             <CardTitle className="text-3xl">{cardTitleForMode(mode)}</CardTitle>
@@ -489,6 +482,5 @@ export function ForgotPasswordPageClient() {
           </CardFooter>
         </Card>
       </section>
-    </>
   );
 }
