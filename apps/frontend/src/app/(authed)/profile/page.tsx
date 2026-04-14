@@ -1,7 +1,7 @@
 "use client";
 
-import { ProfileChangePasswordCard } from "./profile-change-password-card";
-import { ProfileInfoCard } from "./profile-info-card";
+import { ProfileChangePasswordCard } from "@/app/(authed)/profile/profile-change-password-card";
+import { ProfileInfoCard } from "@/app/(authed)/profile/profile-info-card";
 
 const ProfilePage = () => {
   return (

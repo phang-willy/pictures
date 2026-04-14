@@ -237,3 +237,27 @@
     transform: scaleX(0);
   }
 }
+
+/* Controles MapLibre adaptes au theme de l'app (zoom/boussole). */
+.maplibre-theme-light .maplibregl-ctrl-group {
+  border: 1px solid oklch(0.92 0 0 / 85%);
+  background: oklch(1 0 0 / 92%);
+  box-shadow: 0 6px 18px oklch(0.145 0 0 / 18%);
+}
+.maplibre-theme-light .maplibregl-ctrl button span {
+  filter: brightness(0) saturate(100%);
+}
+.maplibre-theme-dark .maplibregl-ctrl-group {
+  border: 1px solid oklch(1 0 0 / 18%);
+  background: oklch(0.205 0 0 / 90%);
+  box-shadow: 0 8px 24px oklch(0.145 0 0 / 55%);
+}
+.maplibre-theme-dark .maplibregl-ctrl button {
+  background: transparent;
+}
+.maplibre-theme-dark .maplibregl-ctrl button:hover {
+  background: oklch(1 0 0 / 12%);
+}
+.maplibre-theme-dark .maplibregl-ctrl button span {
+  filter: invert(1) brightness(1.15) contrast(1.05);
+}

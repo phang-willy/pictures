@@ -12,7 +12,10 @@ if [ -f package-lock.json ]; then
     STORED_HASH="$(cat "$LOCK_HASH_FILE")"
   fi
 
-  if [ ! -d node_modules ] || [ "$CURRENT_HASH" != "$STORED_HASH" ]; then
+  # Réinstalle aussi si le lockfile (bind mount) est plus récent que node_modules (volume Docker obsolète).
+  if [ ! -d node_modules ] ||
+    [ "$CURRENT_HASH" != "$STORED_HASH" ] ||
+    ( [ -d node_modules ] && [ package-lock.json -nt node_modules ] ); then
     npm ci $NPM_FLAGS
     printf "%s" "$CURRENT_HASH" > "$LOCK_HASH_FILE"
   fi

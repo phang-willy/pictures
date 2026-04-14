@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { ForgotPasswordPageClient } from "./forgot-password-page-client";
+import { ForgotPasswordPageClient } from "@/app/(auth)/forgot-password/forgot-password-page-client";
 
 export default function ForgotPasswordPage() {
   return (

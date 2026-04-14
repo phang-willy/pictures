@@ -164,97 +164,92 @@ const LoginPage = () => {
 
   return (
     <section className="w-full container mx-auto p-4 xl:p-8">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-3xl">Connexion</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <FieldGroup>
-              <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-8">
-                <Field>
-                  <FieldLabel htmlFor="email">Email</FieldLabel>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-3xl">Connexion</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <FieldGroup>
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-8">
+              <Field>
+                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="myemail@example.com"
+                  required
+                  value={form.email}
+                  onChange={handleChange}
+                  autoComplete="email"
+                />
+                {errors.email ? (
+                  <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+                ) : null}
+              </Field>
+              <Field>
+                <div className="flex items-center justify-between">
+                  <FieldLabel htmlFor="password">Mot de passe</FieldLabel>
+                  <Link
+                    href="/forgot-password"
+                    className="text-sm text-muted-foreground hover:underline focus:underline"
+                  >
+                    Mot de passe oublié ?
+                  </Link>
+                </div>
+                <div className="relative">
                   <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="myemail@example.com"
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Mot de passe"
                     required
-                    value={form.email}
+                    value={form.password}
                     onChange={handleChange}
-                    autoComplete="email"
+                    className="pr-10"
+                    autoComplete="current-password"
                   />
-                  {errors.email ? (
-                    <p className="mt-1 text-sm text-red-500">{errors.email}</p>
-                  ) : null}
-                </Field>
-                <Field>
-                  <div className="flex items-center justify-between">
-                    <FieldLabel htmlFor="password">Mot de passe</FieldLabel>
-                    <Link
-                      href="/forgot-password"
-                      className="text-sm text-muted-foreground hover:underline focus:underline"
-                    >
-                      Mot de passe oublié ?
-                    </Link>
-                  </div>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Mot de passe"
-                      required
-                      value={form.password}
-                      onChange={handleChange}
-                      className="pr-10"
-                      autoComplete="current-password"
-                    />
-                    <Button
-                      type="button"
-                      onClick={togglePasswordVisibility}
-                      tabIndex={-1}
-                      variant="ghost"
-                      size="icon"
-                      className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 dark:text-gray-400 focus:outline-none"
-                      aria-label={
-                        showPassword
-                          ? "Masquer mot de passe"
-                          : "Montrer mot de passe"
-                      }
-                    >
-                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </Button>
-                  </div>
-                  {errors.password ? (
-                    <p className="mt-1 text-sm text-red-500">
-                      {errors.password}
-                    </p>
-                  ) : null}
-                </Field>
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md bg-blue-600 hover:bg-blue-700 text-white font-semibold transition"
-                >
-                  {isSubmitting ? "Connexion..." : "Se connecter"}
-                </Button>
-              </form>
-            </FieldGroup>
-          </CardContent>
-
-          <CardFooter>
-            <p className="text-sm text-muted-foreground">
-              Pas encore de compte ?{" "}
-              <Link
-                href="/register"
-                className="hover:underline focus:underline"
+                  <Button
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    tabIndex={-1}
+                    variant="ghost"
+                    size="icon"
+                    className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 dark:text-gray-400 focus:outline-none"
+                    aria-label={
+                      showPassword
+                        ? "Masquer mot de passe"
+                        : "Montrer mot de passe"
+                    }
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </Button>
+                </div>
+                {errors.password ? (
+                  <p className="mt-1 text-sm text-red-500">{errors.password}</p>
+                ) : null}
+              </Field>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md bg-blue-600 hover:bg-blue-700 text-white font-semibold transition"
               >
-                Créer un compte
-              </Link>
-            </p>
-          </CardFooter>
-        </Card>
-      </section>
+                {isSubmitting ? "Connexion..." : "Se connecter"}
+              </Button>
+            </form>
+          </FieldGroup>
+        </CardContent>
+
+        <CardFooter>
+          <p className="text-sm text-muted-foreground">
+            Pas encore de compte ?{" "}
+            <Link href="/register" className="hover:underline focus:underline">
+              Créer un compte
+            </Link>
+          </p>
+        </CardFooter>
+      </Card>
+    </section>
   );
 };
 

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { ConfirmPageClient } from "./confirm-page-client";
+import { ConfirmPageClient } from "@/app/(auth)/confirm/confirm-page-client";
 import { appName } from "@/lib/app-name";
 
 type PageProps = {
