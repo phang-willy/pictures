@@ -78,20 +78,20 @@ export function ConfirmPageClient() {
 
   return (
     <section className="w-full container mx-auto p-4 xl:p-8">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-3xl">{cardTitle}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <FieldGroup>
-              <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-8">
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Confirmation..." : "Confirmer"}
-                </Button>
-              </form>
-            </FieldGroup>
-          </CardContent>
-        </Card>
-      </section>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-3xl">{cardTitle}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <FieldGroup>
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-8">
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Confirmation..." : "Confirmer"}
+              </Button>
+            </form>
+          </FieldGroup>
+        </CardContent>
+      </Card>
+    </section>
   );
 }

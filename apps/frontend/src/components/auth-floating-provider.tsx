@@ -30,9 +30,8 @@ export type AuthFloatingContextValue = {
   }) => void;
 };
 
-const AuthFloatingContext = React.createContext<AuthFloatingContextValue | null>(
-  null,
-);
+const AuthFloatingContext =
+  React.createContext<AuthFloatingContextValue | null>(null);
 
 export function useAuthFeedback(): AuthFloatingContextValue {
   const ctx = React.useContext(AuthFloatingContext);
@@ -64,10 +63,7 @@ export function AuthFloatingProvider({
       variant: NonNullable<FloatingAuthFeedback>["variant"],
       message: string,
     ) => {
-      setQueue((q) => [
-        ...q,
-        { id: crypto.randomUUID(), variant, message },
-      ]);
+      setQueue((q) => [...q, { id: crypto.randomUUID(), variant, message }]);
     },
     [],
   );
@@ -88,10 +84,10 @@ export function AuthFloatingProvider({
     [],
   );
 
-  const first = queue[0];
-  const feedback: FloatingAuthFeedback = first
-    ? { variant: first.variant, message: first.message }
-    : null;
+  const feedback = React.useMemo((): FloatingAuthFeedback => {
+    const item = queue[0];
+    return item ? { variant: item.variant, message: item.message } : null;
+  }, [queue]);
 
   const value = React.useMemo(
     () => ({

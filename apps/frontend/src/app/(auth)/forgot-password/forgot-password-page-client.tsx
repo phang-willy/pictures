@@ -432,55 +432,55 @@ export function ForgotPasswordPageClient() {
 
   return (
     <section className="w-full container mx-auto p-4 xl:p-8">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-3xl">{cardTitleForMode(mode)}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <FieldGroup>
-              {mode.kind === "bad_link" ? (
-                <BadLinkSection />
-              ) : mode.kind === "request" ? (
-                <RequestFormSection
-                  email={requestForm.email}
-                  errors={requestErrors}
-                  isSubmitting={isSubmitting}
-                  doneMessage={requestDoneMessage}
-                  onEmailChange={handleRequestChange}
-                  onSubmit={submitRequest}
-                />
-              ) : (
-                <ResetFormSection
-                  form={resetForm}
-                  errors={resetErrors}
-                  isSubmitting={isSubmitting}
-                  showPw={showPw}
-                  showPw2={showPw2}
-                  onChange={handleResetChange}
-                  onTogglePw={() => setShowPw((v) => !v)}
-                  onTogglePw2={() => setShowPw2((v) => !v)}
-                  onSubmit={submitReset}
-                />
-              )}
-            </FieldGroup>
-          </CardContent>
-          <CardFooter className="flex flex-col items-stretch gap-2 sm:flex-row sm:justify-between">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-3xl">{cardTitleForMode(mode)}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <FieldGroup>
+            {mode.kind === "bad_link" ? (
+              <BadLinkSection />
+            ) : mode.kind === "request" ? (
+              <RequestFormSection
+                email={requestForm.email}
+                errors={requestErrors}
+                isSubmitting={isSubmitting}
+                doneMessage={requestDoneMessage}
+                onEmailChange={handleRequestChange}
+                onSubmit={submitRequest}
+              />
+            ) : (
+              <ResetFormSection
+                form={resetForm}
+                errors={resetErrors}
+                isSubmitting={isSubmitting}
+                showPw={showPw}
+                showPw2={showPw2}
+                onChange={handleResetChange}
+                onTogglePw={() => setShowPw((v) => !v)}
+                onTogglePw2={() => setShowPw2((v) => !v)}
+                onSubmit={submitReset}
+              />
+            )}
+          </FieldGroup>
+        </CardContent>
+        <CardFooter className="flex flex-col items-stretch gap-2 sm:flex-row sm:justify-between">
+          <Link
+            href="/login"
+            className="text-sm text-muted-foreground hover:underline"
+          >
+            Retour à la connexion
+          </Link>
+          {mode.kind === "reset" ? (
             <Link
-              href="/login"
+              href="/forgot-password"
               className="text-sm text-muted-foreground hover:underline"
             >
-              Retour à la connexion
+              Nouvelle demande de lien
             </Link>
-            {mode.kind === "reset" ? (
-              <Link
-                href="/forgot-password"
-                className="text-sm text-muted-foreground hover:underline"
-              >
-                Nouvelle demande de lien
-              </Link>
-            ) : null}
-          </CardFooter>
-        </Card>
-      </section>
+          ) : null}
+        </CardFooter>
+      </Card>
+    </section>
   );
 }

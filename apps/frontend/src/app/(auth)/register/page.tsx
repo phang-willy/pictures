@@ -150,124 +150,122 @@ const RegisterPage = () => {
 
   return (
     <section className="w-full container mx-auto p-4 xl:p-8">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-3xl">Inscription</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <FieldGroup>
-              <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-8">
-                <Field>
-                  <FieldLabel htmlFor="email">Email</FieldLabel>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-3xl">Inscription</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <FieldGroup>
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-8">
+              <Field>
+                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="myemail@example.com"
+                  required
+                  value={form.email}
+                  onChange={handleChange}
+                  autoComplete="email"
+                />
+                {errors.email ? (
+                  <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+                ) : null}
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="password">Mot de passe</FieldLabel>
+                <div className="relative">
                   <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="myemail@example.com"
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Mot de passe"
                     required
-                    value={form.email}
+                    value={form.password}
                     onChange={handleChange}
-                    autoComplete="email"
+                    className="pr-10"
+                    autoComplete="new-password"
                   />
-                  {errors.email ? (
-                    <p className="mt-1 text-sm text-red-500">{errors.email}</p>
-                  ) : null}
-                </Field>
+                  <Button
+                    type="button"
+                    onClick={() => setShowPassword((previous) => !previous)}
+                    tabIndex={-1}
+                    variant="ghost"
+                    size="icon"
+                    className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 dark:text-gray-400 focus:outline-none"
+                    aria-label={
+                      showPassword
+                        ? "Masquer mot de passe"
+                        : "Montrer mot de passe"
+                    }
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </Button>
+                </div>
+                {errors.password ? (
+                  <p className="mt-1 text-sm text-red-500">{errors.password}</p>
+                ) : null}
+              </Field>
 
-                <Field>
-                  <FieldLabel htmlFor="password">Mot de passe</FieldLabel>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Mot de passe"
-                      required
-                      value={form.password}
-                      onChange={handleChange}
-                      className="pr-10"
-                      autoComplete="new-password"
-                    />
-                    <Button
-                      type="button"
-                      onClick={() => setShowPassword((previous) => !previous)}
-                      tabIndex={-1}
-                      variant="ghost"
-                      size="icon"
-                      className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 dark:text-gray-400 focus:outline-none"
-                      aria-label={
-                        showPassword
-                          ? "Masquer mot de passe"
-                          : "Montrer mot de passe"
-                      }
-                    >
-                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </Button>
-                  </div>
-                  {errors.password ? (
-                    <p className="mt-1 text-sm text-red-500">
-                      {errors.password}
-                    </p>
-                  ) : null}
-                </Field>
+              <Field>
+                <FieldLabel htmlFor="confirmPassword">
+                  Confirmer le mot de passe
+                </FieldLabel>
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Confirmer le mot de passe"
+                    required
+                    value={form.confirmPassword}
+                    onChange={handleChange}
+                    className="pr-10"
+                    autoComplete="off"
+                  />
+                  <Button
+                    type="button"
+                    onClick={() =>
+                      setShowConfirmPassword((previous) => !previous)
+                    }
+                    tabIndex={-1}
+                    variant="ghost"
+                    size="icon"
+                    className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 dark:text-gray-400 focus:outline-none"
+                    aria-label={
+                      showConfirmPassword
+                        ? "Masquer confirmation du mot de passe"
+                        : "Montrer confirmation du mot de passe"
+                    }
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff size={20} />
+                    ) : (
+                      <Eye size={20} />
+                    )}
+                  </Button>
+                </div>
+                {errors.confirmPassword ? (
+                  <p className="mt-1 text-sm text-red-500">
+                    {errors.confirmPassword}
+                  </p>
+                ) : null}
+              </Field>
 
-                <Field>
-                  <FieldLabel htmlFor="confirmPassword">
-                    Confirmer le mot de passe
-                  </FieldLabel>
-                  <div className="relative">
-                    <Input
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      type={showConfirmPassword ? "text" : "password"}
-                      placeholder="Confirmer le mot de passe"
-                      required
-                      value={form.confirmPassword}
-                      onChange={handleChange}
-                      className="pr-10"
-                      autoComplete="off"
-                    />
-                    <Button
-                      type="button"
-                      onClick={() =>
-                        setShowConfirmPassword((previous) => !previous)
-                      }
-                      tabIndex={-1}
-                      variant="ghost"
-                      size="icon"
-                      className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 dark:text-gray-400 focus:outline-none"
-                      aria-label={
-                        showConfirmPassword
-                          ? "Masquer confirmation du mot de passe"
-                          : "Montrer confirmation du mot de passe"
-                      }
-                    >
-                      {showConfirmPassword ? (
-                        <EyeOff size={20} />
-                      ) : (
-                        <Eye size={20} />
-                      )}
-                    </Button>
-                  </div>
-                  {errors.confirmPassword ? (
-                    <p className="mt-1 text-sm text-red-500">
-                      {errors.confirmPassword}
-                    </p>
-                  ) : null}
-                </Field>
-
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md bg-blue-600 hover:bg-blue-700 text-white font-semibold transition"
-                >
-                  {isSubmitting ? "Création..." : "Créer mon compte"}
-                </Button>
-              </form>
-            </FieldGroup>
-          </CardContent>
-        </Card>
-      </section>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md bg-blue-600 hover:bg-blue-700 text-white font-semibold transition"
+              >
+                {isSubmitting ? "Création..." : "Créer mon compte"}
+              </Button>
+            </form>
+          </FieldGroup>
+        </CardContent>
+      </Card>
+    </section>
   );
 };
 

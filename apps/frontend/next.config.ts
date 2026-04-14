@@ -18,6 +18,8 @@ const publicRegisterOn = process.env.REGISTER_ON === "true" ? "true" : "";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  /** MapLibre (ESM / exports) : évite des erreurs de résolution avec Webpack / Turbopack. */
+  transpilePackages: ["maplibre-gl"],
   env: {
     NEXT_PUBLIC_APP_NAME: publicAppName,
     NEXT_PUBLIC_REGISTER_ON: publicRegisterOn,

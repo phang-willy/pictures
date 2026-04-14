@@ -166,53 +166,53 @@ const TwoAuthPage = () => {
 
   return (
     <section className="w-full container mx-auto p-4 xl:p-8">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-3xl">Vérification 2FA</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <FieldGroup>
-              <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-8">
-                <Field>
-                  <FieldLabel htmlFor="otp">Code de vérification</FieldLabel>
-                  <InputOTP
-                    id="otp"
-                    maxLength={6}
-                    value={code}
-                    onChange={setCode}
-                    pattern={REGEXP_ONLY_DIGITS}
-                  >
-                    <InputOTPGroup>
-                      <InputOTPSlot index={0} />
-                      <InputOTPSlot index={1} />
-                      <InputOTPSlot index={2} />
-                      <InputOTPSlot index={3} />
-                      <InputOTPSlot index={4} />
-                      <InputOTPSlot index={5} />
-                    </InputOTPGroup>
-                  </InputOTP>
-                </Field>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-3xl">Vérification 2FA</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <FieldGroup>
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-8">
+              <Field>
+                <FieldLabel htmlFor="otp">Code de vérification</FieldLabel>
+                <InputOTP
+                  id="otp"
+                  maxLength={6}
+                  value={code}
+                  onChange={setCode}
+                  pattern={REGEXP_ONLY_DIGITS}
+                >
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                  </InputOTPGroup>
+                </InputOTP>
+              </Field>
 
-                <div className="flex items-center justify-between gap-3">
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting || code.length !== 6}
-                  >
-                    {isSubmitting ? "Vérification..." : "Vérifier"}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleResendCode}
-                  >
-                    Renvoyer le code
-                  </Button>
-                </div>
-              </form>
-            </FieldGroup>
-          </CardContent>
-        </Card>
-      </section>
+              <div className="flex items-center justify-between gap-3">
+                <Button
+                  type="submit"
+                  disabled={isSubmitting || code.length !== 6}
+                >
+                  {isSubmitting ? "Vérification..." : "Vérifier"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleResendCode}
+                >
+                  Renvoyer le code
+                </Button>
+              </div>
+            </form>
+          </FieldGroup>
+        </CardContent>
+      </Card>
+    </section>
   );
 };
 
