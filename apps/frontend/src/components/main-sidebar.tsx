@@ -36,15 +36,15 @@ export function MainSidebar() {
       <SidebarContent className="bg-background" />
       <SidebarFooter className="bg-background">
         {isConnected ? (
-            <div className="flex items-center justify-between p-2">
-              <Button variant="outline" className="w-full justify-start" asChild>
-                <Link href="/profile" className="flex min-w-0 items-center gap-2">
-                  <User className="size-4 shrink-0" aria-hidden />
-                  <span className="truncate text-left text-sm">Profil</span>
-                </Link>
-              </Button>
-            </div>
-        ) : ( null )}
+          <div className="flex items-center justify-between p-2">
+            <Button variant="outline" className="w-full justify-start" asChild>
+              <Link href="/profile" className="flex min-w-0 items-center gap-2">
+                <User className="size-4 shrink-0" aria-hidden />
+                <span className="truncate text-left text-sm">Profil</span>
+              </Link>
+            </Button>
+          </div>
+        ) : null}
       </SidebarFooter>
     </Sidebar>
   );

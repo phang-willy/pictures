@@ -32,7 +32,12 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: monorepoRoot,
     resolveAlias: {
-      "@shared/schemas": path.join(monorepoRoot, "shared", "schemas", "index.ts"),
+      "@shared/schemas": path.join(
+        monorepoRoot,
+        "shared",
+        "schemas",
+        "index.ts",
+      ),
       "@shared": path.join(monorepoRoot, "shared"),
     },
   },

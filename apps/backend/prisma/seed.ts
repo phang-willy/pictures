@@ -1,5 +1,6 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import 'dotenv/config';
 
@@ -20,6 +21,50 @@ const DATABASE_URL = getRequiredEnv('DATABASE_URL');
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: DATABASE_URL }),
 });
+const COUNTRIES_GEOJSON_URL =
+  'https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json';
+
+type GeoCountryFeature = {
+  id?: string;
+  geometry?: {
+    type?: string;
+    coordinates?: unknown;
+  };
+};
+
+async function fetchCountriesGeometryByIso3(): Promise<
+  Map<string, { type: string; coordinates: Prisma.InputJsonValue }>
+> {
+  const response = await fetch(COUNTRIES_GEOJSON_URL);
+  if (!response.ok) {
+    throw new Error('[SEED]Unable to download countries geojson');
+  }
+  const payload = (await response.json()) as { features?: GeoCountryFeature[] };
+  const byIso3 = new Map<
+    string,
+    {
+      type: string;
+      coordinates: Prisma.InputJsonValue;
+    }
+  >();
+  for (const feature of payload.features ?? []) {
+    const iso3 = typeof feature.id === 'string' ? feature.id.toUpperCase() : '';
+    const geometryType = feature.geometry?.type;
+    const coordinates = feature.geometry?.coordinates;
+    if (
+      !iso3 ||
+      typeof geometryType !== 'string' ||
+      coordinates === undefined
+    ) {
+      continue;
+    }
+    byIso3.set(iso3, {
+      type: geometryType,
+      coordinates: coordinates as Prisma.InputJsonValue,
+    });
+  }
+  return byIso3;
+}
 
 async function getContinentByCode(code: string, label: string) {
   const continent = await prisma.continent.findUnique({
@@ -83,6 +128,7 @@ async function main() {
       NOT: { email: DEFAULT_EMAIL },
     },
   });
+  await prisma.countryGeometry.deleteMany();
   await prisma.city.deleteMany();
   await prisma.country.deleteMany();
   await prisma.continent.deleteMany();
@@ -176,8 +222,37 @@ async function main() {
       },
     });
   }
+  const countriesGeometryByIso3 = await fetchCountriesGeometryByIso3();
+  for (const country of COUNTRIES) {
+    if (!country.codeIso3) {
+      continue;
+    }
+    const geo = countriesGeometryByIso3.get(country.codeIso3.toUpperCase());
+    if (!geo) {
+      continue;
+    }
+    const createdCountry = await prisma.country.findUnique({
+      where: { codeIso2: country.codeIso2 },
+      select: { id: true },
+    });
+    if (!createdCountry) {
+      continue;
+    }
+    await prisma.countryGeometry.upsert({
+      where: { countryId: createdCountry.id },
+      update: {
+        type: geo.type,
+        coordinate: geo.coordinates,
+      },
+      create: {
+        countryId: createdCountry.id,
+        type: geo.type,
+        coordinate: geo.coordinates,
+      },
+    });
+  }
 
-  console.log('[SEED] Countries created');
+  console.log('[SEED]Countries created');
 
   const FRANCE_COUNTRY = await getCountryByIso2('FR', 'France');
   const LUXEMBOURG_COUNTRY = await getCountryByIso2('LU', 'Luxembourg');
@@ -197,7 +272,14 @@ async function main() {
       longitude: 2.3522,
     },
     {
-      name: 'Luxembourg Ville',
+      name: 'Deauville',
+      slug: 'deauville',
+      countryId: FRANCE_COUNTRY.id,
+      latitude: 49.353976,
+      longitude: 0.075122,
+    },
+    {
+      name: 'Luxembourg',
       slug: 'luxembourg',
       countryId: LUXEMBOURG_COUNTRY.id,
       latitude: 49.6117,
@@ -207,8 +289,15 @@ async function main() {
       name: 'Tokyo',
       slug: 'tokyo',
       countryId: JAPAN_COUNTRY.id,
-      latitude: 35.6895,
-      longitude: 139.6917,
+      latitude: 35.685013,
+      longitude: 139.752445,
+    },
+    {
+      name: 'Kyoto',
+      slug: 'kyoto',
+      countryId: JAPAN_COUNTRY.id,
+      latitude: 35.011636,
+      longitude: 135.768029,
     },
     {
       name: 'Ho Chi Minh',
@@ -218,6 +307,13 @@ async function main() {
       longitude: 106.6297,
     },
     {
+      name: 'Hanoi',
+      slug: 'hanoi',
+      countryId: VIETNAM_COUNTRY.id,
+      latitude: 21.0285,
+      longitude: 105.8542,
+    },
+    {
       name: 'Bangkok',
       slug: 'bangkok',
       countryId: THAILAND_COUNTRY.id,
@@ -225,7 +321,7 @@ async function main() {
       longitude: 100.5018,
     },
     {
-      name: 'Lombok Island',
+      name: 'Lombok',
       slug: 'lombok',
       countryId: INDONESIA_COUNTRY.id,
       latitude: -8.59,
