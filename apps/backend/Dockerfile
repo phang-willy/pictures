@@ -1,5 +1,14 @@
 FROM node:22-alpine AS base
 WORKDIR /app
+RUN wget -qO /tmp/npm.tgz https://registry.npmjs.org/npm/-/npm-11.12.1.tgz \
+  && rm -rf /usr/local/lib/node_modules/npm \
+  && mkdir -p /usr/local/lib/node_modules \
+  && tar -xzf /tmp/npm.tgz -C /usr/local/lib/node_modules \
+  && mv /usr/local/lib/node_modules/package /usr/local/lib/node_modules/npm \
+  && ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+  && ln -sf /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx \
+  && rm -f /tmp/npm.tgz \
+  && npm -v
 
 FROM base AS dev
 RUN apk add --no-cache bash openssl
