@@ -87,11 +87,24 @@ model Country {
   codeIso3    String?     @unique @db.Char(3)
   name        String      @db.VarChar(120)
   slug        String      @unique @db.VarChar(150)
+  geometry    CountryGeometry?
   cities      City[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
   @@index([continentId, name])
+}
+
+model CountryGeometry {
+  id         String   @id @default(uuid())
+  countryId  String   @unique
+  country    Country  @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  type       String   @db.VarChar(40)
+  coordinate Json
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([countryId])
 }
 
 model City {

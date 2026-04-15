@@ -22,20 +22,51 @@ function isSwaggerEnabled(): boolean {
 }
 
 function resolveCorsOrigins(): boolean | string[] {
-  const raw = process.env.CORS_ORIGIN?.trim();
-  if (raw) {
-    const list = raw
+  const origins = new Set<string>();
+  const addOrigin = (origin: string) => {
+    const trimmed = origin.trim();
+    if (!trimmed) {
+      return;
+    }
+    if (/^https?:\/\//i.test(trimmed)) {
+      origins.add(trimmed);
+      return;
+    }
+    // Supporte des valeurs de type "192.168.1.2" dans ALLOWED_DEV_ORIGINS.
+    origins.add(`http://${trimmed}`);
+  };
+
+  const rawCorsOrigin = process.env.CORS_ORIGIN?.trim();
+  if (rawCorsOrigin) {
+    rawCorsOrigin
       .split(',')
       .map((origin) => origin.trim())
-      .filter(Boolean);
-    if (list.length > 0) {
-      return list;
+      .filter(Boolean)
+      .forEach(addOrigin);
+  }
+
+  if (process.env.NODE_ENV !== 'production') {
+    origins.add('http://localhost:3000');
+    const rawAllowedDevOrigins = process.env.ALLOWED_DEV_ORIGINS?.trim();
+    if (rawAllowedDevOrigins) {
+      rawAllowedDevOrigins
+        .split(',')
+        .map((origin) => origin.trim())
+        .filter(Boolean)
+        .forEach((origin) => {
+          addOrigin(origin);
+          // Si ALLOWED_DEV_ORIGINS ne contient que l'hôte, on autorise aussi :3000.
+          if (!/^https?:\/\//i.test(origin) && !origin.includes(':')) {
+            addOrigin(`${origin}:3000`);
+          }
+        });
     }
   }
-  if (process.env.NODE_ENV !== 'production') {
-    return ['http://localhost:3000'];
+
+  if (origins.size > 0) {
+    return Array.from(origins);
   }
-  return false;
+  return process.env.NODE_ENV !== 'production' ? true : false;
 }
 
 async function bootstrap() {

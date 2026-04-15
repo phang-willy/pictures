@@ -11,6 +11,9 @@ import {
   resolveThrottleTracker,
   throttleWindowMs,
 } from '@/common/throttle-policy';
+import { CountryModule } from '@/country/country.module';
+import { CityModule } from '@/city/city.module';
+import { CountryGeometryModule } from '@/country-geometry/country-geometry.module';
 
 @Module({
   imports: [
@@ -31,6 +34,9 @@ import {
     }),
     PrismaModule,
     AuthModule,
+    CountryModule,
+    CityModule,
+    CountryGeometryModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
