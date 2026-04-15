@@ -22,7 +22,9 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader className="p-4 border-b">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold">{appName}</h1>
+          <Link href="/">
+            <h1 className="text-3xl font-bold">{appName}</h1>
+          </Link>
           {isMobile ? <SidebarTrigger /> : null}
         </div>
       </SidebarHeader>

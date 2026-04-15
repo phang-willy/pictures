@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
+import path from "node:path";
 
-/** Relatif à `apps/frontend/next.config.ts` → racine du dépôt. */
-const monorepoRoot = "../..";
+/** Chemin absolu vers la racine du monorepo (requis par Turbopack/tracing). */
+const monorepoRoot = path.resolve(process.cwd(), "../..");
 
 const allowedDevOrigins = process.env.ALLOWED_DEV_ORIGINS?.split(",")
   .map((origin) => origin.trim())
@@ -18,6 +19,9 @@ const publicRegisterOn = process.env.REGISTER_ON === "true" ? "true" : "";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  experimental: {
+    externalDir: true,
+  },
   /** MapLibre (ESM / exports) : évite des erreurs de résolution avec Webpack / Turbopack. */
   transpilePackages: ["maplibre-gl"],
   env: {
@@ -28,8 +32,8 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: monorepoRoot,
     resolveAlias: {
-      "@shared/schemas": `${monorepoRoot}/shared/schemas`,
-      "@shared": `${monorepoRoot}/shared`,
+      "@shared/schemas": path.join(monorepoRoot, "shared", "schemas", "index.ts"),
+      "@shared": path.join(monorepoRoot, "shared"),
     },
   },
   outputFileTracingRoot: monorepoRoot,

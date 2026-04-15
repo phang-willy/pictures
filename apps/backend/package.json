@@ -21,7 +21,8 @@
     "format:check": "prettier --check .",
     "format:write": "prettier --write .",
     "type-check": "npm run prisma:generate && tsc --noEmit",
-    "prisma:generate": "prisma generate"
+    "prisma:generate": "prisma generate",
+    "seed": "prisma db seed"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.18",

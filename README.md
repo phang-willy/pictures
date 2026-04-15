@@ -17,6 +17,7 @@ Starter fullstack prêt pour la production avec un workflow local orienté Docke
 ├─ apps/
 │  ├─ frontend/
 │  └─ backend/
+├─ shared/
 ├─ compose.yml
 ├─ .env
 └─ .env.exemple
@@ -124,11 +125,17 @@ Commandes utiles :
 npx prisma generate
 npx prisma migrate deploy
 npx prisma db push
+npm run seed
 ```
 
 ### Politique Swagger
 
-Swagger est **désactivé** en `NODE_ENV=production` (ou si `SWAGGER=false` / `0`). Sinon il est actif si `NODE_ENV` est vide, `development`, `dev` ou `test`, ou si `SWAGGER=true` / `1` (utile pour un environnement intermédiaire). L’UI est servie sous **`/api/docs`** (préfixe global `api`).
+`NODE_ENV=production`
+- Swagger est désactivée
+
+`NODE_ENV=development`
+- Swagger est activé
+- http://localhost:{BACKEND_PORT}/api/docs
 
 ## Frontend (`apps/frontend`)
 

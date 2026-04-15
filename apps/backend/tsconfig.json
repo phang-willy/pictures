@@ -1,5 +1,6 @@
 {
   "include": [
+    "prisma.config.ts",
     "src/**/*.ts",
     "prisma/**/*.ts",
     "test/**/*.ts",
