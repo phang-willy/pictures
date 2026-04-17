@@ -75,6 +75,7 @@ model Continent {
   code      String    @unique @db.VarChar(8)
   name      String    @unique @db.VarChar(100)
   countries Country[]
+  deletedAt DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
@@ -89,6 +90,7 @@ model Country {
   slug        String      @unique @db.VarChar(150)
   geometry    CountryGeometry?
   cities      City[]
+  deletedAt   DateTime?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
@@ -117,6 +119,7 @@ model City {
   longitude   Float                                 @db.DoublePrecision
   location    Unsupported("geography(Point, 4326)")?
   places      Place[]
+  deletedAt   DateTime?
   createdAt   DateTime                              @default(now())
   updatedAt   DateTime                              @updatedAt
 
@@ -135,6 +138,7 @@ model Place {
   longitude   Float                                 @db.DoublePrecision
   location    Unsupported("geography(Point, 4326)")?
   photos      Photo[]
+  deletedAt   DateTime?
   createdAt   DateTime                              @default(now())
   updatedAt   DateTime                              @updatedAt
 
@@ -158,6 +162,7 @@ model Photo {
   height            Int?
   webpUrl           String   @db.VarChar(2048)
   webpThumbnailUrl  String?  @db.VarChar(2048)
+  deletedAt         DateTime?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 

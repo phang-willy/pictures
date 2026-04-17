@@ -1,9 +1,11 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AdminMutationGuard } from '@/auth/guards/admin-mutation.guard';
 import { CountryGeometryService } from '@/country-geometry/country-geometry.service';
 
 @ApiTags('country-geometry')
 @Controller('country-geometry')
+@UseGuards(AdminMutationGuard)
 export class CountryGeometryController {
   constructor(
     private readonly countryGeometryService: CountryGeometryService,

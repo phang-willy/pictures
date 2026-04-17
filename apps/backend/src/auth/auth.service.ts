@@ -25,12 +25,16 @@ import {
 } from '@shared/schemas';
 import { MailService } from '@/auth/mail.service';
 import { lookupIpGeo } from '@/auth/ip-geo.lookup';
+import { ACCESS_TOKEN_TTL_MS } from '@/auth/access-token-ttl.const';
+import {
+  ACCESS_TOKEN_COOKIE_NAME,
+  getCookieValue,
+} from '@/auth/auth-cookie.config';
 
 const CONFIRM_TOKEN_TTL_MS = 60 * 60 * 1000;
 const FORGOT_PASSWORD_TTL_MS = 60 * 60 * 1000;
 const TWOFA_STEP_TTL_MS = 10 * 60 * 1000;
 const TWOFA_CODE_TTL_MS = 10 * 60 * 1000;
-const ACCESS_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_CODE_ATTEMPTS = 5;
 const LOCK_15_MIN_MS = 15 * 60 * 1000;
 const LOCK_1_H_MS = 60 * 60 * 1000;
@@ -674,15 +678,32 @@ export class AuthService {
     return { ok: true };
   }
 
-  async meFromBearer(authorization: string | undefined): Promise<MeResult> {
+  private resolveRawAccessToken(
+    authorization: string | undefined,
+    cookieHeader: string | undefined,
+  ): string {
+    const fromBearer = authorization?.startsWith('Bearer ')
+      ? authorization.slice(7).trim()
+      : '';
+    if (fromBearer) {
+      return fromBearer;
+    }
+    return getCookieValue(cookieHeader, ACCESS_TOKEN_COOKIE_NAME)?.trim() ?? '';
+  }
+
+  /**
+   * Authentification par header `Authorization: Bearer` et/ou cookie HttpOnly `pictures_at`.
+   */
+  async meFromBearer(
+    authorization: string | undefined,
+    cookieHeader?: string | undefined,
+  ): Promise<MeResult> {
     const secret = this.authSecret();
     if (!secret) {
       return { ok: false, message: 'Service indisponible.' };
     }
 
-    const raw = authorization?.startsWith('Bearer ')
-      ? authorization.slice(7).trim()
-      : '';
+    const raw = this.resolveRawAccessToken(authorization, cookieHeader);
     if (!raw) {
       return { ok: false, message: 'Non authentifié.' };
     }
@@ -895,15 +916,14 @@ export class AuthService {
     input: unknown,
     authorization: string | undefined,
     clientIp: string,
+    cookieHeader?: string | undefined,
   ): Promise<ChangePasswordResult> {
     const secret = this.authSecret();
     if (!secret) {
       return { ok: false, message: 'Service indisponible.' };
     }
 
-    const raw = authorization?.startsWith('Bearer ')
-      ? authorization.slice(7).trim()
-      : '';
+    const raw = this.resolveRawAccessToken(authorization, cookieHeader);
     if (!raw) {
       return { ok: false, message: 'Non authentifié.' };
     }

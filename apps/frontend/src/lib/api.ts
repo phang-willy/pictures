@@ -1,4 +1,12 @@
 function resolveApiBaseUrl(): string {
+  if (typeof window === "undefined") {
+    const serverOnly =
+      process.env.API_URL?.trim() || process.env.INTERNAL_API_URL?.trim();
+    if (serverOnly) {
+      return serverOnly.replace(/\/$/, "");
+    }
+  }
+
   const envBase = process.env.NEXT_PUBLIC_API_URL?.trim();
   const candidates = envBase
     ? envBase
@@ -56,4 +64,12 @@ export function apiUrl(path: string): string {
   const p = path.startsWith("/") ? path : `/${path}`;
   const API_URL = resolveApiBaseUrl() + p;
   return API_URL;
+}
+
+/**
+ * Requêtes vers l’API avec envoi des cookies HttpOnly (`credentials: 'include'`).
+ * Ne pas y placer de jeton dans les en-têtes : l’auth repose sur le cookie `pictures_at`.
+ */
+export function apiFetch(path: string, init?: RequestInit): Promise<Response> {
+  return fetch(apiUrl(path), { ...init, credentials: "include" });
 }

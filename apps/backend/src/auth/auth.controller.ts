@@ -11,6 +11,12 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
+import { ACCESS_TOKEN_TTL_MS } from './access-token-ttl.const';
+import {
+  ACCESS_TOKEN_COOKIE_NAME,
+  accessTokenCookieOptions,
+  clearAccessTokenCookie,
+} from './auth-cookie.config';
 import { AuthService } from '@/auth/auth.service';
 import { extractClientIp } from '@/auth/client-ip.util';
 import {
@@ -94,7 +100,7 @@ export class AuthController {
   @ApiOperation({
     summary: 'Vérification du code 2FA',
     description:
-      'Réponse HTTP 200. Succès : `accessToken` (Bearer) pour les routes protégées.',
+      'Réponse HTTP 200. Succès : cookie HttpOnly `pictures_at` (access token) ; ne pas stocker le jeton en JavaScript.',
   })
   @ApiBody({ type: VerifyTwoFactorRequestBodyDto })
   async verify2fa(
@@ -113,10 +119,13 @@ export class AuthController {
         ...(result.field ? { field: result.field } : {}),
       });
     }
-    return response.status(HttpStatus.OK).json({
-      success: true,
-      accessToken: result.accessToken,
-    });
+    const accessToken = result.accessToken;
+    response.cookie(
+      ACCESS_TOKEN_COOKIE_NAME,
+      accessToken,
+      accessTokenCookieOptions(ACCESS_TOKEN_TTL_MS),
+    );
+    return response.status(HttpStatus.OK).json({ success: true });
   }
 
   @Post('2fa/resend')
@@ -143,13 +152,17 @@ export class AuthController {
   @ApiOperation({
     summary: 'Profil minimal (session)',
     description:
-      'Header `Authorization: Bearer <accessToken>`. Réponse HTTP 200 ; échec auth via `success: false`.',
+      'Cookie HttpOnly `pictures_at` et/ou header `Authorization: Bearer`. Réponse HTTP 200 ; échec auth via `success: false`.',
   })
   async me(
     @Headers('authorization') authorization: string | undefined,
+    @Req() req: Request,
     @Res() response: Response,
   ) {
-    const result = await this.authService.meFromBearer(authorization);
+    const result = await this.authService.meFromBearer(
+      authorization,
+      req.headers.cookie,
+    );
     if (!result.ok) {
       return response.status(HttpStatus.OK).json({
         success: false,
@@ -238,7 +251,7 @@ export class AuthController {
   @ApiOperation({
     summary: 'Changement de mot de passe (connecté)',
     description:
-      'Header `Authorization: Bearer <accessToken>`. Réponse HTTP 200.',
+      'Cookie HttpOnly `pictures_at` et/ou header `Authorization: Bearer`. Réponse HTTP 200.',
   })
   @ApiBody({ type: ChangePasswordRequestBodyDto })
   async changePassword(
@@ -251,6 +264,7 @@ export class AuthController {
       body,
       authorization,
       extractClientIp(req),
+      req.headers.cookie,
     );
     if (!result.ok) {
       return response.status(HttpStatus.OK).json({
@@ -259,6 +273,18 @@ export class AuthController {
         ...(result.field ? { field: result.field } : {}),
       });
     }
+    return response.status(HttpStatus.OK).json({ success: true });
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Déconnexion',
+    description:
+      'Supprime le cookie HttpOnly `pictures_at`. Appeler depuis le client avec `credentials: include`.',
+  })
+  logout(@Res() response: Response) {
+    clearAccessTokenCookie(response);
     return response.status(HttpStatus.OK).json({ success: true });
   }
 }

@@ -1,5 +1,7 @@
+import { apiUrl } from "@/lib/api";
+
 const TWO_FACTOR_LOGIN_TOKEN_KEY = "pictures.twoFactorLoginToken";
-const ACCESS_TOKEN_KEY = "pictures.accessToken";
+const LEGACY_ACCESS_TOKEN_KEY = "pictures.accessToken";
 
 export function setTwoFactorLoginToken(token: string): void {
   try {
@@ -25,26 +27,28 @@ export function clearTwoFactorLoginToken(): void {
   }
 }
 
-export function setAccessToken(token: string): void {
+/** Ancien stockage local du jeton : nettoyage pour ne rien laisser en JS. */
+export function clearLegacyAccessTokenStorage(): void {
   try {
-    sessionStorage.setItem(ACCESS_TOKEN_KEY, token);
+    localStorage.removeItem(LEGACY_ACCESS_TOKEN_KEY);
+    sessionStorage.removeItem(LEGACY_ACCESS_TOKEN_KEY);
   } catch {
     /* ignore */
   }
 }
 
-export function getAccessToken(): string | null {
+/**
+ * Invalide la session côté serveur (cookie HttpOnly) puis nettoie le stockage obsolète.
+ * À appeler à la déconnexion ou quand une route protégée renvoie une erreur d’auth.
+ */
+export async function logoutAuthSession(): Promise<void> {
+  clearLegacyAccessTokenStorage();
   try {
-    return sessionStorage.getItem(ACCESS_TOKEN_KEY);
+    await fetch(apiUrl("/api/auth/logout"), {
+      method: "POST",
+      credentials: "include",
+    });
   } catch {
-    return null;
-  }
-}
-
-export function clearAccessToken(): void {
-  try {
-    sessionStorage.removeItem(ACCESS_TOKEN_KEY);
-  } catch {
-    /* ignore */
+    /* réseau : le navigateur peut quand même avoir effacé l’état local */
   }
 }

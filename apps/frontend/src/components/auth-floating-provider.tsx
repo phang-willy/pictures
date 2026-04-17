@@ -105,7 +105,7 @@ export function AuthFloatingProvider({
       {children}
       <FloatingAuthAlert
         feedback={feedback}
-        placement="top"
+        toastKey={queue[0]?.id ?? null}
         onDismiss={dismiss}
       />
     </AuthFloatingContext.Provider>

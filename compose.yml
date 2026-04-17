@@ -10,6 +10,9 @@ services:
     environment:
       CHOKIDAR_USEPOLLING: "true"
       WATCHPACK_POLLING: "true"
+      API_URL: "http://back:${BACKEND_PORT:-3001}"
+    networks:
+      - backend
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT}"
     volumes:

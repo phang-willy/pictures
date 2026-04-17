@@ -432,7 +432,7 @@ export function HomeGlobeMap() {
     });
     resizeObserver.observe(container);
 
-    void fetch(apiUrl("/api/country?includeGeometry=true"))
+    void fetch(apiUrl("/api/country?includeGeometry=true&activeOnly=true"))
       .then(async (response) => {
         if (isDisposed || mapRef.current !== map) {
           return;
@@ -496,7 +496,7 @@ export function HomeGlobeMap() {
       })
       .catch((error) => {
         console.error(
-          "[map] impossible de charger /api/country?includeGeometry=true et les polygones",
+          "[map] impossible de charger /api/country?includeGeometry=true&activeOnly=true et les polygones",
           error,
         );
       });
