@@ -1,9 +1,17 @@
-import { BadRequestException, Controller, Get, Query } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { AdminMutationGuard } from '@/auth/guards/admin-mutation.guard';
 import { CityService } from '@/city/city.service';
 
 @ApiTags('city')
 @Controller('city')
+@UseGuards(AdminMutationGuard)
 export class CityController {
   constructor(private readonly cityService: CityService) {}
 

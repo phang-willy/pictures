@@ -13,7 +13,7 @@ import {
 import type { core } from "zod";
 import { twoFactorFormSchema } from "@shared/schemas";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { apiUrl } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
 import {
   consumePendingAuthFeedback,
   stashAuthFeedbackForNextPage,
@@ -21,7 +21,6 @@ import {
 import {
   clearTwoFactorLoginToken,
   getTwoFactorLoginToken,
-  setAccessToken,
 } from "@/lib/auth-session";
 import { useAuthFeedback } from "@/components/auth-floating-provider";
 
@@ -69,7 +68,7 @@ const TwoAuthPage = () => {
     try {
       setIsSubmitting(true);
 
-      const response = await fetch(apiUrl("/api/auth/2fa/verify"), {
+      const response = await apiFetch("/api/auth/2fa/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ twoFactorToken, code: parsed.data.code }),
@@ -79,7 +78,6 @@ const TwoAuthPage = () => {
         success?: boolean;
         message?: string;
         field?: "code";
-        accessToken?: string;
       };
 
       if (!response.ok) {
@@ -95,17 +93,12 @@ const TwoAuthPage = () => {
         return;
       }
 
-      if (
-        payload.success !== true ||
-        typeof payload.accessToken !== "string" ||
-        !payload.accessToken
-      ) {
+      if (payload.success !== true) {
         notify("destructive", "Réponse inattendue du serveur.");
         return;
       }
 
       clearTwoFactorLoginToken();
-      setAccessToken(payload.accessToken);
       stashAuthFeedbackForNextPage({
         variant: "success",
         message: "Connexion validée.",
@@ -127,7 +120,7 @@ const TwoAuthPage = () => {
     }
 
     try {
-      const response = await fetch(apiUrl("/api/auth/2fa/resend"), {
+      const response = await apiFetch("/api/auth/2fa/resend", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ twoFactorToken }),

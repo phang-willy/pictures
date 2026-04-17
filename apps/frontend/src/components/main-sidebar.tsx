@@ -10,7 +10,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { getAccessToken } from "@/lib/auth-session";
+import { apiFetch } from "@/lib/api";
 import { appName } from "@/lib/app-name";
 import Link from "next/link";
 import { User } from "lucide-react";
@@ -20,7 +20,23 @@ export function MainSidebar() {
   const [isConnected, setIsConnected] = React.useState(false);
 
   React.useEffect(() => {
-    setIsConnected(Boolean(getAccessToken()));
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await apiFetch("/api/auth/me");
+        const data = (await res.json().catch(() => ({}))) as {
+          success?: boolean;
+        };
+        if (!cancelled && data.success === true) {
+          setIsConnected(true);
+        }
+      } catch {
+        /* ignore */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (

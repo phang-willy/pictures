@@ -10,16 +10,16 @@ import {
   useState,
   startTransition,
 } from "react";
-import { usePathname, useRouter } from "next/navigation";
-import { apiUrl } from "@/lib/api";
+import { notFound, usePathname, useRouter } from "next/navigation";
+import { apiFetch } from "@/lib/api";
 import {
   consumePendingAuthFeedback,
   stashAuthFeedbackForNextPage,
 } from "@/lib/auth-feedback-handoff";
 import {
-  clearAccessToken,
+  clearLegacyAccessTokenStorage,
   clearTwoFactorLoginToken,
-  getAccessToken,
+  logoutAuthSession,
 } from "@/lib/auth-session";
 import { useAuthFeedback } from "@/components/auth-floating-provider";
 
@@ -30,6 +30,8 @@ type AuthedStatus = "loading" | "authenticated" | "unauthenticated";
 type AuthedContextValue = {
   user: AuthedUser | null;
   status: AuthedStatus;
+  /** Aligné sur le backend (`ADMIN` | `USER`). */
+  isAdmin: boolean;
   logout: () => void;
   refresh: () => Promise<void>;
 };
@@ -53,32 +55,26 @@ export function AuthedProvider({ children }: { children: React.ReactNode }) {
   const firstLoadDone = useRef(false);
 
   const redirectToLogin = useCallback(() => {
-    clearAccessToken();
-    clearTwoFactorLoginToken();
-    startTransition(() => {
-      setUser(null);
-      setStatus("unauthenticated");
+    void logoutAuthSession().finally(() => {
+      clearTwoFactorLoginToken();
+      startTransition(() => {
+        setUser(null);
+        setStatus("unauthenticated");
+      });
+      router.replace("/login");
     });
-    router.replace("/login");
   }, [router]);
 
   const verify = useCallback(
     async (signal: AbortSignal) => {
-      const token = getAccessToken();
-      if (!token) {
-        redirectToLogin();
-        return;
-      }
+      clearLegacyAccessTokenStorage();
 
       if (!firstLoadDone.current) {
         startTransition(() => setStatus("loading"));
       }
 
       try {
-        const response = await fetch(apiUrl("/api/auth/me"), {
-          headers: { Authorization: `Bearer ${token}` },
-          signal,
-        });
+        const response = await apiFetch("/api/auth/me", { signal });
         const payload = (await response.json()) as {
           success?: boolean;
           email?: string;
@@ -134,18 +130,19 @@ export function AuthedProvider({ children }: { children: React.ReactNode }) {
   }, [status, notify]);
 
   const logout = useCallback(() => {
-    clearAccessToken();
-    clearTwoFactorLoginToken();
     firstLoadDone.current = false;
-    stashAuthFeedbackForNextPage({
-      variant: "info",
-      message: "Vous êtes bien déconnecté.",
+    void logoutAuthSession().finally(() => {
+      clearTwoFactorLoginToken();
+      stashAuthFeedbackForNextPage({
+        variant: "info",
+        message: "Vous êtes bien déconnecté.",
+      });
+      startTransition(() => {
+        setUser(null);
+        setStatus("unauthenticated");
+      });
+      router.replace("/login");
     });
-    startTransition(() => {
-      setUser(null);
-      setStatus("unauthenticated");
-    });
-    router.replace("/login");
   }, [router]);
 
   const refresh = useCallback(() => {
@@ -157,6 +154,7 @@ export function AuthedProvider({ children }: { children: React.ReactNode }) {
     () => ({
       user,
       status,
+      isAdmin: user?.role === "ADMIN",
       logout,
       refresh,
     }),
@@ -173,6 +171,15 @@ export function AuthedProvider({ children }: { children: React.ReactNode }) {
 
   if (status === "unauthenticated") {
     return null;
+  }
+
+  if (
+    status === "authenticated" &&
+    user &&
+    pathname.startsWith("/admin") &&
+    user.role !== "ADMIN"
+  ) {
+    notFound();
   }
 
   return (

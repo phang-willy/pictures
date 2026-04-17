@@ -8,12 +8,11 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { changePasswordFormSchema } from "@shared/schemas";
-import { apiUrl } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
 import { stashAuthFeedbackForNextPage } from "@/lib/auth-feedback-handoff";
 import {
-  clearAccessToken,
   clearTwoFactorLoginToken,
-  getAccessToken,
+  logoutAuthSession,
 } from "@/lib/auth-session";
 
 type FormSubmitEvent = Parameters<
@@ -75,19 +74,12 @@ export function ProfileChangePasswordCard() {
       return;
     }
 
-    const token = getAccessToken();
-    if (!token) {
-      setFormError("Session expirée. Reconnectez-vous.");
-      return;
-    }
-
     try {
       setIsSubmitting(true);
-      const response = await fetch(apiUrl("/api/auth/password/change"), {
+      const response = await apiFetch("/api/auth/password/change", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           oldPassword: parsed.data.oldPassword,
@@ -128,7 +120,7 @@ export function ProfileChangePasswordCard() {
         return;
       }
 
-      clearAccessToken();
+      await logoutAuthSession();
       clearTwoFactorLoginToken();
       stashAuthFeedbackForNextPage({
         variant: "success",

@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthFloatingProvider } from "@/components/auth-floating-provider";
 import { appName } from "@/lib/app-name";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/sonner";
 
 const outfitHeading = Outfit({
   subsets: ["latin"],
@@ -56,7 +58,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AuthFloatingProvider>{children}</AuthFloatingProvider>
+          <AuthFloatingProvider>
+            <TooltipProvider>{children}</TooltipProvider>
+          </AuthFloatingProvider>
+          <Toaster position="top-center" richColors closeButton />
         </ThemeProvider>
       </body>
     </html>
