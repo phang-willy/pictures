@@ -35,9 +35,14 @@ jobs:
           while IFS= read -r message; do
             [ -z "$message" ] && continue
 
+            # Aligné sur .githooks/commit-msg (squash GitHub, revert local, etc.)
+            if [[ "$message" =~ ^Merge[[:space:]] ]] || [[ "$message" =~ ^Revert[[:space:]] ]]; then
+              continue
+            fi
+
             if [[ ! "$message" =~ $re ]] && [[ ! "$message" =~ ^[iI]nit.* ]]; then
               echo "❌ Invalid commit message: $message"
-              echo "Expected format: feat: ..., fix: ..., chore: ..., chore(scope): ..., docs: ..., refactor: ..."
+              echo "Expected format: feat: ..., fix: ..., chore(scope): ..., docs: ..., refactor: ..., remove: ..."
               exit 1
             fi
           done <<< "$COMMITS"

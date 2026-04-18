@@ -1,0 +1,1 @@
+export const COUNTRY_REPOSITORY = Symbol('COUNTRY_REPOSITORY');

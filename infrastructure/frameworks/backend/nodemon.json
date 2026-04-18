@@ -1,0 +1,19 @@
+{
+  "env": {
+    "TS_NODE_PROJECT": "tsconfig.json"
+  },
+  "watch": [
+    "../../../application",
+    "../../../domain",
+    "../../../infrastructure/persistence",
+    "../../../infrastructure/adapters",
+    "../../../infrastructure/database",
+    "http",
+    "nest",
+    "."
+  ],
+  "ext": "ts,json",
+  "ignore": ["**/node_modules/**", "**/.git/**"],
+  "delay": "800",
+  "exec": "node -r ts-node/register/transpile-only -r tsconfig-paths/register -e \"require('./main').bootstrap().catch((e)=>{console.error(e);process.exit(1);})\""
+}

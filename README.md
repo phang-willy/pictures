@@ -4,8 +4,8 @@ Starter fullstack prêt pour la production avec un workflow local orienté Docke
 
 ## Stack
 
-- Frontend : Next.js 16 (`apps/frontend`)
-- Backend : NestJS 11 + Prisma 7 (`apps/backend`)
+- Frontend : Next.js 16 (`infrastructure/frameworks/frontend/next`)
+- Backend : NestJS 11 + Prisma 7 (code dans `infrastructure/frameworks/backend`)
 - Base de données : PostgreSQL 17
 - Interface DB : Adminer
 - Orchestration : Docker Compose
@@ -14,13 +14,23 @@ Starter fullstack prêt pour la production avec un workflow local orienté Docke
 
 ```text
 .
-├─ apps/
-│  ├─ frontend/
-│  └─ backend/
+├─ .githooks
+├─ .github
+├─ application
+├─ domain
+├─ infrastructure/
+│  └─ frameworks/
+│     ├─ frontend/next/
+│     └─ backend/
+├─ packages /
 ├─ shared/
-├─ compose.yml
 ├─ .env
-└─ .env.exemple
+├─ .env.exemple
+├─ .gitignore
+├─ .nvmrc
+├─ compose.yml
+├─ .import_map.json
+└─ tsconfig.json
 ```
 
 ## Prérequis
@@ -44,9 +54,18 @@ docker compose up -d --build
 
 3. Accéder aux services :
 - Frontend : `http://localhost:3000`
-- Backend (health) : `http://localhost:3001/api/health`
-- Swagger : `http://localhost:3001/api/docs` (activation : section **Backend** → *Politique Swagger*)
 - Adminer : `http://localhost:8080`
+- Maildev : `http://localhost:1080`
+- Backend (si lancé séparément) : `http://localhost:3001/api/health`
+- Swagger (si backend lancé séparément) : `http://localhost:3001/api/docs`
+
+4. Lancer le backend local (hors compose) :
+
+```bash
+cd infrastructure/frameworks/backend
+npm install
+npm run test
+```
 
 ## Configuration des variables d'environnement
 
@@ -78,7 +97,7 @@ ALLOWED_DEV_ORIGINS=192.168.1.2,192.168.1.10
 
 Le projet est configuré pour un file watching fiable dans Docker (notamment sous Windows) :
 - Le frontend tourne en mode développement webpack.
-- Les watchers frontend/backend utilisent le polling via `compose.yml`.
+- Les watchers frontend utilisent le polling via `compose.yml`.
 - Les dépendances sont installées au démarrage uniquement si `package-lock.json` change (fichier `.deps-lock-hash`).
 
 ### Commandes Docker courantes
@@ -91,8 +110,8 @@ docker compose up -d
 docker compose up -d --build
 
 # Voir les logs en continu
-docker compose logs -f front
-docker compose logs -f back
+docker compose logs -f frontend
+docker compose logs -f db
 
 # Arrêter les services
 docker compose down
@@ -101,23 +120,24 @@ docker compose down
 docker compose up -d --build NOM_DU_SERVICE
 ```
 
-## Backend (`apps/backend`)
+## Backend (`infrastructure/frameworks/backend`)
 
 ### Scripts
 
 ```bash
-npm run start:dev
-npm run build
-npm run lint
+npm run start
 npm run test
+npm run test:watch
+npm run test:cov
 npm run test:e2e
 ```
 
-### Prisma 7
+### Nest + Prisma
 
-- Schéma : `apps/backend/prisma/schema.prisma`
-- Configuration Prisma CLI : `apps/backend/prisma.config.ts`
-- Intégration du service Prisma : `apps/backend/prisma/prisma.service.ts`
+- Bootstrap Nest : `infrastructure/frameworks/backend/main.ts`
+- Module principal : `infrastructure/frameworks/backend/app.module.ts`
+- Prisma service : `infrastructure/database/config/prisma.service.ts`
+- Prisma module : `infrastructure/database/config/prisma.module.ts`
 
 Commandes utiles :
 
@@ -125,7 +145,6 @@ Commandes utiles :
 npx prisma generate
 npx prisma migrate deploy
 npx prisma db push
-npm run seed
 ```
 
 ### Politique Swagger
@@ -137,7 +156,7 @@ npm run seed
 - Swagger est activé
 - http://localhost:{BACKEND_PORT}/api/docs
 
-## Frontend (`apps/frontend`)
+## Frontend (`infrastructure/frameworks/frontend/next`)
 
 ### Scripts
 
@@ -165,9 +184,9 @@ Le hook `pre-push` exécute les checks frontend et backend avant chaque push.
 - Changement frontend non visible :
   - Utiliser `http://localhost:3000`
   - Faire un hard refresh du navigateur
-  - Vérifier les logs : `docker compose logs -f front`
+  - Vérifier les logs : `docker compose logs -f frontend`
 - Changement backend non visible :
-  - Vérifier les logs : `docker compose logs -f back`
+  - Vérifier les logs du process backend local (hors docker compose)
   - Vérifier l'état des conteneurs : `docker compose ps`
 - Reset complet :
 

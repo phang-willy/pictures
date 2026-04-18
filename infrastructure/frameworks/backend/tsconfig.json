@@ -1,0 +1,41 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "rootDir": "../../../",
+    "ignoreDeprecations": "6.0",
+    "strict": true,
+    "types": ["node", "jest", "bcrypt"],
+    "typeRoots": [
+      "../../../infrastructure/frameworks/backend/node_modules/@types",
+      "../../../infrastructure/frameworks/frontend/next/node_modules/@types"
+    ],
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "paths": {
+      "*": ["../../../*"],
+      "@/*": ["../../../*"],
+      "@domains/*": ["../../../domains/*"],
+      "@domain/*": ["../../../domain/*"],
+      "@application/*": ["../../../application/*"],
+      "@infrastructure/*": ["../../../infrastructure/*"],
+      "@shared/*": ["../../../shared/*"],
+      "zod": ["../../../infrastructure/frameworks/backend/node_modules/zod"],
+      "@nestjs/*": ["../../../infrastructure/frameworks/backend/node_modules/@nestjs/*"],
+      "nodemailer": ["../../../infrastructure/frameworks/backend/node_modules/nodemailer"],
+      "@prisma/client": ["../../../infrastructure/frameworks/backend/node_modules/@prisma/client"]
+    }
+  },
+  "include": [
+    "../../../application/**/*.ts",
+    "../../../domain/**/*.ts",
+    "../../../infrastructure/**/*.ts",
+    "../../../shared/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}

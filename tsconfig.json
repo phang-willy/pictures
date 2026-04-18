@@ -1,0 +1,44 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "outDir": "./dist",
+    "moduleResolution": "Bundler",
+    "ignoreDeprecations": "6.0",
+    "strict": true,
+    "types": ["node", "jest"],
+    "typeRoots": [
+      "./infrastructure/frameworks/backend/node_modules/@types",
+      "./infrastructure/frameworks/frontend/next/node_modules/@types"
+    ],
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "paths": {
+      "*": ["./*"],
+      "@/*": ["./*"],
+      "@domains/*": ["./domains/*"],
+      "@domain/*": ["./domain/*"],
+      "@application/*": ["./application/*"],
+      "@infrastructure/*": ["./infrastructure/*"],
+      "@shared/*": ["./shared/*"],
+      "zod": ["./infrastructure/frameworks/backend/node_modules/zod"],
+      "@nestjs/*": ["./infrastructure/frameworks/backend/node_modules/@nestjs/*"],
+      "nodemailer": ["./infrastructure/frameworks/backend/node_modules/nodemailer"],
+      "bcrypt": ["./infrastructure/frameworks/backend/node_modules/bcrypt"],
+      "@prisma/client": ["./infrastructure/frameworks/backend/node_modules/@prisma/client"]
+    }
+  },
+  "include": [
+    "domains/**/*",
+    "application/**/*",
+    "infrastructure/**/*",
+    "shared/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "infrastructure/frameworks/backend/**/*",
+  ]
+}

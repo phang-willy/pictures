@@ -1,0 +1,12 @@
+# Contexte Docker = racine du dépôt (compose / build -f …).
+**/.git
+**/.next
+**/node_modules
+**/dist
+**/*.tsbuildinfo
+.env
+.env.*
+!.env.exemple
+
+# Inutile pour compiler le frontend Next
+infrastructure/frameworks/backend

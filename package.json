@@ -1,0 +1,6 @@
+{
+  "name": "pictures",
+  "private": true,
+  "description": "Monorepo — packages internes sous packages/",
+  "workspaces": ["packages/*"]
+}

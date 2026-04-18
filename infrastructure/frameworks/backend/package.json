@@ -1,0 +1,40 @@
+{
+  "name": "backend",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "start": "node -e \"require('./main').bootstrap().catch((e)=>{console.error(e);process.exit(1);})\"",
+    "dev": "nodemon",
+    "seed": "prisma db seed",
+    "test": "jest --config jest.config.ts",
+    "test:watch": "jest --watch --config jest.config.ts",
+    "test:cov": "jest --coverage --config jest.config.ts",
+    "test:e2e": "jest --config jest.config.ts --testMatch '<rootDir>/test/e2e/**/*.e2e-spec.ts'"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.1.6",
+    "@nestjs/core": "^11.1.6",
+    "@nestjs/platform-express": "^11.1.19",
+    "@nestjs/throttler": "^6.5.0",
+    "@prisma/adapter-pg": "^7.7.0",
+    "@prisma/client": "^7.7.0",
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.4.2",
+    "nodemailer": "^8.0.5",
+    "pg": "^8.20.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0",
+    "nodemon": "^3.1.9",
+    "prisma": "^7.7.0",
+    "ts-jest": "^29.4.5",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^6.0.2"
+  }
+}
