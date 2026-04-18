@@ -1,0 +1,14 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "types": ["jest", "node"],
+    "noEmit": true
+  },
+  "include": [
+    "../../../application/**/*.ts",
+    "../../../domain/**/*.ts",
+    "./**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}

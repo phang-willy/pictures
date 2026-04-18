@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Aligné sur .github/workflows/commit-message.yml (Conventional Commits simplifié).
+set -e
+
+msg_file=${1:?}
+msg=$(head -n 1 "$msg_file")
+
+# Squash / merge Git (messages générés)
+if [[ "$msg" =~ ^Merge[[:space:]] ]] || [[ "$msg" =~ ^Revert[[:space:]] ]]; then
+  exit 0
+fi
+
+# Tolère les messages "Initial commit" (comme le workflow CI)
+if [[ "$msg" =~ ^[iI]nit ]]; then
+  exit 0
+fi
+
+re='^(feat|fix|chore|docs|refactor|remove)(\([^)]+\))?:\ .+'
+if [[ ! "$msg" =~ $re ]]; then
+  echo "❌ Message de commit invalide :"
+  echo "   $msg"
+  echo ""
+  echo "Format attendu : feat: ..., fix: ..., chore(scope): ..., docs: ..., refactor: ..., remove: ..."
+  exit 1
+fi

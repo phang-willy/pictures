@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 set -e
 
+# Définir SKIP_SIGNED_COMMITS=1 (ou PICTURES_SKIP_SIGNED_COMMITS=1) si vous ne signez pas les commits en local.
+if [[ -n "${SKIP_SIGNED_COMMITS:-}" ]] || [[ -n "${PICTURES_SKIP_SIGNED_COMMITS:-}" ]]; then
+  exit 0
+fi
+
 REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
 
-while read -r local_ref local_sha remote_ref remote_sha
-do
+while read -r local_ref local_sha remote_ref remote_sha; do
   if [ "$local_sha" = "0000000000000000000000000000000000000000" ]; then
     continue
   fi
@@ -17,7 +21,8 @@ do
 
   for commit in $(git rev-list "$RANGE"); do
     if ! git verify-commit "$commit" >/dev/null 2>&1; then
-      echo "❌ Veuillez signer vos commits avant d'intéragir avec le repo ($REPO_NAME)"
+      echo "❌ Veuillez signer vos commits avant de pousser vers le dépôt ($REPO_NAME)"
+      echo "   (ou définissez SKIP_SIGNED_COMMITS=1 pour désactiver ce contrôle en local)"
       exit 1
     fi
   done

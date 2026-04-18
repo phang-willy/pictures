@@ -18,13 +18,13 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   quality:
     name: Lint / Type-check / Build
     runs-on: ubuntu-latest
-    env:
-      # Actions JS runtime (checkout/setup-node) — align with Node 24 before default switch
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout repository
@@ -36,37 +36,36 @@ jobs:
           node-version-file: ".nvmrc"
           cache: "npm"
           cache-dependency-path: |
-            apps/backend/package-lock.json
-            apps/frontend/package-lock.json
+            infrastructure/frameworks/backend/package-lock.json
+            infrastructure/frameworks/frontend/next/package-lock.json
 
       - name: Install backend dependencies
         run: npm ci
-        working-directory: apps/backend
+        working-directory: infrastructure/frameworks/backend
+
+      - name: Prisma generate
+        run: npx prisma generate
+        working-directory: infrastructure/frameworks/backend
+        env:
+          # Requis par prisma.config.ts (aucune connexion réelle pour generate)
+          DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci?schema=public
+
+      - name: Test backend
+        run: npm test
+        working-directory: infrastructure/frameworks/backend
 
       - name: Install frontend dependencies
         run: npm ci
-        working-directory: apps/frontend
-
-      - name: Lint backend
-        run: npm run lint
-        working-directory: apps/backend
+        working-directory: infrastructure/frameworks/frontend/next
 
       - name: Lint frontend
         run: npm run lint
-        working-directory: apps/frontend
-
-      - name: Type-check backend
-        run: npm run type-check
-        working-directory: apps/backend
+        working-directory: infrastructure/frameworks/frontend/next
 
       - name: Type-check frontend
         run: npm run type-check
-        working-directory: apps/frontend
-
-      - name: Build backend
-        run: npm run build
-        working-directory: apps/backend
+        working-directory: infrastructure/frameworks/frontend/next
 
       - name: Build frontend
         run: npm run build
-        working-directory: apps/frontend
+        working-directory: infrastructure/frameworks/frontend/next

@@ -1,0 +1,170 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+model User {
+  id             String               @id @default(uuid())
+  email          String               @unique
+  loginAttempt   Int                  @default(0)
+  lockUntil      DateTime?
+  token          String?              @unique
+  tokenExpiresAt DateTime?
+  role           UserRole             @default(USER)
+  verifiedAt     DateTime?
+  isActive       Boolean              @default(true)
+  twoFactorCodes UserTwoFactorCode[]
+  passwords      Password[]
+  photos         Photo[]
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  @@index([role])
+}
+
+model Password {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, createdAt])
+  @@map("Password")
+}
+
+model ForgotPassword {
+  id         String    @id @default(uuid())
+  email      String
+  expiredAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([email, createdAt])
+  @@map("ForgotPassword")
+}
+
+model UserTwoFactorCode {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  code      String
+  expiresAt DateTime
+  usedAt    DateTime?
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, expiresAt])
+  @@index([userId, code])
+}
+
+model Continent {
+  id        String    @id @default(uuid())
+  code      String    @unique @db.VarChar(8)
+  name      String    @unique @db.VarChar(100)
+  countries Country[]
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Country {
+  id          String           @id @default(uuid())
+  continentId String
+  continent   Continent        @relation(fields: [continentId], references: [id], onDelete: Restrict)
+  iso2        String           @unique @db.Char(2)
+  iso3        String?          @unique @db.Char(3)
+  name        String           @db.VarChar(120)
+  slug        String           @unique @db.VarChar(150)
+  geometry    CountryGeometry?
+  cities      City[]
+  deletedAt   DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([continentId, name])
+}
+
+model CountryGeometry {
+  id         String   @id @default(uuid())
+  countryId  String   @unique
+  country    Country  @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  type       String   @db.VarChar(40)
+  coordinate Json
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([countryId])
+}
+
+model City {
+  id        String                                @id @default(uuid())
+  countryId String
+  country   Country                               @relation(fields: [countryId], references: [id], onDelete: Restrict)
+  name      String                                @db.VarChar(120)
+  slug      String                                @db.VarChar(150)
+  latitude  Float                                 @db.DoublePrecision
+  longitude Float                                 @db.DoublePrecision
+  location  Unsupported("geography(Point, 4326)")?
+  places    Place[]
+  deletedAt DateTime?
+  createdAt DateTime                              @default(now())
+  updatedAt DateTime                              @updatedAt
+
+  @@unique([countryId, slug])
+  @@index([countryId, name])
+}
+
+model Place {
+  id          String                                @id @default(uuid())
+  cityId      String
+  city        City                                  @relation(fields: [cityId], references: [id], onDelete: Restrict)
+  name        String                                @db.VarChar(160)
+  slug        String                                @db.VarChar(180)
+  description String?
+  latitude    Float                                 @db.DoublePrecision
+  longitude   Float                                 @db.DoublePrecision
+  location    Unsupported("geography(Point, 4326)")?
+  photos      Photo[]
+  deletedAt   DateTime?
+  createdAt   DateTime                              @default(now())
+  updatedAt   DateTime                              @updatedAt
+
+  @@unique([cityId, slug])
+  @@index([cityId, name])
+}
+
+model Photo {
+  id               String   @id @default(uuid())
+  placeId          String
+  place            Place    @relation(fields: [placeId], references: [id], onDelete: Restrict)
+  uploadedByUserId String
+  uploadedByUser   User     @relation(fields: [uploadedByUserId], references: [id], onDelete: Restrict)
+  title            String?  @db.VarChar(200)
+  description      String?
+  takenAt          DateTime?
+  sourceFileName   String?  @db.VarChar(255)
+  mimeType         String?  @db.VarChar(100)
+  fileSizeBytes    BigInt?
+  width            Int?
+  height           Int?
+  webpUrl          String   @db.VarChar(2048)
+  webpThumbnailUrl String?  @db.VarChar(2048)
+  deletedAt        DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([placeId, createdAt])
+  @@index([uploadedByUserId, createdAt])
+}
