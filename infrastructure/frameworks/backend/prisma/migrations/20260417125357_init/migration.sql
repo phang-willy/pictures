@@ -1,3 +1,6 @@
+-- Required for geography(Point, 4326) in dev + shadow DB
+CREATE EXTENSION IF NOT EXISTS postgis;
+
 -- CreateEnum
 CREATE TYPE "UserRole" AS ENUM ('ADMIN', 'USER');
 

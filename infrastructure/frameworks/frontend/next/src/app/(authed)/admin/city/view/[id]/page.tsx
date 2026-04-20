@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
+import { ArrowLeftIcon } from "lucide-react";
 import { serverFetchApiItem, toCookieHeader } from "@/lib/api";
-import type { CountryHttpDetail } from "@/types/admin-country.types";
+import type { CityHttpDetail } from "@/types/admin-city.types";
 import { formatDate } from "@/lib/format-date";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AdminGeometryMap } from "@/components/admin/admin-geometry-map";
+import { CityPointMap } from "@/components/admin/city-point-map";
 import { ContryFlag } from "@/components/admin/country-flag";
-import { ArrowLeftIcon } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +27,7 @@ function DetailRow({
   );
 }
 
-export default async function AdminCountryViewPage({
+export default async function AdminCityViewPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -35,28 +35,26 @@ export default async function AdminCountryViewPage({
   const { id } = await params;
   const jar = await cookies();
   const cookieHeader = toCookieHeader(jar.getAll());
-  const country = await serverFetchApiItem<CountryHttpDetail>(
-    `/api/country/${encodeURIComponent(id)}?geometry=true`,
+  const city = await serverFetchApiItem<CityHttpDetail>(
+    `/api/city/${encodeURIComponent(id)}`,
     cookieHeader,
   );
-  if (!country) {
+  if (!city) {
     notFound();
   }
-
-  const continentLabel = `${country.continent.name} (${country.continent.code})`;
 
   return (
     <div className="space-y-6">
       <div className="space-y-3">
         <Button variant="outline" asChild>
-          <Link href="/admin/country">
+          <Link href="/admin/city">
             <span className="flex items-center gap-2">
               <ArrowLeftIcon className="size-4" />
               <span>Retour à la liste</span>
             </span>
           </Link>
         </Button>
-        <h1 className="text-2xl font-semibold">{country.name}</h1>
+        <h1 className="text-2xl font-semibold">{city.name}</h1>
       </div>
 
       <Card>
@@ -65,35 +63,19 @@ export default async function AdminCountryViewPage({
         </CardHeader>
         <CardContent>
           <dl>
-            <DetailRow label="ID" value={country.id} />
-            <DetailRow label="Continent" value={continentLabel} />
-            <DetailRow
-              label="Nom"
-              value={
-                <ContryFlag
-                  name={country.name}
-                  iso2={country.iso2}
-                />
-              }
-            />
-            <DetailRow label="Slug" value={country.slug} />
-            <DetailRow label="ISO 2" value={country.iso2} />
-            <DetailRow label="ISO 3" value={country.iso3 ?? "-"} />
-            <DetailRow
-              label="Créé le"
-              value={formatDate(country.createdAt, { mode: "date-hour" })}
-            />
-            <DetailRow
-              label="Mis à jour le"
-              value={formatDate(country.updatedAt, { mode: "date-hour" })}
-            />
+            <DetailRow label="ID" value={city.id} />
+            <DetailRow label="Pays" value={
+              <ContryFlag name={city.country.name} iso2={city.country.iso2} />
+            } />
+            <DetailRow label="Nom" value={city.name} />
+            <DetailRow label="Slug" value={city.slug} />
+            <DetailRow label="Latitude" value={city.latitude.toFixed(6)} />
+            <DetailRow label="Longitude" value={city.longitude.toFixed(6)} />
+            <DetailRow label="Créé le" value={formatDate(city.createdAt, { mode: "date-hour" })} />
+            <DetailRow label="Mis à jour le" value={formatDate(city.updatedAt, { mode: "date-hour" })} />
             <DetailRow
               label="Supprimé le"
-              value={
-                country.deletedAt
-                  ? formatDate(country.deletedAt, { mode: "date-hour" })
-                  : "-"
-              }
+              value={city.deletedAt ? formatDate(city.deletedAt, { mode: "date-hour" }) : "-"}
             />
           </dl>
         </CardContent>
@@ -104,11 +86,10 @@ export default async function AdminCountryViewPage({
           <CardTitle>Carte</CardTitle>
         </CardHeader>
         <CardContent>
-          <AdminGeometryMap
-            instanceId={country.id}
-            geometry={country.geometry}
-            ariaLabel={`Carte du pays ${country.name}`}
-            featureProperties={{ countryId: country.id, name: country.name }}
+          <CityPointMap
+            latitude={city.latitude}
+            longitude={city.longitude}
+            ariaLabel={`Carte de la ville ${city.name}`}
           />
         </CardContent>
       </Card>

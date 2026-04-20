@@ -4,26 +4,14 @@ import { Iso2CodeVo } from '@/domain/country/value-objects/iso2-code.vo';
 import { Iso3CodeVo } from '@/domain/country/value-objects/iso3-code.vo';
 import type { CountryRepository } from '@/domain/country/repositories/country.repository';
 import { CreateCountryInput } from '@/application/country/dto/create-country.input';
-
-function slugifyCountryName(name: string): string {
-  const base = name
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
-  return base || 'country';
-}
+import { slugify } from '@/domain/utils/slugify';
 
 export class CreateCountryUseCase {
   constructor(private readonly countryRepository: CountryRepository) {}
 
   async execute(input: CreateCountryInput): Promise<CountryEntity> {
     const name = input.name.trim();
-    const candidateSlug = (input.slug?.trim() || slugifyCountryName(name)).toLowerCase();
+    const candidateSlug = slugify(input.slug?.trim() || name);
 
     const existingIso2 = await this.countryRepository.findByIso2(input.iso2);
     if (existingIso2) {

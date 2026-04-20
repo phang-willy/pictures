@@ -6,7 +6,7 @@ import type { ContinentOption, CountryHttpDetail } from "@/types/admin-country.t
 import { Button } from "@/components/ui/button";
 import { CountryEditForm } from "./country-edit-form";
 import { ArrowLeftIcon } from "lucide-react";
-import { CountryNameWithFlag } from "@/components/admin/country-name-with-flag";
+import { ContryFlag } from "@/components/admin/country-flag";
 export const dynamic = "force-dynamic";
 
 export default async function AdminCountryEditPage({
@@ -41,7 +41,7 @@ export default async function AdminCountryEditPage({
         </Button>
         <h1 className="text-2xl font-semibold flex items-center gap-2">
           Modifier :{" "}
-          <CountryNameWithFlag
+          <ContryFlag
             name={country.name}
             iso2={country.iso2}
           />

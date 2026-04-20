@@ -96,9 +96,9 @@ export function ApiDataTableToolbar(_props: ToolbarProps) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent position="popper">
-            {selectablePageSizes.map((n: number) => (
-              <SelectItem key={n} value={String(n)}>
-                {n}
+            {selectablePageSizes.map((number: number) => (
+              <SelectItem key={number} value={String(number)}>
+                {number}
               </SelectItem>
             ))}
           </SelectContent>

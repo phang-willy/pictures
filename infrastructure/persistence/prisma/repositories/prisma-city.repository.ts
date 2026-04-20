@@ -111,11 +111,36 @@ export class PrismaCityRepository implements CityRepository {
   } as const;
 
   async create(_city: CityEntity): Promise<CityEntity> {
-    throw new Error('Not implemented');
+    const p = _city.toPrimitives();
+    const row = await this.prisma.city.create({
+      data: {
+        countryId: p.country.id,
+        name: p.name,
+        slug: p.slug,
+        latitude: p.latitude,
+        longitude: p.longitude,
+        deletedAt: p.deletedAt,
+      },
+      select: this.baseSelect,
+    });
+    return this.toDomain(row as CityRow);
   }
 
   async update(_city: CityEntity): Promise<CityEntity> {
-    throw new Error('Not implemented');
+    const p = _city.toPrimitives();
+    const row = await this.prisma.city.update({
+      where: { id: p.id },
+      data: {
+        countryId: p.country.id,
+        name: p.name,
+        slug: p.slug,
+        latitude: p.latitude,
+        longitude: p.longitude,
+        deletedAt: p.deletedAt,
+      },
+      select: this.baseSelect,
+    });
+    return this.toDomain(row as CityRow);
   }
 
   async findById(id: string): Promise<CityEntity | null> {
@@ -145,6 +170,17 @@ export class PrismaCityRepository implements CityRepository {
       select: this.baseSelect,
     });
     return rows.map((row) => this.toDomain(row as CityRow));
+  }
+
+  async findByNameInsensitive(countryId: string, name: string): Promise<CityEntity | null> {
+    const row = await this.prisma.city.findFirst({
+      where: {
+        countryId,
+        name: { equals: name.trim(), mode: 'insensitive' },
+      },
+      select: this.baseSelect,
+    });
+    return row ? this.toDomain(row as CityRow) : null;
   }
 
   async findBySlug(countryId: string, slug: string): Promise<CityEntity | null> {

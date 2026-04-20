@@ -14,7 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { CountryNameWithFlag } from "@/components/admin/country-name-with-flag";
+import { ContryFlag } from "@/components/admin/country-flag";
 import {
   ApiDataTable,
   type LoadPageArgs,
@@ -64,7 +64,7 @@ export function CountryAdmin() {
             setCountryToDelete(country);
           },
         },
-        { sortableHeaders: false },
+        { sortableHeaders: true },
       ),
     [],
   );
@@ -78,7 +78,7 @@ export function CountryAdmin() {
             setCountryToActivate(country);
           },
         },
-        { sortableHeaders: false },
+        { sortableHeaders: true },
       ),
     [],
   );
@@ -223,170 +223,170 @@ export function CountryAdmin() {
       </div>
 
       <div>
-            <ApiDataTable
-              title="Pays actifs"
-              columns={columnsActive}
-              emptyMessage="Aucun pays actif."
-              loadPage={loadActivePage}
-              search={{
-                placeholder: "Rechercher dans les pays actifs...",
-                ariaLabel: "Recherche pays actifs",
-                name: "search-country-active",
-              }}
-              pageSize={DATA_TABLE_DEFAULT_PAGE_SIZE}
-              refreshSignal={listsVersion}
-            />
+        <ApiDataTable
+          title="Pays actifs"
+          columns={columnsActive}
+          emptyMessage="Aucun pays actif."
+          loadPage={loadActivePage}
+          search={{
+            placeholder: "Rechercher dans les pays actifs...",
+            ariaLabel: "Recherche pays actifs",
+            name: "search-country-active",
+          }}
+          pageSize={DATA_TABLE_DEFAULT_PAGE_SIZE}
+          refreshSignal={listsVersion}
+        />
 
-            <Dialog
-              open={countryToDelete !== null}
-              onOpenChange={(open) => {
-                if (!open) {
-                  setCountryToDelete(null);
-                  setDeleteError(null);
-                  setDeleteSubmitting(false);
-                }
-              }}
-            >
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Supprimer ce pays ?</DialogTitle>
-                  <DialogDescription asChild>
-                    <div className="space-y-2 text-sm text-muted-foreground *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground">
-                      {countryToDelete ? (
-                        <>
-                          <p>
-                            <span className="font-medium text-foreground flex items-center gap-0.5">
-                              <CountryNameWithFlag
-                                name={countryToDelete.name}
-                                iso2={countryToDelete.iso2}
-                                className="flex items-center gap-0.5"
-                              />
-                              <span>({countryToDelete.iso2})</span>
-                            </span>
-                          </p>
-                          <p>
-                            <span>
-                              Ce pays sera marqué comme supprimé et ne sera plus
-                              visible dans la liste des pays actifs.
-                            </span>
-                          </p>
-                          <p>
-                            <span>
-                              Vous pourrez le réactiver plus tard depuis la liste
-                              des pays désactivés.
-                            </span>
-                          </p>
-                        </>
-                      ) : null}
-                    </div>
-                  </DialogDescription>
-                </DialogHeader>
-                {deleteError ? (
-                  <p className="text-sm text-destructive" role="alert">
-                    {deleteError}
-                  </p>
-                ) : null}
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={deleteSubmitting}
-                    >
-                      Annuler
-                    </Button>
-                  </DialogClose>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    disabled={deleteSubmitting}
-                    onClick={() => void confirmSoftDelete()}
-                  >
-                    {deleteSubmitting ? "Suppression…" : "Supprimer"}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+        <Dialog
+          open={countryToDelete !== null}
+          onOpenChange={(open) => {
+            if (!open) {
+              setCountryToDelete(null);
+              setDeleteError(null);
+              setDeleteSubmitting(false);
+            }
+          }}
+        >
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Supprimer ce pays ?</DialogTitle>
+              <DialogDescription asChild>
+                <div className="space-y-2 text-sm text-muted-foreground *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground">
+                  {countryToDelete ? (
+                    <>
+                      <p>
+                        <span className="font-medium text-foreground flex items-center gap-0.5">
+                          <ContryFlag
+                            name={countryToDelete.name}
+                            iso2={countryToDelete.iso2}
+                            show_name
+                          />
+                          <span>({countryToDelete.iso2})</span>
+                        </span>
+                      </p>
+                      <p>
+                        <span>
+                          Ce pays sera marqué comme supprimé et ne sera plus
+                          visible dans la liste des pays actifs.
+                        </span>
+                      </p>
+                      <p>
+                        <span>
+                          Vous pourrez le réactiver plus tard depuis la liste
+                          des pays désactivés.
+                        </span>
+                      </p>
+                    </>
+                  ) : null}
+                </div>
+              </DialogDescription>
+            </DialogHeader>
+            {deleteError ? (
+              <p className="text-sm text-destructive" role="alert">
+                {deleteError}
+              </p>
+            ) : null}
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={deleteSubmitting}
+                >
+                  Annuler
+                </Button>
+              </DialogClose>
+              <Button
+                type="button"
+                variant="destructive"
+                disabled={deleteSubmitting}
+                onClick={() => void confirmSoftDelete()}
+              >
+                {deleteSubmitting ? "Suppression…" : "Supprimer"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div>
-            <ApiDataTable
-              title="Pays désactivés"
-              columns={columnsDeactivated}
-              emptyMessage="Aucun pays désactivé."
-              loadPage={loadDeactivatedPage}
-              search={{
-                placeholder: "Rechercher dans les pays supprimes...",
-                ariaLabel: "Recherche pays supprimes",
-                name: "search-country-deactivated",
-              }}
-              pageSize={DATA_TABLE_DEFAULT_PAGE_SIZE}
-              refreshSignal={listsVersion}
-            />
+        <ApiDataTable
+          title="Pays désactivés"
+          columns={columnsDeactivated}
+          emptyMessage="Aucun pays désactivé."
+          loadPage={loadDeactivatedPage}
+          search={{
+            placeholder: "Rechercher dans les pays supprimes...",
+            ariaLabel: "Recherche pays supprimes",
+            name: "search-country-deactivated",
+          }}
+          pageSize={DATA_TABLE_DEFAULT_PAGE_SIZE}
+          refreshSignal={listsVersion}
+        />
 
-            <Dialog
-              open={countryToActivate !== null}
-              onOpenChange={(open) => {
-                if (!open) {
-                  setCountryToActivate(null);
-                  setActivateError(null);
-                  setActivateSubmitting(false);
-                }
-              }}
-            >
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Réactiver ce pays ?</DialogTitle>
-                  <DialogDescription asChild>
-                    <div className="space-y-2 text-sm text-muted-foreground *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground">
-                      {countryToActivate ? (
-                        <>
-                          <p>
-                            <span className="font-medium text-foreground flex items-center gap-0.5">
-                              <CountryNameWithFlag
-                                name={countryToActivate.name}
-                                iso2={countryToActivate.iso2}
-                                className="flex items-center gap-0.5"
-                              />
-                              <span> ({countryToActivate.iso2}) </span>
-                            </span>
-                          </p>
-                          <p>
-                            <span>
-                              Ce pays sera de nouveau disponible dans la liste des
-                              pays actifs.
-                            </span>
-                          </p>
-                        </>
-                      ) : null}
-                    </div>
-                  </DialogDescription>
-                </DialogHeader>
-                {activateError ? (
-                  <p className="text-sm text-destructive" role="alert">
-                    {activateError}
-                  </p>
-                ) : null}
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={activateSubmitting}
-                    >
-                      Annuler
-                    </Button>
-                  </DialogClose>
-                  <Button
-                    type="button"
-                    disabled={activateSubmitting}
-                    onClick={() => void confirmReactivate()}
-                  >
-                    {activateSubmitting ? "Réactivation…" : "Réactiver"}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+        <Dialog
+          open={countryToActivate !== null}
+          onOpenChange={(open) => {
+            if (!open) {
+              setCountryToActivate(null);
+              setActivateError(null);
+              setActivateSubmitting(false);
+            }
+          }}
+        >
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Réactiver ce pays ?</DialogTitle>
+              <DialogDescription asChild>
+                <div className="space-y-2 text-sm text-muted-foreground *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground">
+                  {countryToActivate ? (
+                    <>
+                      <p>
+                        <span className="font-medium text-foreground flex items-center gap-0.5">
+                          <ContryFlag
+                            name={countryToActivate.name}
+                            iso2={countryToActivate.iso2}
+                            show_name
+                          />
+                          <span> ({countryToActivate.iso2}) </span>
+                        </span>
+                      </p>
+                      <p>
+                        <span>
+                          Ce pays sera de nouveau disponible dans la liste des
+                          pays actifs.
+                        </span>
+                      </p>
+                    </>
+                  ) : null}
+                </div>
+              </DialogDescription>
+            </DialogHeader>
+            {activateError ? (
+              <p className="text-sm text-destructive" role="alert">
+                {activateError}
+              </p>
+            ) : null}
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={activateSubmitting}
+                >
+                  Annuler
+                </Button>
+              </DialogClose>
+              <Button
+                type="button"
+                disabled={activateSubmitting}
+                onClick={() => void confirmReactivate()}
+              >
+                {activateSubmitting ? "Réactivation…" : "Réactiver"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

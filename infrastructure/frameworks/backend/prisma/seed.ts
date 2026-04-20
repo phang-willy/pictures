@@ -2,7 +2,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import 'dotenv/config';
-
+import { slugify } from '@/domain/utils/slugify';
 type JsonValue =
   | string
   | number
@@ -64,16 +64,6 @@ type CountryCityEntry = {
   latitude?: string;
   longitude?: string;
 };
-
-function slugify(value: string): string {
-  return value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
 
 function normalizeForLookup(value: string): string {
   return value
@@ -278,7 +268,6 @@ async function main() {
   await prisma.country.deleteMany();
   await prisma.continent.deleteMany();
   await prisma.photo.deleteMany();
-  await prisma.place.deleteMany();
 
   console.log('[SEED]Database reset');
 

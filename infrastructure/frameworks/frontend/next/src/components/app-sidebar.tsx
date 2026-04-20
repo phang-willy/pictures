@@ -40,8 +40,16 @@ export function AppSidebar() {
         icon: SettingsIcon,
         items: [
           {
+            title: "Posts",
+            url: "/admin/post",
+          },
+          {
             title: "Pays",
             url: "/admin/country",
+          },
+          {
+            title: "Villes",
+            url: "/admin/city",
           },
         ],
       },
