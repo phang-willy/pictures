@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { appName } from "@/config/app-name";
-import { HomeMapShell } from "@/app/home-map-shell";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { MainSidebar } from "@/components/main-sidebar";
+import { HomeMapShell } from "@/components/home-map-shell";
 import { ModeToggle } from "@/components/toggle-theme";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: `${appName} - Accueil`,
@@ -18,20 +17,19 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <div className="relative h-dvh w-full overflow-hidden">
-      <SidebarProvider>
-        <MainSidebar />
-        <div className="flex flex-col h-full w-full">
-          <header className="w-full border-b">
-            <div className="flex items-center justify-between p-4">
-              <SidebarTrigger />
-              <ModeToggle />
-            </div>
-          </header>
-          <main>
-            <HomeMapShell />
-          </main>
-        </div>
-      </SidebarProvider>
+      <div className="flex flex-col h-full w-full">
+        <header className="w-full border-b">
+          <div className="flex items-center justify-between p-4 mx-auto container">
+            <Link href="/">
+              <span className="text-2xl font-bold">{appName}</span>
+            </Link>
+            <ModeToggle />
+          </div>
+        </header>
+        <main className="relative">
+          <HomeMapShell />
+        </main>
+      </div>
     </div>
   );
 }

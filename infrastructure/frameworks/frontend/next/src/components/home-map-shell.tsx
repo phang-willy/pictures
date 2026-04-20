@@ -10,7 +10,9 @@ const HomeGlobeMap = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="absolute inset-0 animate-pulse bg-muted" aria-hidden />
+      <div className="h-full w-full">
+        <div className="max-w-7xl max-h-7xl w-full h-full animate-pulse bg-gray-200 rounded-full"></div>
+      </div>
     ),
   },
 );

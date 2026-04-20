@@ -16,10 +16,10 @@ function adminTitle(...parts: string[]): string {
   return `${ADMIN_SEGMENT} - ${suffix}`;
 }
 
-async function fetchCountryNameById(id: string): Promise<string | null> {
+async function fetchResourceNameById(resource: string, id: string): Promise<string | null> {
   try {
     const response = await fetch(
-      apiUrl(`/api/country/${encodeURIComponent(id)}`),
+      apiUrl(`/api/${resource}/${encodeURIComponent(id)}`),
       {
         next: { revalidate: 300 },
       },
@@ -49,22 +49,43 @@ export async function resolveAdminPageMetaAsync(
     };
   }
 
-  const resource = segments[1];
+  const resources = [
+    {
+      name: "Pays",
+      singular: "pays",
+      path: "country",
+      article: "un",
+    },
+    {
+      name: "Villes",
+      singular: "ville",
+      path: "city",
+      article: "une",
+    },
+    {
+      name: "Posts",
+      singular: "post",
+      path: "post",
+      article: "un",
+    },
+  ];
+
+  const resource = resources.find((r) => r.path === segments[1]) ?? null;
   const action = segments[2];
   const id = segments[3];
 
-  if (resource === "country") {
+  if (resource) {
     if (!action) {
       return {
-        title: adminTitle("Pays"),
-        description: `Liste et gestion des pays (${appName}).`,
+        title: adminTitle(resource.name),
+        description: `${appName} - Liste et gestion des ${resource.singular}.`,
       };
     }
 
     if (action === "new") {
       return {
-        title: adminTitle("Pays", "Nouveau"),
-        description: `Créer un pays (${appName}).`,
+        title: adminTitle(resource.name, "Nouveau"),
+        description: `${appName} - Créer ${resource.article} ${resource.singular}.`,
       };
     }
 
@@ -75,47 +96,44 @@ export async function resolveAdminPageMetaAsync(
         action === "delete" ||
         action === "activate");
 
-    const countryName = needsName ? await fetchCountryNameById(id) : null;
-    const nameSuffix = countryName ?? (id ? id.slice(0, 8) : "");
+    const resourceName = needsName ? await fetchResourceNameById(resource.path, id) : null;
+    const nameSuffix = resourceName ?? (id ? id.slice(0, 8) : "");
 
     if (action === "view" && id) {
       return {
-        title: adminTitle("Pays", "Details", nameSuffix),
-        description: `Consulter un pays (${appName}).`,
+        title: adminTitle(resource.name, "Details", nameSuffix),
+        description: `${appName} - Consulter ${resource.article} ${resource.singular}.`,
       };
     }
     if (action === "edit" && id) {
       return {
-        title: adminTitle("Pays", "Modification", nameSuffix),
-        description: `Modifier un pays (${appName}).`,
+        title: adminTitle(resource.name, "Modification", nameSuffix),
+        description: `${appName} - Modifier ${resource.article} ${resource.singular}.`,
       };
     }
     if (action === "delete" && id) {
       return {
-        title: adminTitle("Pays", "Suppression", nameSuffix),
-        description: `Supprimer un pays (${appName}).`,
+        title: adminTitle(resource.name, "Suppression", nameSuffix),
+        description: `${appName} - Supprimer ${resource.article} ${resource.singular}.`,
       };
     }
     if (action === "activate" && id) {
       return {
-        title: adminTitle("Pays", "Réactiver", nameSuffix),
-        description: `Réactiver un pays (${appName}).`,
+        title: adminTitle(resource.name, "Réactiver", nameSuffix),
+        description: `${appName} - Réactiver ${resource.article} ${resource.singular}.`,
       };
     }
 
     return {
-      title: adminTitle("Pays"),
-      description: `Gestion des pays (${appName}).`,
+      title: adminTitle(resource.name),
+      description: `${appName} - Gestion des ${resource.singular} .`,
     };
   }
 
-  const label = resource
-    ? resource.charAt(0).toUpperCase() + resource.slice(1).replace(/-/g, " ")
-    : "Accueil";
-
+  const fallbackResource = segments[1] ?? "Accueil";
   return {
-    title: adminTitle(label),
-    description: `Administration : ${label} (${appName}).`,
+    title: adminTitle(fallbackResource),
+    description: `${appName} - Administration : ${fallbackResource}.`,
   };
 }
 

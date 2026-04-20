@@ -39,6 +39,9 @@ const allowedDevOrigins =
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // Force metadata to be resolved before streaming for all user agents,
+  // so title/meta tags are emitted directly in <head>.
+  htmlLimitedBots: /.*/,
   allowedDevOrigins,
   env: nextEnv,
   output: "standalone",

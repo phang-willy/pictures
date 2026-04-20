@@ -3,6 +3,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { AdminGeometryMap } from "@/components/admin/admin-geometry-map";
+import type { AdminGeometryPayload } from "@/components/admin/admin-geometry-map";
+import { AdminGlobePreviewMap } from "@/components/admin/admin-globe-preview-map";
 import { CountryGeometryOsmEditor } from "@/components/admin/country-geometry-osm-editor";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -554,6 +557,18 @@ export function CountryNewForm({
     return parsed.ok ? null : parsed.error;
   }, [geomType, geomJson]);
 
+  const mapPreviewGeometry = useMemo((): AdminGeometryPayload | null => {
+    const parsed = parseGeometryPayload(geomType, geomJson);
+    if (!parsed.ok) {
+      return null;
+    }
+    const g = parsed.geometry;
+    if (g.type !== "Polygon" && g.type !== "MultiPolygon") {
+      return null;
+    }
+    return g;
+  }, [geomType, geomJson]);
+
   function onGeometryTypeSelect(next: string) {
     if (next !== "Polygon" && next !== "MultiPolygon") {
       return;
@@ -894,8 +909,27 @@ export function CountryNewForm({
             </FieldContent>
           </Field>
 
+          <Field>
+            <FieldTitle>Aperçu 3D</FieldTitle>
+            <FieldDescription>
+              Même rendu qu’en fiche pays après enregistrement. Le tracé se
+              modifie dans la carte plane OpenStreetMap ci‑dessous.
+            </FieldDescription>
+            <FieldContent className="mb-4">
+              {mapPreviewGeometry ? (
+                <AdminGeometryMap
+                  instanceId="country-new-geom-preview"
+                  geometry={mapPreviewGeometry}
+                  ariaLabel={`Aperçu 3D — ${name || "nouveau pays"}`}
+                />
+              ) : (
+                <AdminGlobePreviewMap ariaLabel="Globe — complétez le JSON ou dessinez pour prévisualiser le pays" />
+              )}
+            </FieldContent>
+          </Field>
+
           <Field data-invalid={geometryJsonError ? true : undefined}>
-            <FieldTitle>Carte</FieldTitle>
+            <FieldTitle>Tracé (édition OSM)</FieldTitle>
             <FieldDescription>
               Barre d&apos;outils en haut à gauche : polygone, déplacement des
               sommets, suppression.

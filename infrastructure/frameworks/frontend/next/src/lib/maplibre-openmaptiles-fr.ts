@@ -76,3 +76,9 @@ export function applyOpenMapTilesFrenchLabelsWhenReady(map: Map): void {
   }
   map.once("idle", run);
 }
+
+/** Aligné sur la page d’accueil : globe + toponymes français lorsque disponibles. */
+export function applyGlobeAndFrenchLabels(map: Map): void {
+  map.setProjection({ type: "globe" });
+  applyOpenMapTilesFrenchLabelsWhenReady(map);
+}

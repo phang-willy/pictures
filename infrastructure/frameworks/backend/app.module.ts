@@ -8,7 +8,11 @@ import { ListCountriesUseCase } from '@/application/country/use-cases/list-count
 import { ListContinentsUseCase } from '@/application/country/use-cases/list-continents.use-case';
 import { UpdateCountryUseCase } from '@/application/country/use-cases/update-country.use-case';
 import { CheckCountryDuplicateUseCase } from '@/application/country/use-cases/check-country-duplicate.use-case';
+import { CheckCityDuplicateUseCase } from '@/application/city/use-cases/check-city-duplicate.use-case';
+import { CreateCityUseCase } from '@/application/city/use-cases/create-city.use-case';
+import { GetCityByIdUseCase } from '@/application/city/use-cases/get-city-by-id.use-case';
 import { ListCitiesUseCase } from '@/application/city/use-cases/list-cities.use-case';
+import { UpdateCityUseCase } from '@/application/city/use-cases/update-city.use-case';
 import { LoginUseCase } from '@/application/auth/use-cases/login.use-case';
 import { LogoutUseCase } from '@/application/auth/use-cases/logout.use-case';
 import { RefreshSessionUseCase } from '@/application/auth/use-cases/refresh-session.use-case';
@@ -107,6 +111,26 @@ import { TokenSignerModule } from '@/infrastructure/frameworks/backend/token-sig
     { provide: GetCountryByIdUseCase, inject: [COUNTRY_REPOSITORY], useFactory: (repository: CountryRepository) => new GetCountryByIdUseCase(repository) },
     { provide: ListCountriesUseCase, inject: [COUNTRY_REPOSITORY], useFactory: (repository: CountryRepository) => new ListCountriesUseCase(repository) },
     { provide: ListCitiesUseCase, inject: [CITY_REPOSITORY], useFactory: (repository: CityRepository) => new ListCitiesUseCase(repository) },
+    { provide: GetCityByIdUseCase, inject: [CITY_REPOSITORY], useFactory: (repository: CityRepository) => new GetCityByIdUseCase(repository) },
+    { provide: CheckCityDuplicateUseCase, inject: [CITY_REPOSITORY], useFactory: (repository: CityRepository) => new CheckCityDuplicateUseCase(repository) },
+    {
+      provide: CreateCityUseCase,
+      inject: [CITY_REPOSITORY, COUNTRY_REPOSITORY, CheckCityDuplicateUseCase],
+      useFactory: (
+        cityRepository: CityRepository,
+        countryRepository: CountryRepository,
+        checkDuplicate: CheckCityDuplicateUseCase,
+      ) => new CreateCityUseCase(cityRepository, countryRepository, checkDuplicate),
+    },
+    {
+      provide: UpdateCityUseCase,
+      inject: [CITY_REPOSITORY, COUNTRY_REPOSITORY, CheckCityDuplicateUseCase],
+      useFactory: (
+        cityRepository: CityRepository,
+        countryRepository: CountryRepository,
+        checkDuplicate: CheckCityDuplicateUseCase,
+      ) => new UpdateCityUseCase(cityRepository, countryRepository, checkDuplicate),
+    },
     { provide: ListContinentsUseCase, inject: [COUNTRY_REPOSITORY], useFactory: (repository: CountryRepository) => new ListContinentsUseCase(repository) },
     { provide: CreateUserUseCase, inject: [USER_REPOSITORY], useFactory: (repository: UserRepository) => new CreateUserUseCase(repository) },
     { provide: GetUserByIdUseCase, inject: [USER_REPOSITORY], useFactory: (repository: UserRepository) => new GetUserByIdUseCase(repository) },

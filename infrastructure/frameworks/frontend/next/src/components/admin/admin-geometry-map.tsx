@@ -1,17 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useTheme } from "next-themes";
 import maplibregl from "maplibre-gl";
 import type { Map as MapLibreMap } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { applyOpenMapTilesFrenchLabelsWhenReady } from "@/lib/maplibre-openmaptiles-fr";
+import { applyGlobeAndFrenchLabels } from "@/lib/maplibre-openmaptiles-fr";
+import { openfreemapStyleForTheme } from "@/lib/openfreemap-basemap";
+import {
+  scheduleMapResize,
+  scheduleMapResizeRobust,
+} from "@/lib/maplibre-map-resize";
 import { cn } from "@/lib/utils";
-
-const OPENFREEMAP = {
-  light: "https://tiles.openfreemap.org/styles/bright",
-  dark: "https://tiles.openfreemap.org/styles/dark",
-} as const;
+import { maplibreMapNew } from "@/lib/maplibre-map-new";
 
 type GeoJsonGeometry = GeoJSON.Geometry;
 
@@ -35,10 +36,6 @@ export type AdminGeometryMapProps = {
   fitBoundsMaxZoom?: number;
 };
 
-function basemapStyleForTheme(resolved: string | undefined): string {
-  return resolved === "dark" ? OPENFREEMAP.dark : OPENFREEMAP.light;
-}
-
 function coordinatePairsFromGeometry(geometry: GeoJsonGeometry): number[][] {
   if (geometry.type === "Polygon") {
     return geometry.coordinates.flat();
@@ -53,6 +50,7 @@ function fitToFeature(
   map: MapLibreMap,
   feature: GeoJSON.Feature<GeoJsonGeometry>,
   maxZoom: number,
+  options?: { duration?: number },
 ): void {
   if (
     feature.geometry.type !== "Polygon" &&
@@ -95,7 +93,11 @@ function fitToFeature(
       [minLng, minLat],
       [maxLng, maxLat],
     ],
-    { padding: 40, duration: 800, maxZoom },
+    {
+      padding: 40,
+      duration: options?.duration ?? 800,
+      maxZoom,
+    },
   );
 }
 
@@ -115,6 +117,13 @@ function lineLayerId(instanceId: string): string {
   return `admin-geo-line-${sanitizeMapInstanceId(instanceId)}`;
 }
 
+type CameraSnapshot = {
+  center: maplibregl.LngLat;
+  zoom: number;
+  bearing: number;
+  pitch: number;
+};
+
 type AdminGeometryMapCanvasProps = {
   instanceId: string;
   geometry: NonNullable<AdminGeometryPayload>;
@@ -129,7 +138,7 @@ type AdminGeometryMapCanvasProps = {
 function AdminGeometryMapCanvas({
   instanceId,
   geometry,
-  ariaLabel,
+  ariaLabel: _ariaLabel,
   featureProperties,
   fitBoundsMaxZoom = 8,
   resolvedTheme,
@@ -137,128 +146,206 @@ function AdminGeometryMapCanvas({
   className,
 }: AdminGeometryMapCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<MapLibreMap | null>(null);
+  const appliedStyleUrlRef = useRef<string | null>(null);
+  const themeRef = useRef(resolvedTheme);
+
+  const snapshotRef = useRef({
+    geometry,
+    featureProperties,
+    fitBoundsMaxZoom,
+  });
+
+  useLayoutEffect(() => {
+    themeRef.current = resolvedTheme;
+  }, [resolvedTheme]);
+
+  useLayoutEffect(() => {
+    snapshotRef.current = { geometry, featureProperties, fitBoundsMaxZoom };
+  }, [geometry, featureProperties, fitBoundsMaxZoom]);
+
+  const cameraAfterStyleRef = useRef<CameraSnapshot | null>(null);
+  const controlsAddedRef = useRef(false);
+
+  const sid = sourceId(instanceId);
+  const fid = fillLayerId(instanceId);
+  const lid = lineLayerId(instanceId);
 
   useEffect(() => {
-    const geometryType = geometry.type;
-    const coordinates = geometry.coordinate;
-    const geoJsonGeometry = {
-      type: geometryType,
-      coordinates,
-    } as GeoJsonGeometry;
-
-    const feature: GeoJSON.Feature<GeoJsonGeometry> = {
-      type: "Feature",
-      properties: { ...(featureProperties ?? {}) },
-      geometry: geoJsonGeometry,
-    };
-
-    const collection: GeoJSON.FeatureCollection = {
-      type: "FeatureCollection",
-      features: [feature],
-    };
-
     const container = containerRef.current;
     if (!container) {
       return;
     }
 
-    const sid = sourceId(instanceId);
-    const fid = fillLayerId(instanceId);
-    const lid = lineLayerId(instanceId);
-
-    const initialStyle = basemapStyleForTheme(resolvedTheme);
-    const map = new maplibregl.Map({
+    const initialStyle = openfreemapStyleForTheme(themeRef.current);
+    const map = maplibreMapNew({
       container,
-      style: initialStyle,
+      initialStyle,
       center: [2.3522, 48.8566],
       zoom: 1.5,
-      minZoom: 0,
-      maxZoom: 18,
-      locale: {
-        "Map.Title": "Carte",
-        "NavigationControl.ResetBearing":
-          "Faites glisser pour faire pivoter la carte, cliquez pour remettre le nord",
-        "NavigationControl.ZoomIn": "Zoom avant",
-        "NavigationControl.ZoomOut": "Zoom arrière",
-        "GlobeControl.Enable": "Activer le globe",
-        "GlobeControl.Disable": "Désactiver le globe",
-      },
     });
+    mapRef.current = map;
+    appliedStyleUrlRef.current = initialStyle;
 
-    const onStyleLoad = () => {
-      map.setProjection({ type: "globe" });
-      applyOpenMapTilesFrenchLabelsWhenReady(map);
+    const rebuildGeoLayers = () => {
+      const snap = snapshotRef.current;
+      const g = snap.geometry;
+      const geoJsonGeometry = {
+        type: g.type,
+        coordinates: g.coordinate,
+      } as GeoJsonGeometry;
+      const feature: GeoJSON.Feature<GeoJsonGeometry> = {
+        type: "Feature",
+        properties: { ...(snap.featureProperties ?? {}) },
+        geometry: geoJsonGeometry,
+      };
+      applyGlobeAndFrenchLabels(map);
 
-      if (!map.getSource(sid)) {
-        map.addSource(sid, { type: "geojson", data: collection });
-      } else {
-        (map.getSource(sid) as maplibregl.GeoJSONSource).setData(collection);
+      if (map.getLayer(fid)) {
+        map.removeLayer(fid);
+      }
+      if (map.getLayer(lid)) {
+        map.removeLayer(lid);
+      }
+      if (map.getSource(sid)) {
+        map.removeSource(sid);
       }
 
+      const collection: GeoJSON.FeatureCollection = {
+        type: "FeatureCollection",
+        features: [feature],
+      };
+      map.addSource(sid, { type: "geojson", data: collection });
       const firstSymbolLayerId = map
         .getStyle()
         .layers?.find((layer) => layer.type === "symbol")?.id;
 
-      if (!map.getLayer(fid)) {
-        map.addLayer(
-          {
-            id: fid,
-            type: "fill",
-            source: sid,
-            paint: {
-              "fill-color": "#0ea5e9",
-              "fill-opacity": 0.28,
-            },
+      map.addLayer(
+        {
+          id: fid,
+          type: "fill",
+          source: sid,
+          paint: {
+            "fill-color": "#0ea5e9",
+            "fill-opacity": 0.28,
           },
-          firstSymbolLayerId,
-        );
-      }
-
-      if (!map.getLayer(lid)) {
-        map.addLayer(
-          {
-            id: lid,
-            type: "line",
-            source: sid,
-            paint: {
-              "line-color": "#0369a1",
-              "line-width": 2,
-            },
-          },
-          firstSymbolLayerId,
-        );
-      }
-
-      map.addControl(
-        new maplibregl.NavigationControl({ showCompass: true }),
-        "top-right",
+        },
+        firstSymbolLayerId,
       );
 
-      fitToFeature(map, feature, fitBoundsMaxZoom);
+      map.addLayer(
+        {
+          id: lid,
+          type: "line",
+          source: sid,
+          paint: {
+            "line-color": "#0369a1",
+            "line-width": 2,
+          },
+        },
+        firstSymbolLayerId,
+      );
+
+      if (!controlsAddedRef.current) {
+        map.addControl(
+          new maplibregl.NavigationControl({ showCompass: true }),
+          "top-right",
+        );
+        controlsAddedRef.current = true;
+      }
+
+      scheduleMapResizeRobust(map);
+
+      const preserve = cameraAfterStyleRef.current;
+      if (preserve) {
+        cameraAfterStyleRef.current = null;
+        map.easeTo({
+          center: preserve.center,
+          zoom: preserve.zoom,
+          bearing: preserve.bearing,
+          pitch: preserve.pitch,
+          duration: 900,
+          essential: true,
+        });
+      } else {
+        fitToFeature(map, feature, snap.fitBoundsMaxZoom ?? 8, {
+          duration: 800,
+        });
+      }
+      map.once("idle", () => {
+        scheduleMapResizeRobust(map);
+      });
     };
 
-    map.once("style.load", onStyleLoad);
+    const onStyleLoad = () => {
+      rebuildGeoLayers();
+    };
+    map.on("style.load", onStyleLoad);
 
-    const resizeObserver = new ResizeObserver(() => {
-      map.resize();
-    });
-    resizeObserver.observe(container);
+    const ro = new ResizeObserver(() => map.resize());
+    ro.observe(container);
 
     return () => {
-      resizeObserver.disconnect();
+      map.off("style.load", onStyleLoad);
+      ro.disconnect();
+      controlsAddedRef.current = false;
       map.remove();
+      mapRef.current = null;
+      appliedStyleUrlRef.current = null;
     };
-  }, [
-    instanceId,
-    geometry,
-    featureProperties,
-    fitBoundsMaxZoom,
-    resolvedTheme,
-  ]);
+  }, [instanceId, sid, fid, lid]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map?.isStyleLoaded()) {
+      return;
+    }
+    const snap = snapshotRef.current;
+    const g = snap.geometry;
+    const geoJsonGeometry = {
+      type: g.type,
+      coordinates: g.coordinate,
+    } as GeoJsonGeometry;
+    const feature: GeoJSON.Feature<GeoJsonGeometry> = {
+      type: "Feature",
+      properties: { ...(snap.featureProperties ?? {}) },
+      geometry: geoJsonGeometry,
+    };
+    const collection: GeoJSON.FeatureCollection = {
+      type: "FeatureCollection",
+      features: [feature],
+    };
+
+    const src = map.getSource(sid) as maplibregl.GeoJSONSource | undefined;
+    if (!src) {
+      return;
+    }
+    src.setData(collection);
+    fitToFeature(map, feature, snap.fitBoundsMaxZoom ?? 8, { duration: 800 });
+    scheduleMapResize(map);
+  }, [geometry, featureProperties, fitBoundsMaxZoom, sid]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) {
+      return;
+    }
+    const next = openfreemapStyleForTheme(resolvedTheme);
+    if (appliedStyleUrlRef.current === next) {
+      return;
+    }
+    cameraAfterStyleRef.current = {
+      center: map.getCenter(),
+      zoom: map.getZoom(),
+      bearing: map.getBearing(),
+      pitch: map.getPitch(),
+    };
+    appliedStyleUrlRef.current = next;
+    map.setStyle(next);
+  }, [resolvedTheme]);
 
   return (
     <div
-      ref={containerRef}
       lang="fr"
       className={cn(
         "h-[min(420px,55vh)] w-full min-h-[280px] overflow-hidden rounded-lg border",
@@ -266,8 +353,10 @@ function AdminGeometryMapCanvas({
         className,
       )}
       role="application"
-      aria-label={ariaLabel}
-    />
+      aria-label={_ariaLabel}
+    >
+      <div ref={containerRef} className="relative isolate h-full w-full" />
+    </div>
   );
 }
 

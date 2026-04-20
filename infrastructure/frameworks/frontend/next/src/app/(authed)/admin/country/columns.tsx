@@ -25,7 +25,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { CountryNameWithFlag } from "@/components/admin/country-name-with-flag";
+import { ContryFlag } from "@/components/admin/country-flag";
 import type { CountryRow } from "@pictures/contracts";
 
 export type { CountryRow };
@@ -123,7 +123,7 @@ function buildCountryDataColumns(sortableHeaders: boolean): ColumnDef<CountryRow
     accessorKey: "name",
     header: header("Nom"),
     cell: ({ row }) => (
-      <CountryNameWithFlag
+      <ContryFlag
         name={row.original.name}
         iso2={row.original.iso2}
       />

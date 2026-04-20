@@ -5,7 +5,9 @@ import { useTheme } from "next-themes";
 import maplibregl from "maplibre-gl";
 import type { Map as MapLibreMap, MapLayerMouseEvent } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { applyOpenMapTilesFrenchLabelsWhenReady } from "@/lib/maplibre-openmaptiles-fr";
+import { applyGlobeAndFrenchLabels } from "@/lib/maplibre-openmaptiles-fr";
+import { scheduleMapResizeRobust } from "@/lib/maplibre-map-resize";
+import { openfreemapStyleForTheme } from "@/lib/openfreemap-basemap";
 import { apiUrl } from "@/lib/api";
 import type {
   ApiCity,
@@ -14,12 +16,9 @@ import type {
   CountryFeatureCollection,
   GeoJsonGeometry,
 } from "@/types/home-globe-map.types";
-
-/** OpenFreeMap + OpenMapTiles, sans clé. @see https://openfreemap.org/ */
-const OPENFREEMAP = {
-  light: "https://tiles.openfreemap.org/styles/bright",
-  dark: "https://tiles.openfreemap.org/styles/dark",
-} as const;
+import { maplibreMapNew } from "@/lib/maplibre-map-new";
+import { slugify } from "@/domain/utils/slugify";
+import { MaplibreMapPinHtml } from "@/components/maplibre-map-pin-html";
 
 const COUNTRY_SHAPES_SOURCE_ID = "countries-shapes-source";
 const COUNTRY_SHAPES_FILL_LAYER_ID = "countries-shapes-fill";
@@ -137,24 +136,8 @@ function parseCountryListItems(data: unknown): ApiCountry[] {
   return out;
 }
 
-function basemapStyleForTheme(resolved: string | undefined): string {
-  return resolved === "dark" ? OPENFREEMAP.dark : OPENFREEMAP.light;
-}
-
-function slugifyCountryName(name: string): string {
-  return name
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
 function countrySlugFallbackFromName(name: string): string {
-  const slug = slugifyCountryName(name);
+  const slug = slugify(name);
   // Aligne quelques variantes fréquentes des noms GeoJSON avec les slugs DB.
   if (slug === "viet-nam") {
     return "vietnam";
@@ -280,11 +263,23 @@ function addCountryLayers(
   }
 }
 
-function markerPinHtml(): string {
-  // Icône inspirée de lucide map-pin: https://v0.lucide.dev/icons/map-pin
-  return `
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f00612" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin-icon lucide-map-pin"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
-  `;
+/**
+ * MapLibre peut encore refuser addSource/addLayer juste après style.load
+ * (ex. isStyleLoaded() faux pendant des setLayoutProperty). On retente au
+ * prochain style.load ou idle, sans dépendre seul de isStyleLoaded().
+ */
+function runWhenStyleMutationsSafe(map: MapLibreMap, fn: () => void): void {
+  try {
+    fn();
+  } catch {
+    const onReady = () => {
+      map.off("style.load", onReady);
+      map.off("idle", onReady);
+      runWhenStyleMutationsSafe(map, fn);
+    };
+    map.once("style.load", onReady);
+    map.once("idle", onReady);
+  }
 }
 
 function clearCityMarkers(markers: maplibregl.Marker[]): void {
@@ -307,7 +302,7 @@ function renderCityMarkers(
     element.className = "cursor-pointer bg-transparent border-0 p-0 m-0";
     element.style.zIndex = "20";
     element.setAttribute("aria-label", `Ville: ${city.name}`);
-    element.innerHTML = markerPinHtml();
+    element.innerHTML = MaplibreMapPinHtml(city.name);
     element.addEventListener("click", (event) => {
       event.stopPropagation();
       map.flyTo({
@@ -323,11 +318,6 @@ function renderCityMarkers(
       .addTo(map);
     markers.push(marker);
   }
-}
-
-function applyGlobeAndFrenchLabels(map: MapLibreMap): void {
-  map.setProjection({ type: "globe" });
-  applyOpenMapTilesFrenchLabelsWhenReady(map);
 }
 
 export function HomeGlobeMap() {
@@ -349,15 +339,8 @@ export function HomeGlobeMap() {
       return;
     }
 
-    const initialStyle = basemapStyleForTheme(resolvedTheme);
-    const map = new maplibregl.Map({
-      container,
-      style: initialStyle,
-      center: [2.3522, 48.8566],
-      zoom: 2,
-      minZoom: 0,
-      maxZoom: 20,
-    });
+    const initialStyle = openfreemapStyleForTheme(resolvedTheme);
+    const map = maplibreMapNew({ container, initialStyle, center: [2.3522, 48.8566], zoom: 2 });
     mapRef.current = map;
     appliedStyleUrlRef.current = initialStyle;
     const cityMarkers = cityMarkersRef.current;
@@ -372,12 +355,17 @@ export function HomeGlobeMap() {
       ) {
         return;
       }
-      try {
+      const geojson = countriesGeoJsonRef.current;
+      runWhenStyleMutationsSafe(map, () => {
+        if (
+          isDisposed ||
+          mapRef.current !== map ||
+          countriesGeoJsonRef.current !== geojson
+        ) {
+          return;
+        }
         addCountryLayers(map, countriesGeoJsonRef.current);
-      } catch {
-        // Le style peut être en transition (setStyle) : on réessaie au prochain style.load.
-        map.once("style.load", tryAddCountryLayers);
-      }
+      });
     };
 
     const tryAddCityMarkers = () => {
@@ -456,7 +444,8 @@ export function HomeGlobeMap() {
         }
         cityCache.set(cacheKey, cities);
         applyMarkersForSelectedCountry();
-      } catch {
+      } catch (error) {
+        console.error("impossible de charger les villes", error);
         if (
           isDisposed ||
           mapRef.current !== map ||
@@ -534,7 +523,6 @@ export function HomeGlobeMap() {
           throw new Error("country geometry payload is empty");
         }
 
-        // Garantit un fallback slug cohérent même si le payload est incomplet.
         for (const feature of filtered.features) {
           if (!feature.properties) {
             continue;
@@ -552,10 +540,7 @@ export function HomeGlobeMap() {
         tryAddCountryLayers();
       })
       .catch((error) => {
-        console.error(
-          "[map] impossible de charger /api/country?geometry=true&activate=true et les polygones",
-          error,
-        );
+        console.error("impossible de charger les pays", error);
       });
 
     const onCountryClick = (event: MapLayerMouseEvent) => {
@@ -614,22 +599,43 @@ export function HomeGlobeMap() {
     if (!map) {
       return;
     }
-    const nextUrl = basemapStyleForTheme(resolvedTheme);
+    const nextUrl = openfreemapStyleForTheme(resolvedTheme);
     if (appliedStyleUrlRef.current === nextUrl) {
       return;
     }
     appliedStyleUrlRef.current = nextUrl;
 
+    const camera = {
+      center: map.getCenter(),
+      zoom: map.getZoom(),
+      bearing: map.getBearing(),
+      pitch: map.getPitch(),
+    };
+
     const onStyleLoad = () => {
       applyGlobeAndFrenchLabels(map);
+      scheduleMapResizeRobust(map);
       if (countriesGeoJsonRef.current) {
-        try {
+        const geojson = countriesGeoJsonRef.current;
+        runWhenStyleMutationsSafe(map, () => {
+          if (!countriesGeoJsonRef.current || countriesGeoJsonRef.current !== geojson) {
+            return;
+          }
           addCountryLayers(map, countriesGeoJsonRef.current);
-        } catch {
-          // Ignore si le style est encore en transition.
-        }
+        });
       }
       reapplyCityMarkersRef.current?.();
+      map.easeTo({
+        center: camera.center,
+        zoom: camera.zoom,
+        bearing: camera.bearing,
+        pitch: camera.pitch,
+        duration: 900,
+        essential: true,
+      });
+      map.once("idle", () => {
+        scheduleMapResizeRobust(map);
+      });
     };
     map.setStyle(nextUrl);
     map.once("style.load", onStyleLoad);
@@ -637,10 +643,14 @@ export function HomeGlobeMap() {
 
   return (
     <div
-      ref={containerRef}
       className={`absolute inset-0 min-h-0 h-dvh w-full ${mapThemeClass}`}
       role="application"
       aria-label="Carte interactive : globe en vue large, carte plane en zoom rapproché, toponymes en français lorsque disponibles"
-    />
+    >
+      <div
+        ref={containerRef}
+        className="absolute inset-0 min-h-0 h-full w-full"
+      />
+    </div>
   );
 }

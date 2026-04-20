@@ -3,8 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CountryGeometryOsmEditor } from "@/components/admin/country-geometry-osm-editor";
+import { AdminGeometryMap } from "@/components/admin/admin-geometry-map";
 import type { AdminGeometryPayload } from "@/components/admin/admin-geometry-map";
+import { AdminGlobePreviewMap } from "@/components/admin/admin-globe-preview-map";
+import { CountryGeometryOsmEditor } from "@/components/admin/country-geometry-osm-editor";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -187,6 +189,18 @@ export function CountryEditForm({
   const geometryJsonError = useMemo(() => {
     const parsed = parseGeometryPayload(geomType, geomJson);
     return parsed.ok ? null : parsed.error;
+  }, [geomType, geomJson]);
+
+  const mapPreviewGeometry = useMemo((): AdminGeometryPayload | null => {
+    const parsed = parseGeometryPayload(geomType, geomJson);
+    if (!parsed.ok) {
+      return null;
+    }
+    const g = parsed.geometry;
+    if (g.type !== "Polygon" && g.type !== "MultiPolygon") {
+      return null;
+    }
+    return g;
   }, [geomType, geomJson]);
 
   async function onSubmit(e: React.FormEvent) {
@@ -450,8 +464,29 @@ export function CountryEditForm({
             </FieldContent>
           </Field>
 
+          <Field>
+            <FieldTitle>Aperçu 3D</FieldTitle>
+            <FieldDescription>
+              Même rendu qu’en fiche pays. Le tracé se modifie dans la carte
+              plane OpenStreetMap ci‑dessous.
+            </FieldDescription>
+            <FieldContent className="mb-4">
+              {mapPreviewGeometry ? (
+                <AdminGeometryMap
+                  instanceId={`${country.id}-geom-preview`}
+                  geometry={mapPreviewGeometry}
+                  ariaLabel={`Aperçu 3D — ${name || country.name}`}
+                />
+              ) : (
+                <AdminGlobePreviewMap
+                  ariaLabel="Globe — corrigez le JSON ou dessinez pour prévisualiser"
+                />
+              )}
+            </FieldContent>
+          </Field>
+
           <Field data-invalid={geometryJsonError ? true : undefined}>
-            <FieldTitle>Carte</FieldTitle>
+            <FieldTitle>Tracé (édition OSM)</FieldTitle>
             <FieldDescription>
               Utilisez la barre d&apos;outils en haut à gauche : polygone pour
               dessiner, crayon pour déplacer les sommets, corbeille pour

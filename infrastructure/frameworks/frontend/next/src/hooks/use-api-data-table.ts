@@ -5,6 +5,7 @@ import {
   type ColumnDef,
   type Table as TanstackTable,
   getCoreRowModel,
+  getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import type { ApiPagination } from "@pictures/contracts";
@@ -163,7 +164,8 @@ export function useApiDataTable<TData>(
       });
     },
     getCoreRowModel: getCoreRowModel(),
-    enableSorting: false,
+    getSortedRowModel: getSortedRowModel(),
+    enableSorting: true,
   });
 
   const total = meta?.total ?? 0;

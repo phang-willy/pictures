@@ -117,7 +117,7 @@ model City {
   latitude  Float                                 @db.DoublePrecision
   longitude Float                                 @db.DoublePrecision
   location  Unsupported("geography(Point, 4326)")?
-  places    Place[]
+  posts     Post[]
   deletedAt DateTime?
   createdAt DateTime                              @default(now())
   updatedAt DateTime                              @updatedAt
@@ -126,7 +126,7 @@ model City {
   @@index([countryId, name])
 }
 
-model Place {
+model Post {
   id          String                                @id @default(uuid())
   cityId      String
   city        City                                  @relation(fields: [cityId], references: [id], onDelete: Restrict)
@@ -147,8 +147,8 @@ model Place {
 
 model Photo {
   id               String   @id @default(uuid())
-  placeId          String
-  place            Place    @relation(fields: [placeId], references: [id], onDelete: Restrict)
+  postId           String
+  post             Post     @relation(fields: [postId], references: [id], onDelete: Restrict)
   uploadedByUserId String
   uploadedByUser   User     @relation(fields: [uploadedByUserId], references: [id], onDelete: Restrict)
   title            String?  @db.VarChar(200)
@@ -165,6 +165,6 @@ model Photo {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  @@index([placeId, createdAt])
+  @@index([postId, createdAt])
   @@index([uploadedByUserId, createdAt])
 }
