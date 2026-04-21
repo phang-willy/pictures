@@ -8,4 +8,5 @@ export interface CityRepository {
   findByCountryId(countryId: string, activeOnly: boolean): Promise<CityEntity[]>;
   findByNameInsensitive(countryId: string, name: string): Promise<CityEntity | null>;
   findBySlug(countryId: string, slug: string): Promise<CityEntity | null>;
+  deleteById(id: string): Promise<void>;
 }

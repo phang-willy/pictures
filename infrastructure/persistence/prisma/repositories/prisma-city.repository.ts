@@ -16,7 +16,7 @@ type CityRow = {
   slug: string;
   latitude: number;
   longitude: number;
-  deletedAt: Date | null;
+  desactivatedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
   country: {
@@ -25,14 +25,14 @@ type CityRow = {
     iso2: string;
     iso3: string | null;
     slug: string;
-    deletedAt: Date | null;
+    desactivatedAt: Date | null;
     createdAt: Date;
     updatedAt: Date;
     continent: {
       id: string;
       code: string;
       name: string;
-      deletedAt: Date | null;
+      desactivatedAt: Date | null;
       createdAt: Date;
       updatedAt: Date;
     };
@@ -41,6 +41,8 @@ type CityRow = {
 
 @Injectable()
 export class PrismaCityRepository implements CityRepository {
+  private static readonly NULL_UUID = '00000000-0000-0000-0000-000000000000';
+
   constructor(private readonly prisma: PrismaService) {}
 
   private toDomain(row: CityRow): CityEntity {
@@ -48,7 +50,7 @@ export class PrismaCityRepository implements CityRepository {
       id: row.country.continent.id,
       code: new ContinentCodeVo(row.country.continent.code),
       name: row.country.continent.name,
-      deletedAt: row.country.continent.deletedAt,
+      desactivatedAt: row.country.continent.desactivatedAt,
       createdAt: row.country.continent.createdAt,
       updatedAt: row.country.continent.updatedAt,
     });
@@ -60,7 +62,7 @@ export class PrismaCityRepository implements CityRepository {
       slug: new CountrySlugVo(row.country.slug),
       continent,
       geometry: null,
-      deletedAt: row.country.deletedAt,
+      desactivatedAt: row.country.desactivatedAt,
       createdAt: row.country.createdAt,
       updatedAt: row.country.updatedAt,
     });
@@ -71,7 +73,7 @@ export class PrismaCityRepository implements CityRepository {
       slug: new CitySlugVo(row.slug),
       latitude: row.latitude,
       longitude: row.longitude,
-      deletedAt: row.deletedAt,
+      desactivatedAt: row.desactivatedAt,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     });
@@ -83,7 +85,7 @@ export class PrismaCityRepository implements CityRepository {
     slug: true,
     latitude: true,
     longitude: true,
-    deletedAt: true,
+    desactivatedAt: true,
     createdAt: true,
     updatedAt: true,
     country: {
@@ -93,7 +95,7 @@ export class PrismaCityRepository implements CityRepository {
         iso2: true,
         iso3: true,
         slug: true,
-        deletedAt: true,
+        desactivatedAt: true,
         createdAt: true,
         updatedAt: true,
         continent: {
@@ -101,7 +103,7 @@ export class PrismaCityRepository implements CityRepository {
             id: true,
             code: true,
             name: true,
-            deletedAt: true,
+            desactivatedAt: true,
             createdAt: true,
             updatedAt: true,
           },
@@ -112,38 +114,68 @@ export class PrismaCityRepository implements CityRepository {
 
   async create(_city: CityEntity): Promise<CityEntity> {
     const p = _city.toPrimitives();
-    const row = await this.prisma.city.create({
-      data: {
-        countryId: p.country.id,
-        name: p.name,
-        slug: p.slug,
-        latitude: p.latitude,
-        longitude: p.longitude,
-        deletedAt: p.deletedAt,
-      },
-      select: this.baseSelect,
+    const row = await this.prisma.$transaction(async (tx) => {
+      await tx.city.create({
+        data: {
+          id: p.id,
+          countryId: p.country.id,
+          name: p.name,
+          slug: p.slug,
+          latitude: p.latitude,
+          longitude: p.longitude,
+          desactivatedAt: p.desactivatedAt,
+        },
+      });
+      await tx.$executeRaw`
+        UPDATE "City"
+        SET "location" = ST_SetSRID(ST_MakePoint("longitude", "latitude"), 4326)::geography
+        WHERE "id" = ${p.id}
+      `;
+      return tx.city.findUnique({
+        where: { id: p.id },
+        select: this.baseSelect,
+      });
     });
+    if (!row) {
+      throw new Error('City creation failed.');
+    }
     return this.toDomain(row as CityRow);
   }
 
   async update(_city: CityEntity): Promise<CityEntity> {
     const p = _city.toPrimitives();
-    const row = await this.prisma.city.update({
-      where: { id: p.id },
-      data: {
-        countryId: p.country.id,
-        name: p.name,
-        slug: p.slug,
-        latitude: p.latitude,
-        longitude: p.longitude,
-        deletedAt: p.deletedAt,
-      },
-      select: this.baseSelect,
+    const row = await this.prisma.$transaction(async (tx) => {
+      await tx.city.update({
+        where: { id: p.id },
+        data: {
+          countryId: p.country.id,
+          name: p.name,
+          slug: p.slug,
+          latitude: p.latitude,
+          longitude: p.longitude,
+          desactivatedAt: p.desactivatedAt,
+        },
+      });
+      await tx.$executeRaw`
+        UPDATE "City"
+        SET "location" = ST_SetSRID(ST_MakePoint("longitude", "latitude"), 4326)::geography
+        WHERE "id" = ${p.id}
+      `;
+      return tx.city.findUnique({
+        where: { id: p.id },
+        select: this.baseSelect,
+      });
     });
+    if (!row) {
+      throw new Error('City update failed.');
+    }
     return this.toDomain(row as CityRow);
   }
 
   async findById(id: string): Promise<CityEntity | null> {
+    if (id === PrismaCityRepository.NULL_UUID) {
+      return null;
+    }
     const row = await this.prisma.city.findUnique({
       where: { id },
       select: this.baseSelect,
@@ -153,7 +185,10 @@ export class PrismaCityRepository implements CityRepository {
 
   async list(activeOnly: boolean): Promise<CityEntity[]> {
     const rows = await this.prisma.city.findMany({
-      where: activeOnly ? { deletedAt: null } : undefined,
+      where: {
+        id: { not: PrismaCityRepository.NULL_UUID },
+        ...(activeOnly ? { desactivatedAt: null } : {}),
+      },
       orderBy: { name: 'asc' },
       select: this.baseSelect,
     });
@@ -163,8 +198,9 @@ export class PrismaCityRepository implements CityRepository {
   async findByCountryId(countryId: string, activeOnly: boolean): Promise<CityEntity[]> {
     const rows = await this.prisma.city.findMany({
       where: {
+        id: { not: PrismaCityRepository.NULL_UUID },
         countryId,
-        ...(activeOnly ? { deletedAt: null } : {}),
+        ...(activeOnly ? { desactivatedAt: null } : {}),
       },
       orderBy: { name: 'asc' },
       select: this.baseSelect,
@@ -175,6 +211,7 @@ export class PrismaCityRepository implements CityRepository {
   async findByNameInsensitive(countryId: string, name: string): Promise<CityEntity | null> {
     const row = await this.prisma.city.findFirst({
       where: {
+        id: { not: PrismaCityRepository.NULL_UUID },
         countryId,
         name: { equals: name.trim(), mode: 'insensitive' },
       },
@@ -186,11 +223,76 @@ export class PrismaCityRepository implements CityRepository {
   async findBySlug(countryId: string, slug: string): Promise<CityEntity | null> {
     const row = await this.prisma.city.findFirst({
       where: {
+        id: { not: PrismaCityRepository.NULL_UUID },
         countryId,
         slug: slug.trim().toLowerCase(),
       },
       select: this.baseSelect,
     });
     return row ? this.toDomain(row as CityRow) : null;
+  }
+
+  async deleteById(id: string): Promise<void> {
+    const nullId = PrismaCityRepository.NULL_UUID;
+    if (id === nullId) {
+      return;
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.continent.upsert({
+        where: { id: nullId },
+        create: {
+          id: nullId,
+          code: 'NONE',
+          name: 'Aucun continent',
+        },
+        update: {},
+      });
+
+      await tx.country.upsert({
+        where: { id: nullId },
+        create: {
+          id: nullId,
+          continentId: nullId,
+          iso2: 'ZZ',
+          iso3: 'ZZZ',
+          name: 'Aucun pays',
+          slug: 'no-country',
+        },
+        update: {},
+      });
+
+      await tx.city.upsert({
+        where: { id: nullId },
+        create: {
+          id: nullId,
+          countryId: nullId,
+          name: 'Aucune ville',
+          slug: 'no-city',
+          latitude: 0,
+          longitude: 0,
+        },
+        update: {},
+      });
+
+      const postsToRelink = await tx.post.findMany({
+        where: { cityId: id },
+        select: { id: true },
+      });
+
+      for (const post of postsToRelink) {
+        await tx.post.update({
+          where: { id: post.id },
+          data: {
+            cityId: nullId,
+            // Evite les collisions sur la contrainte unique (cityId, slug)
+            // quand plusieurs villes supprimées contiennent le meme slug.
+            slug: `orphan-${post.id}`,
+          },
+        });
+      }
+
+      await tx.city.delete({ where: { id } });
+    });
   }
 }

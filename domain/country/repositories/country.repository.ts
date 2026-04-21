@@ -10,6 +10,7 @@ export interface CountryRepository {
   findByIso3(iso3: string): Promise<CountryEntity | null>;
   findBySlug(slug: string): Promise<CountryEntity | null>;
   findByNameInsensitive(name: string): Promise<CountryEntity | null>;
+  deleteById(id: string): Promise<void>;
   list(
     mode: 'active' | 'inactive' | 'all',
     includeGeometry: boolean,

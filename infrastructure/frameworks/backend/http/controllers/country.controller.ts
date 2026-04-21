@@ -1,9 +1,14 @@
-import { Body, Controller, Get, NotFoundException, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, ForbiddenException, Get, Inject, NotFoundException, Param, Patch, Post, Query, Req } from '@nestjs/common';
+import type { Request } from 'express';
+import { TOKEN_SIGNER_PORT } from '@/application/auth/ports/di-tokens';
+import type { TokenSignerPort } from '@/application/auth/ports/token-signer.port';
 import { CheckCountryDuplicateUseCase } from '@application/country/use-cases/check-country-duplicate.use-case';
 import { CreateCountryUseCase } from '@application/country/use-cases/create-country.use-case';
+import { DeleteCountryUseCase } from '@application/country/use-cases/delete-country.use-case';
 import { GetCountryByIdUseCase } from '@application/country/use-cases/get-country-by-id.use-case';
 import { ListCountriesUseCase } from '@application/country/use-cases/list-countries.use-case';
 import { UpdateCountryUseCase } from '@application/country/use-cases/update-country.use-case';
+import { getRoleFromRequest } from '@/infrastructure/frameworks/backend/http/auth/access-token-role.util';
 import { success } from '@/infrastructure/frameworks/backend/nest/response.presenter';
 import { toHttpError } from '@/infrastructure/frameworks/backend/http/errors';
 import {
@@ -20,10 +25,20 @@ export class CountryController {
     private readonly listCountriesUseCase: ListCountriesUseCase,
     private readonly checkCountryDuplicateUseCase: CheckCountryDuplicateUseCase,
     private readonly updateCountryUseCase: UpdateCountryUseCase,
+    private readonly deleteCountryUseCase: DeleteCountryUseCase,
+    @Inject(TOKEN_SIGNER_PORT)
+    private readonly tokenSigner: TokenSignerPort,
   ) {}
+
+  private assertAdmin(req: Request): void {
+    if (getRoleFromRequest(this.tokenSigner, req) !== 'ADMIN') {
+      throw new ForbiddenException('Only ADMIN can mutate data.');
+    }
+  }
 
   @Post()
   async create(
+    @Req() req: Request,
     @Body()
     body: {
       name: string;
@@ -37,6 +52,7 @@ export class CountryController {
       } | null;
     },
   ) {
+    this.assertAdmin(req);
     try {
       const country = await this.createCountryUseCase.execute({
         name: body.name,
@@ -123,6 +139,7 @@ export class CountryController {
 
   @Patch(':id')
   async update(
+    @Req() req: Request,
     @Param('id') id: string,
     @Body()
     body: {
@@ -131,13 +148,14 @@ export class CountryController {
       iso3?: string | null;
       slug?: string;
       continentId?: string;
-      deletedAt?: string | null;
+      desactivatedAt?: string | null;
       geometry?: {
         type: 'Polygon' | 'MultiPolygon';
         coordinate: unknown;
       } | null;
     },
   ) {
+    this.assertAdmin(req);
     try {
       return await this.updateCountryUseCase.execute({
         id,
@@ -146,9 +164,20 @@ export class CountryController {
         iso3: body.iso3,
         slug: body.slug,
         continentId: body.continentId,
-        deletedAt: body.deletedAt,
+        desactivatedAt: body.desactivatedAt,
         geometry: body.geometry,
       });
+    } catch (error) {
+      toHttpError(error);
+    }
+  }
+
+  @Delete(':id')
+  async delete(@Req() req: Request, @Param('id') id: string) {
+    this.assertAdmin(req);
+    try {
+      await this.deleteCountryUseCase.execute(id);
+      return success({ id });
     } catch (error) {
       toHttpError(error);
     }
