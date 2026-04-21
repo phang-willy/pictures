@@ -1,8 +1,4 @@
-import type {
-  Feature,
-  FeatureCollection,
-  Geometry,
-} from "geojson";
+import type { Feature, FeatureCollection, Geometry } from "geojson";
 
 export type GeoJsonGeometry = Geometry;
 
@@ -12,10 +8,7 @@ export type CountryFeatureProperties = {
   countrySlug?: string;
 };
 
-export type CountryFeature = Feature<
-  GeoJsonGeometry,
-  CountryFeatureProperties
->;
+export type CountryFeature = Feature<GeoJsonGeometry, CountryFeatureProperties>;
 
 export type CountryFeatureCollection = FeatureCollection<
   GeoJsonGeometry,

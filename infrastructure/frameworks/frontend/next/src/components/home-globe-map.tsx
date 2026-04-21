@@ -25,15 +25,14 @@ const COUNTRY_SHAPES_FILL_LAYER_ID = "countries-shapes-fill";
 const COUNTRY_SHAPES_OUTLINE_LAYER_ID = "countries-shapes-outline";
 
 function parseCityListPayload(data: unknown): ApiCity[] {
-  const rawItems =
-    Array.isArray(data)
-      ? data
-      : data &&
-          typeof data === "object" &&
-          "items" in data &&
-          Array.isArray((data as { items?: unknown }).items)
-        ? (data as { items: unknown[] }).items
-        : null;
+  const rawItems = Array.isArray(data)
+    ? data
+    : data &&
+        typeof data === "object" &&
+        "items" in data &&
+        Array.isArray((data as { items?: unknown }).items)
+      ? (data as { items: unknown[] }).items
+      : null;
   if (!rawItems) {
     return [];
   }
@@ -91,15 +90,14 @@ function parseCityListPayload(data: unknown): ApiCity[] {
 }
 
 function parseCountryListItems(data: unknown): ApiCountry[] {
-  const rawItems =
-    Array.isArray(data)
-      ? data
-      : data &&
-          typeof data === "object" &&
-          "items" in data &&
-          Array.isArray((data as { items?: unknown }).items)
-        ? (data as { items: unknown[] }).items
-        : null;
+  const rawItems = Array.isArray(data)
+    ? data
+    : data &&
+        typeof data === "object" &&
+        "items" in data &&
+        Array.isArray((data as { items?: unknown }).items)
+      ? (data as { items: unknown[] }).items
+      : null;
   if (!rawItems) {
     return [];
   }
@@ -340,7 +338,12 @@ export function HomeGlobeMap() {
     }
 
     const initialStyle = openfreemapStyleForTheme(resolvedTheme);
-    const map = maplibreMapNew({ container, initialStyle, center: [2.3522, 48.8566], zoom: 2 });
+    const map = maplibreMapNew({
+      container,
+      initialStyle,
+      center: [2.3522, 48.8566],
+      zoom: 2,
+    });
     mapRef.current = map;
     appliedStyleUrlRef.current = initialStyle;
     const cityMarkers = cityMarkersRef.current;
@@ -618,7 +621,10 @@ export function HomeGlobeMap() {
       if (countriesGeoJsonRef.current) {
         const geojson = countriesGeoJsonRef.current;
         runWhenStyleMutationsSafe(map, () => {
-          if (!countriesGeoJsonRef.current || countriesGeoJsonRef.current !== geojson) {
+          if (
+            !countriesGeoJsonRef.current ||
+            countriesGeoJsonRef.current !== geojson
+          ) {
             return;
           }
           addCountryLayers(map, countriesGeoJsonRef.current);

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
@@ -17,12 +17,8 @@ import {
 import type { core } from "zod";
 import { loginFormSchema } from "@/modules/auth/forms/auth.form.schemas";
 import { apiUrl } from "@/lib/api";
-import {
-  consumePendingAuthFeedback,
-  stashAuthFeedbackForNextPage,
-} from "@/lib/auth-feedback-handoff";
 import { setTwoFactorLoginToken } from "@/lib/auth-session";
-import { useAuthFeedback } from "@/components/auth-floating-provider";
+import { toast } from "sonner";
 
 type FormSubmitEvent = Parameters<
   NonNullable<React.ComponentProps<"form">["onSubmit"]>
@@ -30,15 +26,8 @@ type FormSubmitEvent = Parameters<
 
 const LoginPage = () => {
   const router = useRouter();
-  const { notify } = useAuthFeedback();
   const [showPassword, setShowPassword] = useState(false);
 
-  useEffect(() => {
-    const pending = consumePendingAuthFeedback();
-    if (pending) {
-      notify(pending.variant, pending.message);
-    }
-  }, [notify]);
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState<{ email?: string; password?: string }>(
     {},
@@ -74,8 +63,7 @@ const LoginPage = () => {
         password: passwordError,
       });
       const parts = [emailError, passwordError].filter(Boolean) as string[];
-      notify(
-        "destructive",
+      toast.error(
         parts.length > 0
           ? parts.join(" ")
           : "Veuillez corriger les champs du formulaire.",
@@ -100,8 +88,7 @@ const LoginPage = () => {
       };
 
       if (!response.ok) {
-        notify(
-          "destructive",
+        toast.error(
           payload.message ?? "Impossible de contacter le serveur, réessayez.",
         );
         return;
@@ -112,10 +99,7 @@ const LoginPage = () => {
           setErrors({
             email: payload.message ?? "Veuillez vérifier vos identifiants.",
           });
-          notify(
-            "destructive",
-            payload.message ?? "Veuillez vérifier vos identifiants.",
-          );
+          toast.error(payload.message ?? "Veuillez vérifier vos identifiants.");
           return;
         }
 
@@ -123,16 +107,12 @@ const LoginPage = () => {
           setErrors({
             password: payload.message ?? "Veuillez vérifier vos identifiants.",
           });
-          notify(
-            "destructive",
-            payload.message ?? "Veuillez vérifier vos identifiants.",
-          );
+          toast.error(payload.message ?? "Veuillez vérifier vos identifiants.");
           return;
         }
 
-        notify(
-          "destructive",
-          payload.message ?? "Impossible de se connecter, réessayez.",
+        toast.error(
+          payload.message ?? "Impossible de se connecter, veuillez réessayer.",
         );
         return;
       }
@@ -142,19 +122,15 @@ const LoginPage = () => {
         typeof payload.twoFactorToken !== "string" ||
         !payload.twoFactorToken
       ) {
-        notify("destructive", "Réponse inattendue du serveur.");
+        toast.error("Réponse inattendue du serveur.");
         return;
       }
 
-      stashAuthFeedbackForNextPage({
-        variant: "success",
-        message: "Un code de vérification vous a été envoyé par e-mail.",
-      });
+      toast.success("Un code de vérification vous a été envoyé par e-mail.");
       setTwoFactorLoginToken(payload.twoFactorToken);
       router.push("/2auth");
     } catch {
-      notify(
-        "destructive",
+      toast.error(
         "Erreur réseau, veuillez vérifier votre connexion puis réessayer.",
       );
     } finally {

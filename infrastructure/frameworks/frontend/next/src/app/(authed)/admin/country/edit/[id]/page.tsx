@@ -1,8 +1,15 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import { serverFetchApiItem, serverFetchApiItems, toCookieHeader } from "@/lib/api";
-import type { ContinentOption, CountryHttpDetail } from "@/types/admin-country.types";
+import {
+  serverFetchApiItem,
+  serverFetchApiItems,
+  toCookieHeader,
+} from "@/lib/api";
+import type {
+  ContinentOption,
+  CountryHttpDetail,
+} from "@/types/admin-country.types";
 import { Button } from "@/components/ui/button";
 import { CountryEditForm } from "./country-edit-form";
 import { ArrowLeftIcon } from "lucide-react";
@@ -40,14 +47,10 @@ export default async function AdminCountryEditPage({
           </Link>
         </Button>
         <h1 className="text-2xl font-semibold flex items-center gap-2">
-          Modifier :{" "}
-          <ContryFlag
-            name={country.name}
-            iso2={country.iso2}
-          />
+          Modifier : <ContryFlag name={country.name} iso2={country.iso2} />
         </h1>
       </div>
-
-      <CountryEditForm country={country} continents={continents} />    </div>
+      <CountryEditForm country={country} continents={continents} />{" "}
+    </div>
   );
 }

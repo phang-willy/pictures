@@ -81,14 +81,14 @@ export const forgotPasswordNewFormSchema = z
   .object({
     email: emailSchema,
     password: passwordSchema,
-    confirmPassword: z.string().min(1, 'Confirme ton mot de passe'),
+    confirmPassword: z.string().min(1, "Confirme ton mot de passe"),
   })
   .refine(
     (data: { email: string; password: string; confirmPassword: string }) =>
       data.password === data.confirmPassword,
     {
-      path: ['confirmPassword'],
-      message: 'Les mots de passe ne correspondent pas',
+      path: ["confirmPassword"],
+      message: "Les mots de passe ne correspondent pas",
     },
   );
 
@@ -96,14 +96,17 @@ export const changePasswordFormSchema = z
   .object({
     oldPassword: passwordSchema,
     newPassword: passwordSchema,
-    confirmPassword: z.string().min(1, 'Confirme ton mot de passe'),
+    confirmPassword: z.string().min(1, "Confirme ton mot de passe"),
   })
   .refine(
-    (data: { oldPassword: string; newPassword: string; confirmPassword: string }) =>
-      data.newPassword === data.confirmPassword,
+    (data: {
+      oldPassword: string;
+      newPassword: string;
+      confirmPassword: string;
+    }) => data.newPassword === data.confirmPassword,
     {
-      path: ['confirmPassword'],
-      message: 'Les mots de passe ne correspondent pas',
+      path: ["confirmPassword"],
+      message: "Les mots de passe ne correspondent pas",
     },
   );
 
@@ -113,5 +116,7 @@ export type TwoFactorFormValues = z.infer<typeof twoFactorFormSchema>;
 export type ForgotPasswordRequestFormValues = z.infer<
   typeof forgotPasswordRequestFormSchema
 >;
-export type ForgotPasswordNewFormValues = z.infer<typeof forgotPasswordNewFormSchema>;
+export type ForgotPasswordNewFormValues = z.infer<
+  typeof forgotPasswordNewFormSchema
+>;
 export type ChangePasswordFormValues = z.infer<typeof changePasswordFormSchema>;

@@ -6,8 +6,7 @@ import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { apiUrl } from "@/lib/api";
-import { stashAuthFeedbackForNextPage } from "@/lib/auth-feedback-handoff";
-import { useAuthFeedback } from "@/components/auth-floating-provider";
+import { toast } from "sonner";
 
 type FormSubmitEvent = Parameters<
   NonNullable<React.ComponentProps<"form">["onSubmit"]>
@@ -15,7 +14,6 @@ type FormSubmitEvent = Parameters<
 
 export function ConfirmPageClient() {
   const router = useRouter();
-  const { notify } = useAuthFeedback();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const searchParams = useSearchParams();
 
@@ -30,7 +28,7 @@ export function ConfirmPageClient() {
     const type = searchParams.get("type");
     const token = searchParams.get("token");
     if (!type || !token) {
-      notify("destructive", "Lien de confirmation invalide.");
+      toast.error("Lien de confirmation invalide.");
       return;
     }
 
@@ -49,28 +47,19 @@ export function ConfirmPageClient() {
       };
 
       if (!response.ok) {
-        notify(
-          "destructive",
-          payload.message ?? "Impossible de confirmer ton compte.",
-        );
+        toast.error(payload.message ?? "Impossible de confirmer le compte.");
         return;
       }
 
       if (payload.success === false) {
-        notify(
-          "destructive",
-          payload.message ?? "Lien de confirmation invalide ou déjà utilisé.",
-        );
+        toast.error(payload.message ?? "Impossible de confirmer le compte.");
         return;
       }
 
-      stashAuthFeedbackForNextPage({
-        variant: "success",
-        message: "Compte confirmé avec succès.",
-      });
+      toast.success("Compte confirmé avec succès.");
       router.push("/login");
     } catch {
-      notify("destructive", "Erreur réseau, réessayez.");
+      toast.error("Erreur réseau, réessayez.");
     } finally {
       setIsSubmitting(false);
     }

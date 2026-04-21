@@ -7,7 +7,12 @@ type MaplibreMapNewProps = {
 
 import maplibregl from "maplibre-gl";
 
-export function maplibreMapNew({ container, initialStyle, center, zoom }: MaplibreMapNewProps): maplibregl.Map {
+export function maplibreMapNew({
+  container,
+  initialStyle,
+  center,
+  zoom,
+}: MaplibreMapNewProps): maplibregl.Map {
   return new maplibregl.Map({
     container,
     style: initialStyle,

@@ -36,7 +36,9 @@ export function ContryFlag({
           aria-hidden
           dangerouslySetInnerHTML={{ __html: svgMarkup }}
         />
-      ) : iso2 }
+      ) : (
+        iso2
+      )}
       {show_name && name ? <span>{name}</span> : null}
     </span>
   );

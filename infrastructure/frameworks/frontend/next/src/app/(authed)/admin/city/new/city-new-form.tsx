@@ -11,7 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Field,
   FieldContent,
-  FieldDescription,
   FieldGroup,
   FieldLabel,
   FieldSet,
@@ -228,7 +227,9 @@ export function CityNewForm({
     e.preventDefault();
     setSubmitError(null);
     if (!canSubmit || latitude === null || longitude === null) {
-      setSubmitError("Renseignez tous les champs et placez un point sur la carte.");
+      setSubmitError(
+        "Renseignez tous les champs et placez un point sur la carte.",
+      );
       return;
     }
     if (!existsResult || existsFetchError) {
@@ -271,8 +272,6 @@ export function CityNewForm({
       if (data.id) {
         toast.success("Ville créée avec succès.");
         router.push(`/admin/city/view/${encodeURIComponent(data.id)}`);
-        router.refresh();
-        return;
       }
       setSubmitError("Réponse API sans identifiant ville.");
     } catch {
@@ -337,7 +336,10 @@ export function CityNewForm({
                 <FieldLabel htmlFor="new-city-country">Pays</FieldLabel>
                 <FieldContent>
                   <Select value={countryId} onValueChange={setCountryId}>
-                    <SelectTrigger id="new-city-country" className="w-full max-w-none">
+                    <SelectTrigger
+                      id="new-city-country"
+                      className="w-full max-w-none"
+                    >
                       <SelectValue placeholder="Choisir un pays" />
                     </SelectTrigger>
                     <SelectContent className="w-(--radix-select-trigger-width)">
@@ -393,10 +395,6 @@ export function CityNewForm({
         <CardContent className="space-y-4">
           <Field>
             <FieldTitle>Point unique</FieldTitle>
-            <FieldDescription>
-              Cliquez sur la carte pour placer un seul point, puis ajustez-le en le
-              déplaçant ou en cliquant ailleurs sur la carte.
-            </FieldDescription>
             <FieldContent className="space-y-2">
               <CityPointOsmEditor
                 latitude={latitude}
@@ -419,7 +417,11 @@ export function CityNewForm({
                   step="any"
                   value={latitude ?? ""}
                   onChange={(event) =>
-                    setLatitude(event.target.value === "" ? null : Number(event.target.value))
+                    setLatitude(
+                      event.target.value === ""
+                        ? null
+                        : Number(event.target.value),
+                    )
                   }
                 />
               </FieldContent>
@@ -433,7 +435,11 @@ export function CityNewForm({
                   step="any"
                   value={longitude ?? ""}
                   onChange={(event) =>
-                    setLongitude(event.target.value === "" ? null : Number(event.target.value))
+                    setLongitude(
+                      event.target.value === ""
+                        ? null
+                        : Number(event.target.value),
+                    )
                   }
                 />
               </FieldContent>
@@ -442,7 +448,9 @@ export function CityNewForm({
         </CardContent>
       </Card>
 
-      {submitError ? <p className="text-sm text-destructive">{submitError}</p> : null}
+      {submitError ? (
+        <p className="text-sm text-destructive">{submitError}</p>
+      ) : null}
 
       <div className="flex flex-wrap gap-2">
         <Button

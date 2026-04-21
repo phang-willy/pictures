@@ -3,16 +3,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AdminGeometryMap } from "@/components/admin/admin-geometry-map";
-import type { AdminGeometryPayload } from "@/components/admin/admin-geometry-map";
-import { AdminGlobePreviewMap } from "@/components/admin/admin-globe-preview-map";
-import { CountryGeometryOsmEditor } from "@/components/admin/country-geometry-osm-editor";
+import { CountryGeometryGlobeDrawEditor } from "@/components/admin/country-geometry-globe-draw-editor";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Field,
   FieldContent,
-  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -524,7 +520,7 @@ export function CountryNewForm({
           const countryLabel =
             name.trim() || englishCommonReference?.trim() || iso3Normalized;
           setGeoHint(
-            `Aucune géométrie dans world.geo.json pour « ${countryLabel} ». Veuillez dessiner le tracé du pays sur la carte à la main (outil polygone, barre d’outils en haut à gauche).`,
+            `Aucune géométrie dans world.geo.json pour « ${countryLabel} ». Veuillez dessiner le tracé du pays sur le globe (outil polygone, barre d’outils en haut à gauche).`,
           );
           return;
         }
@@ -533,7 +529,7 @@ export function CountryNewForm({
           const countryLabel =
             name.trim() || englishCommonReference?.trim() || iso3Normalized;
           setGeoHint(
-            `Type géométrique « ${gType} » non pris en charge pour « ${countryLabel} ». Dessinez un polygone ou multi-polygone sur la carte.`,
+            `Type géométrique « ${gType} » non pris en charge pour « ${countryLabel} ». Dessinez un polygone ou multi-polygone sur le globe.`,
           );
           return;
         }
@@ -555,18 +551,6 @@ export function CountryNewForm({
   const geometryJsonError = useMemo(() => {
     const parsed = parseGeometryPayload(geomType, geomJson);
     return parsed.ok ? null : parsed.error;
-  }, [geomType, geomJson]);
-
-  const mapPreviewGeometry = useMemo((): AdminGeometryPayload | null => {
-    const parsed = parseGeometryPayload(geomType, geomJson);
-    if (!parsed.ok) {
-      return null;
-    }
-    const g = parsed.geometry;
-    if (g.type !== "Polygon" && g.type !== "MultiPolygon") {
-      return null;
-    }
-    return g;
   }, [geomType, geomJson]);
 
   function onGeometryTypeSelect(next: string) {
@@ -660,9 +644,7 @@ export function CountryNewForm({
         typeof data === "object" && data && "id" in data ? String(data.id) : "";
       if (id) {
         router.push(`/admin/country/view/${encodeURIComponent(id)}`);
-        router.refresh();
         toast.success("Pays créé avec succès.");
-        return;
       }
       setSubmitError("Réponse API sans identifiant pays.");
     } catch {
@@ -679,9 +661,7 @@ export function CountryNewForm({
           <CardTitle>Identification</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {mledozeError ||
-          existsFetchError ||
-          pendingDuplicateAck?.exists ? (
+          {mledozeError || existsFetchError || pendingDuplicateAck?.exists ? (
             <div className="space-y-2 text-sm">
               {mledozeError ? (
                 <Alert variant="destructive">
@@ -791,9 +771,7 @@ export function CountryNewForm({
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="new-country-iso2">
-                  Code ISO2
-                </FieldLabel>
+                <FieldLabel htmlFor="new-country-iso2">Code ISO2</FieldLabel>
                 <FieldContent>
                   <Input
                     id="new-country-iso2"
@@ -814,9 +792,7 @@ export function CountryNewForm({
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="new-country-iso3">
-                  Code ISO3
-                </FieldLabel>
+                <FieldLabel htmlFor="new-country-iso3">Code ISO3</FieldLabel>
                 <FieldContent>
                   <Input
                     id="new-country-iso3"
@@ -879,12 +855,7 @@ export function CountryNewForm({
             </p>
           ) : null}
           <Field>
-            <FieldTitle>Type</FieldTitle>
-            <FieldDescription>
-              Les données world.geo.json sont chargées automatiquement quand le
-              code ISO3 est connu et absent de la base. Vous pouvez ajuster le
-              tracé avant enregistrement.
-            </FieldDescription>
+            <FieldTitle>Type de géométrie</FieldTitle>
             <FieldContent>
               <Select
                 value={geomType}
@@ -909,38 +880,15 @@ export function CountryNewForm({
             </FieldContent>
           </Field>
 
-          <Field>
-            <FieldTitle>Aperçu 3D</FieldTitle>
-            <FieldDescription>
-              Même rendu qu’en fiche pays après enregistrement. Le tracé se
-              modifie dans la carte plane OpenStreetMap ci‑dessous.
-            </FieldDescription>
-            <FieldContent className="mb-4">
-              {mapPreviewGeometry ? (
-                <AdminGeometryMap
-                  instanceId="country-new-geom-preview"
-                  geometry={mapPreviewGeometry}
-                  ariaLabel={`Aperçu 3D — ${name || "nouveau pays"}`}
-                />
-              ) : (
-                <AdminGlobePreviewMap ariaLabel="Globe — complétez le JSON ou dessinez pour prévisualiser le pays" />
-              )}
-            </FieldContent>
-          </Field>
-
           <Field data-invalid={geometryJsonError ? true : undefined}>
-            <FieldTitle>Tracé (édition OSM)</FieldTitle>
-            <FieldDescription>
-              Barre d&apos;outils en haut à gauche : polygone, déplacement des
-              sommets, suppression.
-            </FieldDescription>
+            <FieldTitle>Tracé sur le globe 3D</FieldTitle>
             <FieldContent className="space-y-2">
-              <CountryGeometryOsmEditor
+              <CountryGeometryGlobeDrawEditor
                 key={`new-${geomType}`}
                 geometryType={geomType}
                 geomJson={geomJson}
                 onGeomJsonChange={setGeomJson}
-                ariaLabel={`Nouveau pays — édition géométrie ${name || "pays"} sur OpenStreetMap`}
+                ariaLabel={`Nouveau pays — édition géométrie ${name || "pays"} sur le globe`}
               />
               <FieldError>{geometryJsonError}</FieldError>
             </FieldContent>

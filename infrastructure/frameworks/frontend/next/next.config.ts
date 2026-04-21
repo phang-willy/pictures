@@ -32,8 +32,7 @@ if (appName?.trim()) {
 }
 
 const allowedDevOrigins =
-  process.env.ALLOWED_DEV_ORIGINS
-    ?.split(",")
+  process.env.ALLOWED_DEV_ORIGINS?.split(",")
     .map((origin) => origin.trim())
     .filter(Boolean) ?? [];
 
@@ -49,7 +48,7 @@ const nextConfig: NextConfig = {
     externalDir: true,
   },
   /** Paquet interne ; alias explicite pour éviter les échecs de résolution (symlink file:, Docker, etc.). */
-  transpilePackages: ["@pictures/contracts"],
+  transpilePackages: ["@pictures/contracts", "@geoman-io/maplibre-geoman-free"],
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,

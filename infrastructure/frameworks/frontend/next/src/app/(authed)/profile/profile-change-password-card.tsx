@@ -9,12 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { changePasswordFormSchema } from "@/modules/auth/forms/auth.form.schemas";
 import { apiFetch } from "@/lib/api";
-import { stashAuthFeedbackForNextPage } from "@/lib/auth-feedback-handoff";
 import {
   clearTwoFactorLoginToken,
   logoutAuthSession,
 } from "@/lib/auth-session";
 import { useAuthed } from "@/app/(authed)/authed-provider";
+import { toast } from "sonner";
 
 type FormSubmitEvent = Parameters<
   NonNullable<React.ComponentProps<"form">["onSubmit"]>
@@ -114,24 +114,29 @@ export function ProfileChangePasswordCard() {
         setFormError(
           payload.message ?? "Le changement de mot de passe a échoué.",
         );
+        toast.error(
+          payload.message ?? "Le changement de mot de passe a échoué.",
+        );
         return;
       }
 
       if (payload.success !== true) {
         setFormError("Réponse inattendue du serveur.");
+        toast.error("Réponse inattendue du serveur.");
         return;
       }
 
       await logoutAuthSession();
       clearTwoFactorLoginToken();
-      stashAuthFeedbackForNextPage({
-        variant: "success",
-        message:
-          "Mot de passe modifié. Un e-mail de confirmation (avec l'adresse IP utilisée) vous a été envoyé. Reconnectez-vous avec votre nouveau mot de passe.",
-      });
+      toast.success(
+        "Mot de passe modifié. Un e-mail de confirmation (avec l'adresse IP utilisée) vous a été envoyé. Veuillez vous reconnecter avec votre nouveau mot de passe.",
+      );
       router.replace("/login");
     } catch {
       setFormError(
+        "Erreur réseau, veuillez vérifier votre connexion puis réessayer.",
+      );
+      toast.error(
         "Erreur réseau, veuillez vérifier votre connexion puis réessayer.",
       );
     } finally {

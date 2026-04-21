@@ -16,7 +16,10 @@ function adminTitle(...parts: string[]): string {
   return `${ADMIN_SEGMENT} - ${suffix}`;
 }
 
-async function fetchResourceNameById(resource: string, id: string): Promise<string | null> {
+async function fetchResourceNameById(
+  resource: string,
+  id: string,
+): Promise<string | null> {
   try {
     const response = await fetch(
       apiUrl(`/api/${resource}/${encodeURIComponent(id)}`),
@@ -96,7 +99,9 @@ export async function resolveAdminPageMetaAsync(
         action === "delete" ||
         action === "activate");
 
-    const resourceName = needsName ? await fetchResourceNameById(resource.path, id) : null;
+    const resourceName = needsName
+      ? await fetchResourceNameById(resource.path, id)
+      : null;
     const nameSuffix = resourceName ?? (id ? id.slice(0, 8) : "");
 
     if (action === "view" && id) {

@@ -138,12 +138,17 @@ export function CityAdmin() {
     setDeleteSubmitting(true);
     setDeleteError(null);
     try {
-      const res = await apiFetch(`/api/city/${encodeURIComponent(cityToDelete.id)}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ deletedAt: new Date().toISOString() }),
-      });
-      const data = (await res.json().catch(() => ({}))) as { message?: unknown };
+      const res = await apiFetch(
+        `/api/city/${encodeURIComponent(cityToDelete.id)}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ deletedAt: new Date().toISOString() }),
+        },
+      );
+      const data = (await res.json().catch(() => ({}))) as {
+        message?: unknown;
+      };
       if (!res.ok) {
         const raw = data.message;
         setDeleteError(typeof raw === "string" ? raw : `Erreur ${res.status}.`);
@@ -173,10 +178,14 @@ export function CityAdmin() {
           body: JSON.stringify({ deletedAt: null }),
         },
       );
-      const data = (await res.json().catch(() => ({}))) as { message?: unknown };
+      const data = (await res.json().catch(() => ({}))) as {
+        message?: unknown;
+      };
       if (!res.ok) {
         const raw = data.message;
-        setActivateError(typeof raw === "string" ? raw : `Erreur ${res.status}.`);
+        setActivateError(
+          typeof raw === "string" ? raw : `Erreur ${res.status}.`,
+        );
         return;
       }
       setCityToActivate(null);
@@ -230,7 +239,10 @@ export function CityAdmin() {
         refreshSignal={listsVersion}
       />
 
-      <Dialog open={cityToDelete !== null} onOpenChange={(open) => !open && setCityToDelete(null)}>
+      <Dialog
+        open={cityToDelete !== null}
+        onOpenChange={(open) => !open && setCityToDelete(null)}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Supprimer cette ville ?</DialogTitle>
@@ -240,10 +252,16 @@ export function CityAdmin() {
                 : ""}
             </DialogDescription>
           </DialogHeader>
-          {deleteError ? <p className="text-sm text-destructive">{deleteError}</p> : null}
+          {deleteError ? (
+            <p className="text-sm text-destructive">{deleteError}</p>
+          ) : null}
           <DialogFooter>
             <DialogClose asChild>
-              <Button type="button" variant="outline" disabled={deleteSubmitting}>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={deleteSubmitting}
+              >
                 Annuler
               </Button>
             </DialogClose>
@@ -259,7 +277,10 @@ export function CityAdmin() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={cityToActivate !== null} onOpenChange={(open) => !open && setCityToActivate(null)}>
+      <Dialog
+        open={cityToActivate !== null}
+        onOpenChange={(open) => !open && setCityToActivate(null)}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Réactiver cette ville ?</DialogTitle>
@@ -269,10 +290,16 @@ export function CityAdmin() {
                 : ""}
             </DialogDescription>
           </DialogHeader>
-          {activateError ? <p className="text-sm text-destructive">{activateError}</p> : null}
+          {activateError ? (
+            <p className="text-sm text-destructive">{activateError}</p>
+          ) : null}
           <DialogFooter>
             <DialogClose asChild>
-              <Button type="button" variant="outline" disabled={activateSubmitting}>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={activateSubmitting}
+              >
                 Annuler
               </Button>
             </DialogClose>

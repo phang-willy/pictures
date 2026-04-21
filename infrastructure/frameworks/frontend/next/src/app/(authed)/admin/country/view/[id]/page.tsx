@@ -69,12 +69,7 @@ export default async function AdminCountryViewPage({
             <DetailRow label="Continent" value={continentLabel} />
             <DetailRow
               label="Nom"
-              value={
-                <ContryFlag
-                  name={country.name}
-                  iso2={country.iso2}
-                />
-              }
+              value={<ContryFlag name={country.name} iso2={country.iso2} />}
             />
             <DetailRow label="Slug" value={country.slug} />
             <DetailRow label="ISO 2" value={country.iso2} />

@@ -32,7 +32,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
 
 export const DATA_TABLE_DEFAULT_PAGE_SIZE = 20;
 
@@ -157,37 +162,37 @@ export function DataTable<TData>({
             className={searchProps.className ?? "max-w-md"}
           />
         ) : null}
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground whitespace-nowrap">
-              Lignes
-            </span>
-            <Select
-              value={String(currentPageSize)}
-              onValueChange={(value) => {
-                const next = Number.parseInt(value, 10);
-                if (!Number.isFinite(next)) {
-                  return;
-                }
-                table.setPageSize(next);
-                table.setPageIndex(0);
-              }}
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground whitespace-nowrap">
+            Lignes
+          </span>
+          <Select
+            value={String(currentPageSize)}
+            onValueChange={(value) => {
+              const next = Number.parseInt(value, 10);
+              if (!Number.isFinite(next)) {
+                return;
+              }
+              table.setPageSize(next);
+              table.setPageIndex(0);
+            }}
+          >
+            <SelectTrigger
+              size="sm"
+              className="h-8 w-18"
+              aria-label="Nombre de lignes par page"
             >
-              <SelectTrigger
-                size="sm"
-                className="h-8 w-18"
-                aria-label="Nombre de lignes par page"
-              >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent position="popper">
-                {selectablePageSizes.map((n) => (
-                  <SelectItem key={n} value={String(n)}>
-                    {n}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent position="popper">
+              {selectablePageSizes.map((n) => (
+                <SelectItem key={n} value={String(n)}>
+                  {n}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       <div className="w-full">
         <Table>

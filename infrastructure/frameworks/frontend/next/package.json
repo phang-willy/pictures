@@ -7,11 +7,15 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
+    "lint:unused": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "ts-prune:raw": "ts-prune -i \"^[A-Za-z]:\\\\|[\\\\/]\\.next[\\\\/]|[\\\\/]src[\\\\/]components[\\\\/]ui[\\\\/]\" | findstr /V /R /C:\"\\\\next\\.config\\.ts:\"",
+    "ts-prune": "node ./scripts/ts-prune-report.cjs",
     "format:check": "prettier --check .",
     "format:write": "prettier --write .",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@geoman-io/maplibre-geoman-free": "^0.7.1",
     "@hookform/resolvers": "^5.2.2",
     "@next/env": "^16.2.4",
     "@pictures/contracts": "file:../../../../packages/contracts",
@@ -47,8 +51,10 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9.39.4",
     "eslint-config-next": "^16.2.2",
+    "eslint-plugin-unused-imports": "^4.4.1",
     "prettier": "3.8.1",
     "tailwindcss": "^4",
+    "ts-prune": "^0.10.3",
     "typescript": "^6.0.2"
   }
 }

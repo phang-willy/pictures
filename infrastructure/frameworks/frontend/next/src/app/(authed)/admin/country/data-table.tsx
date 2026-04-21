@@ -15,10 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ContryFlag } from "@/components/admin/country-flag";
-import {
-  ApiDataTable,
-  type LoadPageArgs,
-} from "@/components/data-table";
+import { ApiDataTable, type LoadPageArgs } from "@/components/data-table";
 import { DATA_TABLE_DEFAULT_PAGE_SIZE } from "@/components/ui/data-table";
 import type { CountryRow } from "@pictures/contracts";
 import { parsePaginatedCountryListResponse } from "@pictures/contracts";

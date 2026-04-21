@@ -8,7 +8,10 @@ import { CityNewForm } from "./city-new-form";
 
 export const dynamic = "force-dynamic";
 
-type CountryOption = Pick<CountryHttpDetail, "id" | "name" | "iso2" | "geometry">;
+type CountryOption = Pick<
+  CountryHttpDetail,
+  "id" | "name" | "iso2" | "geometry"
+>;
 
 export default async function AdminCityNewPage() {
   const jar = await cookies();

@@ -19,7 +19,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { apiUrl } from "@/lib/api";
-import { useAuthFeedback } from "@/components/auth-floating-provider";
+import { toast } from "sonner";
 
 type ForgotPageMode =
   | { kind: "request" }
@@ -288,7 +288,6 @@ function cardTitleForMode(mode: ForgotPageMode): string {
 
 export function ForgotPasswordPageClient() {
   const searchParams = useSearchParams();
-  const { notify } = useAuthFeedback();
 
   const mode = useMemo(
     () => resolveForgotPageMode(searchParams),
@@ -339,7 +338,7 @@ export function ForgotPasswordPageClient() {
     if (!parsed.success) {
       const errs = fieldErrorsFromRequestParse(parsed.error.issues);
       setRequestErrors(errs);
-      notify("destructive", errs.email ?? "Vérifiez l’adresse e-mail.");
+      toast.error(errs.email ?? "Vérifiez l'adresse e-mail saisie.");
       return;
     }
 
@@ -348,10 +347,7 @@ export function ForgotPasswordPageClient() {
       const payload = await requestForgotPasswordLink(parsed.data);
 
       if (payload.success === false) {
-        notify(
-          "destructive",
-          payload.message ?? "Une erreur est survenue, réessayez.",
-        );
+        toast.error(payload.message ?? "Une erreur est survenue, réessayez.");
         return;
       }
 
@@ -360,12 +356,9 @@ export function ForgotPasswordPageClient() {
           ? payload.message
           : "Si un compte correspond, un e-mail va vous être envoyé.";
       setRequestDoneMessage(msg);
-      notify("success", msg);
+      toast.success(msg);
     } catch {
-      notify(
-        "destructive",
-        "Erreur réseau, vérifiez votre connexion puis réessayez.",
-      );
+      toast.error("Erreur réseau, vérifiez votre connexion puis réessayez.");
     } finally {
       setIsSubmitting(false);
     }
@@ -382,8 +375,7 @@ export function ForgotPasswordPageClient() {
       const parts = [errs.email, errs.password, errs.confirmPassword].filter(
         Boolean,
       ) as string[];
-      notify(
-        "destructive",
+      toast.error(
         parts.length > 0 ? parts.join(" ") : "Vérifiez le formulaire.",
       );
       return;
@@ -411,20 +403,16 @@ export function ForgotPasswordPageClient() {
         } else if (f === "confirmPassword") {
           setResetErrors({ confirmPassword: payload.message });
         }
-        notify(
-          "destructive",
+        toast.error(
           payload.message ?? "Impossible de mettre à jour le mot de passe.",
         );
         return;
       }
 
-      notify("success", "Mot de passe mis à jour. Vous pouvez vous connecter.");
+      toast.success("Mot de passe mis à jour. Vous pouvez vous connecter.");
       setResetForm({ email: "", password: "", confirmPassword: "" });
     } catch {
-      notify(
-        "destructive",
-        "Erreur réseau, vérifiez votre connexion puis réessayez.",
-      );
+      toast.error("Erreur réseau, vérifiez votre connexion puis réessayez.");
     } finally {
       setIsSubmitting(false);
     }

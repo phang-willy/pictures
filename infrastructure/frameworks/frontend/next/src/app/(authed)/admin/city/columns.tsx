@@ -50,7 +50,8 @@ function sortHeader(label: string) {
 }
 
 function buildCityDataColumns(sortableHeaders: boolean): ColumnDef<CityRow>[] {
-  const header = (label: string) => (sortableHeaders ? sortHeader(label) : label);
+  const header = (label: string) =>
+    sortableHeaders ? sortHeader(label) : label;
 
   return [
     {
@@ -174,7 +175,8 @@ export function createDeactivatedCityColumns(
       header: sortableHeaders
         ? sortHeader("Date de désactivation")
         : "Date de désactivation",
-      cell: ({ row }) => formatDate(row.original.deletedAt, { mode: "date-hour" }),
+      cell: ({ row }) =>
+        formatDate(row.original.deletedAt, { mode: "date-hour" }),
     },
     {
       id: "actions",
@@ -192,7 +194,9 @@ export function createDeactivatedCityColumns(
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-44">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onSelect={() => handlers.onRequestReactivate(city)}>
+              <DropdownMenuItem
+                onSelect={() => handlers.onRequestReactivate(city)}
+              >
                 <span className="flex items-center gap-2">
                   <RotateCcw className="size-4" />
                   <span>Réactiver</span>

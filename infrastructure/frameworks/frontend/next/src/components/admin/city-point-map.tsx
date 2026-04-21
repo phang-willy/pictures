@@ -69,7 +69,12 @@ export function CityPointMap({
     }
 
     const initialStyle = openfreemapStyleForTheme(themeRef.current);
-    const map = maplibreMapNew({ container, initialStyle, center: [longitude, latitude], zoom: 9 });
+    const map = maplibreMapNew({
+      container,
+      initialStyle,
+      center: [longitude, latitude],
+      zoom: 9,
+    });
     mapRef.current = map;
     appliedStyleUrlRef.current = initialStyle;
 

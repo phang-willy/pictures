@@ -3,16 +3,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AdminGeometryMap } from "@/components/admin/admin-geometry-map";
 import type { AdminGeometryPayload } from "@/components/admin/admin-geometry-map";
-import { AdminGlobePreviewMap } from "@/components/admin/admin-globe-preview-map";
-import { CountryGeometryOsmEditor } from "@/components/admin/country-geometry-osm-editor";
+import { CountryGeometryGlobeDrawEditor } from "@/components/admin/country-geometry-globe-draw-editor";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Field,
   FieldContent,
-  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -28,7 +25,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { apiFetch } from "@/lib/api";
-import type { ContinentOption, CountryHttpDetail } from "@/types/admin-country.types";
+import type {
+  ContinentOption,
+  CountryHttpDetail,
+} from "@/types/admin-country.types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircleIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -191,18 +191,6 @@ export function CountryEditForm({
     return parsed.ok ? null : parsed.error;
   }, [geomType, geomJson]);
 
-  const mapPreviewGeometry = useMemo((): AdminGeometryPayload | null => {
-    const parsed = parseGeometryPayload(geomType, geomJson);
-    if (!parsed.ok) {
-      return null;
-    }
-    const g = parsed.geometry;
-    if (g.type !== "Polygon" && g.type !== "MultiPolygon") {
-      return null;
-    }
-    return g;
-  }, [geomType, geomJson]);
-
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitError(null);
@@ -216,14 +204,12 @@ export function CountryEditForm({
 
     if (!existsResult || existsFetchError) {
       setSubmitError(
-        "Vérifiez les doublons (appel API) avant d’enregistrer, ou corrigez les champs.",
+        "Vérifiez les doublons (appel API) avant de réenregistrer, ou corrigez les champs.",
       );
       return;
     }
     if (existsResult.exists) {
-      setSubmitError(
-        "Un autre pays utilise déjà ce nom, code ISO ou slug.",
-      );
+      setSubmitError("Un autre pays utilise déjà ce nom, code ISO ou slug.");
       return;
     }
 
@@ -265,7 +251,7 @@ export function CountryEditForm({
 
       setSuccess(true);
       toast.success("Modifications enregistrées avec succès.");
-      router.push(`/admin/country/view/${country.id}`);
+      router.push(`/admin/country/view/${encodeURIComponent(country.id)}`);
     } catch {
       setSubmitError("Impossible de contacter l'API.");
     } finally {
@@ -300,7 +286,8 @@ export function CountryEditForm({
               <AlertCircleIcon />
               <AlertTitle>Erreur</AlertTitle>
               <AlertDescription>
-                Impossible de vérifier les doublons. Réessayez ou reconnectez-vous.
+                Impossible de vérifier les doublons. Réessayez ou
+                reconnectez-vous.
               </AlertDescription>
             </Alert>
           ) : null}
@@ -309,8 +296,7 @@ export function CountryEditForm({
               <AlertCircleIcon />
               <AlertTitle>Conflit</AlertTitle>
               <AlertDescription className="space-y-2">
-                {existsResult.match &&
-                existsResult.match.id !== country.id ? (
+                {existsResult.match && existsResult.match.id !== country.id ? (
                   <p>
                     <strong>
                       {existsResult.match.name} ({existsResult.match.iso2}
@@ -354,9 +340,7 @@ export function CountryEditForm({
                     id="country-iso2"
                     name="iso2"
                     value={iso2}
-                    onChange={(ev) =>
-                      setiso2(ev.target.value.toUpperCase())
-                    }
+                    onChange={(ev) => setiso2(ev.target.value.toUpperCase())}
                     required
                     maxLength={2}
                     minLength={2}
@@ -372,9 +356,7 @@ export function CountryEditForm({
                     id="country-iso3"
                     name="iso3"
                     value={iso3}
-                    onChange={(ev) =>
-                      setiso3(ev.target.value.toUpperCase())
-                    }
+                    onChange={(ev) => setiso3(ev.target.value.toUpperCase())}
                     maxLength={3}
                     placeholder="Optionnel"
                     autoComplete="off"
@@ -403,7 +385,11 @@ export function CountryEditForm({
               <Field>
                 <FieldLabel htmlFor="country-continent">Continent</FieldLabel>
                 <FieldContent>
-                  <Select value={continentId} onValueChange={setContinentId} name="continentId">
+                  <Select
+                    value={continentId}
+                    onValueChange={setContinentId}
+                    name="continentId"
+                  >
                     <SelectTrigger
                       id="country-continent"
                       name="continentId"
@@ -437,14 +423,12 @@ export function CountryEditForm({
         <CardContent className="space-y-4">
           <Field>
             <FieldTitle>Type</FieldTitle>
-            <FieldDescription>
-              En mode <strong className="font-medium">Polygon</strong>, un seul
-              polygone est conservé. En mode{" "}
-              <strong className="font-medium">MultiPolygon</strong>, vous pouvez
-              en dessiner plusieurs.
-            </FieldDescription>
             <FieldContent>
-              <Select value={geomType} onValueChange={onGeometryTypeSelect} name="geomType">
+              <Select
+                value={geomType}
+                onValueChange={onGeometryTypeSelect}
+                name="geomType"
+              >
                 <SelectTrigger
                   id="country-geom-type"
                   name="geomType"
@@ -464,41 +448,15 @@ export function CountryEditForm({
             </FieldContent>
           </Field>
 
-          <Field>
-            <FieldTitle>Aperçu 3D</FieldTitle>
-            <FieldDescription>
-              Même rendu qu’en fiche pays. Le tracé se modifie dans la carte
-              plane OpenStreetMap ci‑dessous.
-            </FieldDescription>
-            <FieldContent className="mb-4">
-              {mapPreviewGeometry ? (
-                <AdminGeometryMap
-                  instanceId={`${country.id}-geom-preview`}
-                  geometry={mapPreviewGeometry}
-                  ariaLabel={`Aperçu 3D — ${name || country.name}`}
-                />
-              ) : (
-                <AdminGlobePreviewMap
-                  ariaLabel="Globe — corrigez le JSON ou dessinez pour prévisualiser"
-                />
-              )}
-            </FieldContent>
-          </Field>
-
           <Field data-invalid={geometryJsonError ? true : undefined}>
-            <FieldTitle>Tracé (édition OSM)</FieldTitle>
-            <FieldDescription>
-              Utilisez la barre d&apos;outils en haut à gauche : polygone pour
-              dessiner, crayon pour déplacer les sommets, corbeille pour
-              supprimer une forme sélectionnée.
-            </FieldDescription>
+            <FieldTitle>Tracé sur le globe 3D</FieldTitle>
             <FieldContent className="space-y-2">
-              <CountryGeometryOsmEditor
+              <CountryGeometryGlobeDrawEditor
                 key={`${country.id}-${geomType}`}
                 geometryType={geomType}
                 geomJson={geomJson}
                 onGeomJsonChange={setGeomJson}
-                ariaLabel={`Édition géométrie ${name || country.name} sur OpenStreetMap`}
+                ariaLabel={`Édition géométrie ${name || country.name} sur le globe`}
               />
               <FieldError>{geometryJsonError}</FieldError>
             </FieldContent>
