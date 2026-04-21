@@ -9,7 +9,7 @@ describe('CreateCountryUseCase', () => {
       id: 'cont-1',
       code: new ContinentCodeVo('AF'),
       name: 'Africa',
-      deletedAt: null,
+      desactivatedAt: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });

@@ -8,7 +8,8 @@ import {
   MoreHorizontal,
   PencilIcon,
   RotateCcw,
-  TrashIcon,
+  OctagonMinus,
+  TrashIcon
 } from "lucide-react";
 import { formatDate } from "@/lib/format-date";
 import { Button } from "@/components/ui/button";
@@ -114,7 +115,7 @@ function buildCountryDataColumns(
 
 export function createActiveCountryColumns(
   handlers: {
-    onRequestDelete: (country: CountryRow) => void;
+    onRequestDesactivate: (country: CountryRow) => void;
   },
   options?: { sortableHeaders?: boolean },
 ): ColumnDef<CountryRow>[] {
@@ -161,11 +162,11 @@ export function createActiveCountryColumns(
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 variant="destructive"
-                onSelect={() => handlers.onRequestDelete(country)}
+                onSelect={() => handlers.onRequestDesactivate(country)}
               >
                 <span className="flex items-center gap-2">
-                  <TrashIcon className="size-4" />
-                  <span>Supprimer</span>
+                  <OctagonMinus  className="size-4" />
+                  <span>Désactiver</span>
                 </span>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -178,7 +179,8 @@ export function createActiveCountryColumns(
 
 export function createDeactivatedCountryColumns(
   handlers: {
-    onRequestReactivate: (country: CountryRow) => void;
+    onRequestActivate: (country: CountryRow) => void;
+    onRequestDelete: (country: CountryRow) => void;
   },
   options?: { sortableHeaders?: boolean },
 ): ColumnDef<CountryRow>[] {
@@ -186,12 +188,12 @@ export function createDeactivatedCountryColumns(
   return [
     ...buildCountryDataColumns(sortableHeaders),
     {
-      accessorKey: "deletedAt",
+      accessorKey: "desactivatedAt",
       header: sortableHeaders
         ? sortHeader("Date de désactivation")
         : "Date de désactivation",
       cell: ({ row }) =>
-        formatDate(row.original.deletedAt, { mode: "date-hour" }),
+        formatDate(row.original.desactivatedAt, { mode: "date-hour" }),
     },
     {
       id: "actions",
@@ -215,11 +217,21 @@ export function createDeactivatedCountryColumns(
             <DropdownMenuContent align="end" className="w-44">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem
-                onSelect={() => handlers.onRequestReactivate(country)}
+                onSelect={() => handlers.onRequestActivate(country)}
               >
                 <span className="flex items-center gap-2">
                   <RotateCcw className="size-4" />
                   <span>Réactiver</span>
+                </span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                variant="destructive"
+                onSelect={() => void handlers.onRequestDelete(country)}
+              >
+                <span className="flex items-center gap-2">
+                  <TrashIcon className="size-4" />
+                  <span>Supprimer</span>
                 </span>
               </DropdownMenuItem>
             </DropdownMenuContent>

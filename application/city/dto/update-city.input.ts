@@ -5,5 +5,5 @@ export type UpdateCityInput = {
   slug?: string;
   latitude?: number;
   longitude?: number;
-  deletedAt?: string | null;
+  desactivatedAt?: string | null;
 };

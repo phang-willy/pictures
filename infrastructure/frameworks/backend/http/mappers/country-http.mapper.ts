@@ -19,7 +19,7 @@ export function toCountryDetailHttp(country: CountryEntity, includeGeometry: boo
     slug: data.slug,
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
-    deletedAt: data.deletedAt,
+    desactivatedAt: data.desactivatedAt,
     geometry: includeGeometry ? data.geometry : null,
   };
 }
@@ -33,7 +33,7 @@ export function toCountryListItemHttp(country: CountryEntity, includeGeometry: b
     iso3: data.iso3,
     slug: data.slug,
     continent: data.continent,
-    deletedAt: data.deletedAt,
+    desactivatedAt: data.desactivatedAt,
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
   };

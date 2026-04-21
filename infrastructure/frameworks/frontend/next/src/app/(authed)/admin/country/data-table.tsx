@@ -40,25 +40,28 @@ function parseApiErrorMessage(json: unknown, status: number): string {
 export function CountryAdmin() {
   const [listsVersion, setListsVersion] = useState(0);
 
-  const [countryToDelete, setCountryToDelete] = useState<CountryRow | null>(
+  const [countryToDesactivate, setCountryToDesactivate] = useState<CountryRow | null>(
     null,
   );
-  const [deleteSubmitting, setDeleteSubmitting] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [desactivateSubmitting, setDesactivateSubmitting] = useState(false);
+  const [desactivateError, setDesactivateError] = useState<string | null>(null);
 
   const [countryToActivate, setCountryToActivate] = useState<CountryRow | null>(
     null,
   );
   const [activateSubmitting, setActivateSubmitting] = useState(false);
   const [activateError, setActivateError] = useState<string | null>(null);
+  const [countryToDelete, setCountryToDelete] = useState<CountryRow | null>(null);
+  const [deleteSubmitting, setDeleteSubmitting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const columnsActive = useMemo(
     () =>
       createActiveCountryColumns(
         {
-          onRequestDelete: (country) => {
-            setDeleteError(null);
-            setCountryToDelete(country);
+          onRequestDesactivate: (country) => {
+            setDesactivateError(null);
+            setCountryToDesactivate(country);
           },
         },
         { sortableHeaders: true },
@@ -70,9 +73,13 @@ export function CountryAdmin() {
     () =>
       createDeactivatedCountryColumns(
         {
-          onRequestReactivate: (country) => {
+          onRequestActivate: (country) => {
             setActivateError(null);
             setCountryToActivate(country);
+          },
+          onRequestDelete: (country) => {
+            setDeleteError(null);
+            setCountryToDelete(country);
           },
         },
         { sortableHeaders: true },
@@ -125,7 +132,73 @@ export function CountryAdmin() {
     setListsVersion((v) => v + 1);
   }, []);
 
-  async function confirmSoftDelete() {
+  async function confirmDesactivate() {
+    if (!countryToDesactivate) {
+      return;
+    }
+    setDesactivateSubmitting(true);
+    setDesactivateError(null);
+    try {
+      const res = await apiFetch(
+        `/api/country/${encodeURIComponent(countryToDesactivate.id)}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ desactivatedAt: new Date().toISOString() }),
+        },
+      );
+      const data = (await res.json().catch(() => ({}))) as {
+        message?: unknown;
+      };
+      if (!res.ok) {
+        const raw = data.message;
+        const msg =
+          typeof raw === "string"
+            ? raw
+            : Array.isArray(raw)
+              ? raw.filter((m) => typeof m === "string").join(", ")
+              : `Erreur ${res.status}.`;
+        setDesactivateError(msg);
+        return;
+      }
+      setCountryToDesactivate(null);
+      bumpLists();
+    } catch {
+      setDesactivateError("Impossible de contacter l'API.");
+    } finally {
+      setDesactivateSubmitting(false);
+    }
+  }
+
+  async function confirmReactivate() {
+    if (!countryToActivate) {
+      return;
+    }
+    setActivateSubmitting(true);
+    setActivateError(null);
+    try {
+      await apiFetch(
+        `/api/country/${encodeURIComponent(countryToActivate.id)}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ desactivatedAt: null }),
+        },
+      );
+      setCountryToActivate(null);
+      bumpLists();
+    } catch {
+      setActivateError("Impossible de contacter l'API.");
+    } finally {
+      setActivateSubmitting(false);
+    }
+  }
+
+  async function confirmDelete() {
     if (!countryToDelete) {
       return;
     }
@@ -134,13 +207,7 @@ export function CountryAdmin() {
     try {
       const res = await apiFetch(
         `/api/country/${encodeURIComponent(countryToDelete.id)}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ deletedAt: new Date().toISOString() }),
-        },
+        { method: "DELETE" },
       );
       const data = (await res.json().catch(() => ({}))) as {
         message?: unknown;
@@ -164,47 +231,6 @@ export function CountryAdmin() {
       setDeleteSubmitting(false);
     }
   }
-
-  async function confirmReactivate() {
-    if (!countryToActivate) {
-      return;
-    }
-    setActivateSubmitting(true);
-    setActivateError(null);
-    try {
-      const res = await apiFetch(
-        `/api/country/${encodeURIComponent(countryToActivate.id)}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ deletedAt: null }),
-        },
-      );
-      const data = (await res.json().catch(() => ({}))) as {
-        message?: unknown;
-      };
-      if (!res.ok) {
-        const raw = data.message;
-        const msg =
-          typeof raw === "string"
-            ? raw
-            : Array.isArray(raw)
-              ? raw.filter((m) => typeof m === "string").join(", ")
-              : `Erreur ${res.status}.`;
-        setActivateError(msg);
-        return;
-      }
-      setCountryToActivate(null);
-      bumpLists();
-    } catch {
-      setActivateError("Impossible de contacter l'API.");
-    } finally {
-      setActivateSubmitting(false);
-    }
-  }
-
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between gap-3">
@@ -235,37 +261,34 @@ export function CountryAdmin() {
         />
 
         <Dialog
-          open={countryToDelete !== null}
+          open={countryToDesactivate !== null}
           onOpenChange={(open) => {
             if (!open) {
-              setCountryToDelete(null);
-              setDeleteError(null);
-              setDeleteSubmitting(false);
+              setCountryToDesactivate(null);
+              setDesactivateError(null);
+              setDesactivateSubmitting(false);
             }
           }}
         >
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Supprimer ce pays ?</DialogTitle>
+              <DialogTitle>Désactiver ce pays ?</DialogTitle>
               <DialogDescription asChild>
                 <div className="space-y-2 text-sm text-muted-foreground *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground">
-                  {countryToDelete ? (
+                  {countryToDesactivate ? (
                     <>
                       <p>
                         <span className="font-medium text-foreground flex items-center gap-0.5">
                           <ContryFlag
-                            name={countryToDelete.name}
-                            iso2={countryToDelete.iso2}
+                            name={countryToDesactivate.name}
+                            iso2={countryToDesactivate.iso2}
                             show_name
                           />
-                          <span>({countryToDelete.iso2})</span>
+                          <span>({countryToDesactivate.iso2})</span>
                         </span>
                       </p>
                       <p>
-                        <span>
-                          Ce pays sera marqué comme supprimé et ne sera plus
-                          visible dans la liste des pays actifs.
-                        </span>
+                        <span>Ce pays sera marqué comme désactivé.</span>
                       </p>
                       <p>
                         <span>
@@ -278,9 +301,9 @@ export function CountryAdmin() {
                 </div>
               </DialogDescription>
             </DialogHeader>
-            {deleteError ? (
+            {desactivateError ? (
               <p className="text-sm text-destructive" role="alert">
-                {deleteError}
+                {desactivateError}
               </p>
             ) : null}
             <DialogFooter>
@@ -288,7 +311,7 @@ export function CountryAdmin() {
                 <Button
                   type="button"
                   variant="outline"
-                  disabled={deleteSubmitting}
+                  disabled={desactivateSubmitting}
                 >
                   Annuler
                 </Button>
@@ -296,10 +319,10 @@ export function CountryAdmin() {
               <Button
                 type="button"
                 variant="destructive"
-                disabled={deleteSubmitting}
-                onClick={() => void confirmSoftDelete()}
+                disabled={desactivateSubmitting}
+                onClick={() => void confirmDesactivate()}
               >
-                {deleteSubmitting ? "Suppression…" : "Supprimer"}
+                {desactivateSubmitting ? "Désactivation…" : "Désactiver"}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -380,6 +403,75 @@ export function CountryAdmin() {
                 onClick={() => void confirmReactivate()}
               >
                 {activateSubmitting ? "Réactivation…" : "Réactiver"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={countryToDelete !== null}
+          onOpenChange={(open) => {
+            if (!open) {
+              setCountryToDelete(null);
+              setDeleteError(null);
+              setDeleteSubmitting(false);
+            }
+          }}
+        >
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Supprimer définitivement ce pays ?</DialogTitle>
+              <DialogDescription asChild>
+                <div className="space-y-2 text-sm text-muted-foreground">
+                  {countryToDelete ? (
+                    <>
+                      <p>
+                        <span className="font-medium text-foreground flex items-center gap-0.5">
+                          <ContryFlag
+                            name={countryToDelete.name}
+                            iso2={countryToDelete.iso2}
+                            show_name
+                          />
+                          <span> ({countryToDelete.iso2}) </span>
+                        </span>
+                      </p>
+                      <p>
+                        <span>
+                          Ce pays sera supprimé définitivement.
+                        </span>
+                      </p>
+                    </>
+                  ) : null}
+                  <p>
+                    <span>
+                      Cette action est irréversible.
+                    </span>
+                  </p>
+                </div>
+              </DialogDescription>
+            </DialogHeader>
+            {deleteError ? (
+              <p className="text-sm text-destructive" role="alert">
+                {deleteError}
+              </p>
+            ) : null}
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={deleteSubmitting}
+                >
+                  Annuler
+                </Button>
+              </DialogClose>
+              <Button
+                type="button"
+                variant="destructive"
+                disabled={deleteSubmitting}
+                onClick={() => void confirmDelete()}
+              >
+                {deleteSubmitting ? "Suppression…" : "Supprimer définitivement"}
               </Button>
             </DialogFooter>
           </DialogContent>

@@ -14,7 +14,7 @@ export type CountryEntityProps = {
     type: 'Polygon' | 'MultiPolygon';
     coordinate: unknown;
   } | null;
-  deletedAt: Date | null;
+  desactivatedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -59,7 +59,7 @@ export class CountryEntity {
       slug: this.props.slug.value,
       continent: this.props.continent.toPrimitives(),
       geometry: this.props.geometry,
-      deletedAt: this.props.deletedAt,
+      desactivatedAt: this.props.desactivatedAt,
       createdAt: this.props.createdAt,
       updatedAt: this.props.updatedAt,
     };

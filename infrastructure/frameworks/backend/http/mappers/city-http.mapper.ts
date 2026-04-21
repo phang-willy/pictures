@@ -9,7 +9,7 @@ export function toCityListItemHttp(city: CityEntity) {
     slug: data.slug,
     latitude: data.latitude,
     longitude: data.longitude,
-    deletedAt: data.deletedAt,
+    desactivatedAt: data.desactivatedAt,
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
   };

@@ -272,6 +272,7 @@ export function CityNewForm({
       if (data.id) {
         toast.success("Ville créée avec succès.");
         router.push(`/admin/city/view/${encodeURIComponent(data.id)}`);
+        return;
       }
       setSubmitError("Réponse API sans identifiant ville.");
     } catch {

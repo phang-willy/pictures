@@ -645,6 +645,7 @@ export function CountryNewForm({
       if (id) {
         router.push(`/admin/country/view/${encodeURIComponent(id)}`);
         toast.success("Pays créé avec succès.");
+        return;
       }
       setSubmitError("Réponse API sans identifiant pays.");
     } catch {

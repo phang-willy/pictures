@@ -3,6 +3,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { PrismaModule } from '@/infrastructure/database/config/prisma.module';
 import { CreateCountryUseCase } from '@/application/country/use-cases/create-country.use-case';
+import { DeleteCountryUseCase } from '@/application/country/use-cases/delete-country.use-case';
 import { GetCountryByIdUseCase } from '@/application/country/use-cases/get-country-by-id.use-case';
 import { ListCountriesUseCase } from '@/application/country/use-cases/list-countries.use-case';
 import { ListContinentsUseCase } from '@/application/country/use-cases/list-continents.use-case';
@@ -10,6 +11,7 @@ import { UpdateCountryUseCase } from '@/application/country/use-cases/update-cou
 import { CheckCountryDuplicateUseCase } from '@/application/country/use-cases/check-country-duplicate.use-case';
 import { CheckCityDuplicateUseCase } from '@/application/city/use-cases/check-city-duplicate.use-case';
 import { CreateCityUseCase } from '@/application/city/use-cases/create-city.use-case';
+import { DeleteCityUseCase } from '@/application/city/use-cases/delete-city.use-case';
 import { GetCityByIdUseCase } from '@/application/city/use-cases/get-city-by-id.use-case';
 import { ListCitiesUseCase } from '@/application/city/use-cases/list-cities.use-case';
 import { UpdateCityUseCase } from '@/application/city/use-cases/update-city.use-case';
@@ -109,9 +111,11 @@ import { TokenSignerModule } from '@/infrastructure/frameworks/backend/token-sig
         new UpdateCountryUseCase(repository, checkDuplicate),
     },
     { provide: GetCountryByIdUseCase, inject: [COUNTRY_REPOSITORY], useFactory: (repository: CountryRepository) => new GetCountryByIdUseCase(repository) },
+    { provide: DeleteCountryUseCase, inject: [COUNTRY_REPOSITORY], useFactory: (repository: CountryRepository) => new DeleteCountryUseCase(repository) },
     { provide: ListCountriesUseCase, inject: [COUNTRY_REPOSITORY], useFactory: (repository: CountryRepository) => new ListCountriesUseCase(repository) },
     { provide: ListCitiesUseCase, inject: [CITY_REPOSITORY], useFactory: (repository: CityRepository) => new ListCitiesUseCase(repository) },
     { provide: GetCityByIdUseCase, inject: [CITY_REPOSITORY], useFactory: (repository: CityRepository) => new GetCityByIdUseCase(repository) },
+    { provide: DeleteCityUseCase, inject: [CITY_REPOSITORY], useFactory: (repository: CityRepository) => new DeleteCityUseCase(repository) },
     { provide: CheckCityDuplicateUseCase, inject: [CITY_REPOSITORY], useFactory: (repository: CityRepository) => new CheckCityDuplicateUseCase(repository) },
     {
       provide: CreateCityUseCase,

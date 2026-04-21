@@ -8,7 +8,7 @@ export type CityEntityProps = {
   slug: CitySlugVo;
   latitude: number;
   longitude: number;
-  deletedAt: Date | null;
+  desactivatedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -40,8 +40,8 @@ export class CityEntity {
     return this.props.longitude;
   }
 
-  get deletedAt() {
-    return this.props.deletedAt;
+  get desactivatedAt() {
+    return this.props.desactivatedAt;
   }
 
   toPrimitives() {
@@ -52,7 +52,7 @@ export class CityEntity {
       slug: this.props.slug.value,
       latitude: this.props.latitude,
       longitude: this.props.longitude,
-      deletedAt: this.props.deletedAt,
+      desactivatedAt: this.props.desactivatedAt,
       createdAt: this.props.createdAt,
       updatedAt: this.props.updatedAt,
     };

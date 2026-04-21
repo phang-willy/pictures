@@ -58,17 +58,20 @@ function isApiPagination(value: unknown): value is ApiPagination {
 
 export function CityAdmin() {
   const [listsVersion, setListsVersion] = useState(0);
-  const [cityToDelete, setCityToDelete] = useState<CityRow | null>(null);
-  const [deleteSubmitting, setDeleteSubmitting] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [cityToDesactivate, setCityToDesactivate] = useState<CityRow | null>(null);
+  const [desactivateSubmitting, setDesactivateSubmitting] = useState(false);
+  const [desactivateError, setDesactivateError] = useState<string | null>(null);
   const [cityToActivate, setCityToActivate] = useState<CityRow | null>(null);
   const [activateSubmitting, setActivateSubmitting] = useState(false);
   const [activateError, setActivateError] = useState<string | null>(null);
+  const [cityToDelete, setCityToDelete] = useState<CityRow | null>(null);
+  const [deleteSubmitting, setDeleteSubmitting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const columnsActive = useMemo(
     () =>
       createActiveCityColumns(
-        { onRequestDelete: (city) => setCityToDelete(city) },
+        { onRequestDesactivate: (city) => setCityToDesactivate(city) },
         { sortableHeaders: true },
       ),
     [],
@@ -77,7 +80,10 @@ export function CityAdmin() {
   const columnsDeactivated = useMemo(
     () =>
       createDeactivatedCityColumns(
-        { onRequestReactivate: (city) => setCityToActivate(city) },
+        {
+          onRequestActivate: (city) => setCityToActivate(city),
+          onRequestDelete: (city) => setCityToDelete(city),
+        },
         { sortableHeaders: true },
       ),
     [],
@@ -131,19 +137,19 @@ export function CityAdmin() {
 
   const bumpLists = useCallback(() => setListsVersion((v) => v + 1), []);
 
-  async function confirmSoftDelete() {
-    if (!cityToDelete) {
+  async function confirmDesactivate() {
+    if (!cityToDesactivate) {
       return;
     }
-    setDeleteSubmitting(true);
-    setDeleteError(null);
+    setDesactivateSubmitting(true);
+    setDesactivateError(null);
     try {
       const res = await apiFetch(
-        `/api/city/${encodeURIComponent(cityToDelete.id)}`,
+        `/api/city/${encodeURIComponent(cityToDesactivate.id)}`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ deletedAt: new Date().toISOString() }),
+          body: JSON.stringify({ desactivatedAt: new Date().toISOString() }),
         },
       );
       const data = (await res.json().catch(() => ({}))) as {
@@ -151,19 +157,19 @@ export function CityAdmin() {
       };
       if (!res.ok) {
         const raw = data.message;
-        setDeleteError(typeof raw === "string" ? raw : `Erreur ${res.status}.`);
+        setDesactivateError(typeof raw === "string" ? raw : `Erreur ${res.status}.`);
         return;
       }
-      setCityToDelete(null);
+      setCityToDesactivate(null);
       bumpLists();
     } catch {
-      setDeleteError("Impossible de contacter l'API.");
+      setDesactivateError("Impossible de contacter l'API.");
     } finally {
-      setDeleteSubmitting(false);
+      setDesactivateSubmitting(false);
     }
   }
 
-  async function confirmReactivate() {
+  async function confirmActivate() {
     if (!cityToActivate) {
       return;
     }
@@ -175,7 +181,7 @@ export function CityAdmin() {
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ deletedAt: null }),
+          body: JSON.stringify({ desactivatedAt: null }),
         },
       );
       const data = (await res.json().catch(() => ({}))) as {
@@ -194,6 +200,39 @@ export function CityAdmin() {
       setActivateError("Impossible de contacter l'API.");
     } finally {
       setActivateSubmitting(false);
+    }
+  }
+
+  async function confirmDelete() {
+    if (!cityToDelete) {
+      return;
+    }
+    setDeleteSubmitting(true);
+    setDeleteError(null);
+    try {
+      const res = await apiFetch(`/api/city/${encodeURIComponent(cityToDelete.id)}`, {
+        method: "DELETE",
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        message?: unknown;
+      };
+      if (!res.ok) {
+        const raw = data.message;
+        const msg =
+          typeof raw === "string"
+            ? raw
+            : Array.isArray(raw)
+              ? raw.filter((m) => typeof m === "string").join(", ")
+              : `Erreur ${res.status}.`;
+        setDeleteError(msg);
+        return;
+      }
+      setCityToDelete(null);
+      bumpLists();
+    } catch {
+      setDeleteError("Impossible de contacter l'API.");
+    } finally {
+      setDeleteSubmitting(false);
     }
   }
 
@@ -240,27 +279,27 @@ export function CityAdmin() {
       />
 
       <Dialog
-        open={cityToDelete !== null}
-        onOpenChange={(open) => !open && setCityToDelete(null)}
+        open={cityToDesactivate !== null}
+        onOpenChange={(open) => !open && setCityToDesactivate(null)}
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Supprimer cette ville ?</DialogTitle>
+            <DialogTitle>Désactiver cette ville ?</DialogTitle>
             <DialogDescription>
-              {cityToDelete
-                ? `La ville « ${cityToDelete.name} » sera marquée comme supprimée.`
+              {cityToDesactivate
+                ? `La ville « ${cityToDesactivate.name} » sera marquée comme désactivée.`
                 : ""}
             </DialogDescription>
           </DialogHeader>
-          {deleteError ? (
-            <p className="text-sm text-destructive">{deleteError}</p>
+          {desactivateError ? (
+            <p className="text-sm text-destructive">{desactivateError}</p>
           ) : null}
           <DialogFooter>
             <DialogClose asChild>
               <Button
                 type="button"
                 variant="outline"
-                disabled={deleteSubmitting}
+                disabled={desactivateSubmitting}
               >
                 Annuler
               </Button>
@@ -268,10 +307,10 @@ export function CityAdmin() {
             <Button
               type="button"
               variant="destructive"
-              disabled={deleteSubmitting}
-              onClick={() => void confirmSoftDelete()}
+              disabled={desactivateSubmitting}
+              onClick={() => void confirmDesactivate()}
             >
-              {deleteSubmitting ? "Suppression…" : "Supprimer"}
+              {desactivateSubmitting ? "Désactivation…" : "Désactiver"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -306,9 +345,47 @@ export function CityAdmin() {
             <Button
               type="button"
               disabled={activateSubmitting}
-              onClick={() => void confirmReactivate()}
+              onClick={() => void confirmActivate()}
             >
               {activateSubmitting ? "Réactivation…" : "Réactiver"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={cityToDelete !== null}
+        onOpenChange={(open) => !open && setCityToDelete(null)}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Supprimer définitivement cette ville ?</DialogTitle>
+            <DialogDescription>
+              {cityToDelete
+                ? `Cette action est irréversible pour « ${cityToDelete.name} ». Les enfants ne seront pas supprimés : seul le lien sera retiré.`
+                : ""}
+            </DialogDescription>
+          </DialogHeader>
+          {deleteError ? (
+            <p className="text-sm text-destructive">{deleteError}</p>
+          ) : null}
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={deleteSubmitting}
+              >
+                Annuler
+              </Button>
+            </DialogClose>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={deleteSubmitting}
+              onClick={() => void confirmDelete()}
+            >
+              {deleteSubmitting ? "Suppression…" : "Supprimer définitivement"}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -11,13 +11,15 @@ import { PrismaService } from '@/infrastructure/database/config/prisma.service';
 
 @Injectable()
 export class PrismaCountryRepository implements CountryRepository {
+  private static readonly NULL_UUID = '00000000-0000-0000-0000-000000000000';
+
   constructor(private readonly prisma: PrismaService) {}
 
   private continentRowToDomain(row: {
     id: string;
     code: string;
     name: string;
-    deletedAt: Date | null;
+    desactivatedAt: Date | null;
     createdAt: Date;
     updatedAt: Date;
   }): ContinentEntity {
@@ -25,7 +27,7 @@ export class PrismaCountryRepository implements CountryRepository {
       id: row.id,
       code: new ContinentCodeVo(row.code),
       name: row.name,
-      deletedAt: row.deletedAt,
+      desactivatedAt: row.desactivatedAt,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     });
@@ -42,11 +44,11 @@ export class PrismaCountryRepository implements CountryRepository {
       id: string;
       code: string;
       name: string;
-      deletedAt: Date | null;
+      desactivatedAt: Date | null;
       createdAt: Date;
       updatedAt: Date;
     };
-    deletedAt: Date | null;
+    desactivatedAt: Date | null;
     createdAt: Date;
     updatedAt: Date;
     geometry?: {
@@ -70,7 +72,7 @@ export class PrismaCountryRepository implements CountryRepository {
             coordinate: row.geometry.coordinate,
           }
         : null,
-      deletedAt: row.deletedAt,
+      desactivatedAt: row.desactivatedAt,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     });
@@ -103,7 +105,7 @@ export class PrismaCountryRepository implements CountryRepository {
             id: true,
             code: true,
             name: true,
-            deletedAt: true,
+            desactivatedAt: true,
             createdAt: true,
             updatedAt: true,
           },
@@ -126,7 +128,7 @@ export class PrismaCountryRepository implements CountryRepository {
         iso3: data.iso3,
         slug: data.slug,
         continentId: data.continent.id,
-        deletedAt: data.deletedAt,
+        desactivatedAt: data.desactivatedAt,
         ...(data.geometry === null
           ? { geometry: { deleteMany: {} } }
           : data.geometry
@@ -152,7 +154,7 @@ export class PrismaCountryRepository implements CountryRepository {
             id: true,
             code: true,
             name: true,
-            deletedAt: true,
+            desactivatedAt: true,
             createdAt: true,
             updatedAt: true,
           },
@@ -166,6 +168,9 @@ export class PrismaCountryRepository implements CountryRepository {
   }
 
   async findById(id: string) {
+    if (id === PrismaCountryRepository.NULL_UUID) {
+      return null;
+    }
     const row = await this.prisma.country.findUnique({
       where: { id },
       include: {
@@ -174,7 +179,7 @@ export class PrismaCountryRepository implements CountryRepository {
             id: true,
             code: true,
             name: true,
-            deletedAt: true,
+            desactivatedAt: true,
             createdAt: true,
             updatedAt: true,
           },
@@ -203,26 +208,32 @@ export class PrismaCountryRepository implements CountryRepository {
             id: true,
             code: true,
             name: true,
-            deletedAt: true,
+            desactivatedAt: true,
             createdAt: true,
             updatedAt: true,
           },
         },
       },
     });
-    return row ? this.toDomain(row) : null;
+    if (!row || row.id === PrismaCountryRepository.NULL_UUID) {
+      return null;
+    }
+    return this.toDomain(row);
   }
 
   async findByIso3(iso3: string) {
     const row = await this.prisma.country.findFirst({
-      where: { iso3: iso3.trim().toUpperCase() },
+      where: {
+        id: { not: PrismaCountryRepository.NULL_UUID },
+        iso3: iso3.trim().toUpperCase(),
+      },
       include: {
         continent: {
           select: {
             id: true,
             code: true,
             name: true,
-            deletedAt: true,
+            desactivatedAt: true,
             createdAt: true,
             updatedAt: true,
           },
@@ -241,7 +252,32 @@ export class PrismaCountryRepository implements CountryRepository {
             id: true,
             code: true,
             name: true,
-            deletedAt: true,
+            desactivatedAt: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+      },
+    });
+    if (!row || row.id === PrismaCountryRepository.NULL_UUID) {
+      return null;
+    }
+    return this.toDomain(row);
+  }
+
+  async findByNameInsensitive(name: string) {
+    const row = await this.prisma.country.findFirst({
+      where: {
+        id: { not: PrismaCountryRepository.NULL_UUID },
+        name: { equals: name.trim(), mode: 'insensitive' },
+      },
+      include: {
+        continent: {
+          select: {
+            id: true,
+            code: true,
+            name: true,
+            desactivatedAt: true,
             createdAt: true,
             updatedAt: true,
           },
@@ -251,25 +287,43 @@ export class PrismaCountryRepository implements CountryRepository {
     return row ? this.toDomain(row) : null;
   }
 
-  async findByNameInsensitive(name: string) {
-    const row = await this.prisma.country.findFirst({
-      where: {
-        name: { equals: name.trim(), mode: 'insensitive' },
-      },
-      include: {
-        continent: {
-          select: {
-            id: true,
-            code: true,
-            name: true,
-            deletedAt: true,
-            createdAt: true,
-            updatedAt: true,
-          },
+  async deleteById(id: string): Promise<void> {
+    const nullId = PrismaCountryRepository.NULL_UUID;
+    if (id === nullId) {
+      return;
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.continent.upsert({
+        where: { id: nullId },
+        create: {
+          id: nullId,
+          code: 'NONE',
+          name: 'Aucun continent',
         },
-      },
+        update: {},
+      });
+
+      await tx.country.upsert({
+        where: { id: nullId },
+        create: {
+          id: nullId,
+          continentId: nullId,
+          iso2: 'ZZ',
+          iso3: 'ZZZ',
+          name: 'Aucun pays',
+          slug: 'no-country',
+        },
+        update: {},
+      });
+
+      await tx.city.updateMany({
+        where: { countryId: id },
+        data: { countryId: nullId },
+      });
+
+      await tx.country.delete({ where: { id } });
     });
-    return row ? this.toDomain(row) : null;
   }
 
   async list(
@@ -279,9 +333,9 @@ export class PrismaCountryRepository implements CountryRepository {
   ) {
     const modeWhere =
       mode === 'active'
-        ? { deletedAt: null }
+        ? { desactivatedAt: null }
         : mode === 'inactive'
-          ? { deletedAt: { not: null } }
+          ? { desactivatedAt: { not: null } }
           : null;
 
     const trimmed = q?.trim();
@@ -317,12 +371,9 @@ export class PrismaCountryRepository implements CountryRepository {
     const parts = [modeWhere, searchWhere].filter(
       (p): p is NonNullable<typeof p> => p != null,
     );
-    const where: Prisma.CountryWhereInput | undefined =
-      parts.length === 0
-        ? undefined
-        : parts.length === 1
-          ? parts[0]
-          : { AND: parts };
+    const where: Prisma.CountryWhereInput = {
+      AND: [{ id: { not: PrismaCountryRepository.NULL_UUID } }, ...parts],
+    };
     const rows = await this.prisma.country.findMany({
       where,
       orderBy: { name: 'asc' },
@@ -334,7 +385,7 @@ export class PrismaCountryRepository implements CountryRepository {
                   id: true,
                   code: true,
                   name: true,
-                  deletedAt: true,
+                  desactivatedAt: true,
                   createdAt: true,
                   updatedAt: true,
                 },
@@ -351,7 +402,7 @@ export class PrismaCountryRepository implements CountryRepository {
                   id: true,
                   code: true,
                   name: true,
-                  deletedAt: true,
+                  desactivatedAt: true,
                   createdAt: true,
                   updatedAt: true,
                 },
@@ -364,7 +415,10 @@ export class PrismaCountryRepository implements CountryRepository {
 
   async listContinentsForSelect() {
     return this.prisma.continent.findMany({
-      where: { deletedAt: null },
+      where: {
+        id: { not: PrismaCountryRepository.NULL_UUID },
+        desactivatedAt: null,
+      },
       orderBy: { name: 'asc' },
       select: { id: true, code: true, name: true },
     });

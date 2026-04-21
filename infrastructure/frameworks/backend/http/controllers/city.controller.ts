@@ -1,9 +1,16 @@
-import { Body, Controller, Get, NotFoundException, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, ForbiddenException, Get, Inject, NotFoundException, Param, Patch, Post, Query, Req } from '@nestjs/common';
+import type { Request } from 'express';
+import { TOKEN_SIGNER_PORT } from '@/application/auth/ports/di-tokens';
+import type { TokenSignerPort } from '@/application/auth/ports/token-signer.port';
 import { CheckCityDuplicateUseCase } from '@/application/city/use-cases/check-city-duplicate.use-case';
 import { CreateCityUseCase } from '@/application/city/use-cases/create-city.use-case';
+import { DeleteCityUseCase } from '@/application/city/use-cases/delete-city.use-case';
 import { GetCityByIdUseCase } from '@/application/city/use-cases/get-city-by-id.use-case';
 import { ListCitiesUseCase } from '@/application/city/use-cases/list-cities.use-case';
 import { UpdateCityUseCase } from '@/application/city/use-cases/update-city.use-case';
+import { COUNTRY_REPOSITORY } from '@/application/country/ports/country.tokens';
+import type { CountryRepository } from '@/domain/country/repositories/country.repository';
+import { getRoleFromRequest } from '@/infrastructure/frameworks/backend/http/auth/access-token-role.util';
 import { success } from '@/infrastructure/frameworks/backend/nest/response.presenter';
 import { toCityListItemHttp } from '@/infrastructure/frameworks/backend/http/mappers';
 import { toHttpError } from '@/infrastructure/frameworks/backend/http/errors';
@@ -17,10 +24,22 @@ export class CityController {
     private readonly listCitiesUseCase: ListCitiesUseCase,
     private readonly checkCityDuplicateUseCase: CheckCityDuplicateUseCase,
     private readonly updateCityUseCase: UpdateCityUseCase,
+    private readonly deleteCityUseCase: DeleteCityUseCase,
+    @Inject(COUNTRY_REPOSITORY)
+    private readonly countryRepository: CountryRepository,
+    @Inject(TOKEN_SIGNER_PORT)
+    private readonly tokenSigner: TokenSignerPort,
   ) {}
+
+  private assertAdmin(req: Request): void {
+    if (getRoleFromRequest(this.tokenSigner, req) !== 'ADMIN') {
+      throw new ForbiddenException('Only ADMIN can mutate data.');
+    }
+  }
 
   @Post()
   async create(
+    @Req() req: Request,
     @Body()
     body: {
       countryId: string;
@@ -30,6 +49,7 @@ export class CityController {
       longitude: number;
     },
   ) {
+    this.assertAdmin(req);
     try {
       const city = await this.createCityUseCase.execute(body);
       return success({
@@ -82,7 +102,7 @@ export class CityController {
     });
     const filteredItems =
       mode === 'inactive'
-        ? items.filter((city) => city.deletedAt !== null)
+        ? items.filter((city) => city.desactivatedAt !== null)
         : items;
     const total = filteredItems.length;
     const totalPages = Math.max(1, Math.ceil(total / perPage));
@@ -125,6 +145,7 @@ export class CityController {
 
   @Patch(':id')
   async update(
+    @Req() req: Request,
     @Param('id') id: string,
     @Body()
     body: {
@@ -133,9 +154,10 @@ export class CityController {
       slug?: string;
       latitude?: number;
       longitude?: number;
-      deletedAt?: string | null;
+      desactivatedAt?: string | null;
     },
   ) {
+    this.assertAdmin(req);
     try {
       const city = await this.updateCityUseCase.execute({
         id,
@@ -144,9 +166,20 @@ export class CityController {
         slug: body.slug,
         latitude: body.latitude,
         longitude: body.longitude,
-        deletedAt: body.deletedAt,
+        desactivatedAt: body.desactivatedAt,
       });
       return success({ item: toCityListItemHttp(city) });
+    } catch (error) {
+      toHttpError(error);
+    }
+  }
+
+  @Delete(':id')
+  async delete(@Req() req: Request, @Param('id') id: string) {
+    this.assertAdmin(req);
+    try {
+      await this.deleteCityUseCase.execute(id);
+      return success({ id });
     } catch (error) {
       toHttpError(error);
     }

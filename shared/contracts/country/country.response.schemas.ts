@@ -21,7 +21,7 @@ export const countryListItemSchema = z.object({
   slug: z.string().optional(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
-  deletedAt: z.string().nullable().optional(),
+  desactivatedAt: z.string().nullable().optional(),
   geometry: z
     .object({
       type: z.string(),
