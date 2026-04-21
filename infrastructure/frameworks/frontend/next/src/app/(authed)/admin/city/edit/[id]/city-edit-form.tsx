@@ -11,7 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Field,
   FieldContent,
-  FieldDescription,
   FieldGroup,
   FieldLabel,
   FieldSet,
@@ -256,8 +255,7 @@ export function CityEditForm({
         return;
       }
       toast.success("Modifications enregistrées avec succès.");
-      router.push(`/admin/city/view/${city.id}`);
-      router.refresh();
+      router.push(`/admin/city/view/${encodeURIComponent(city.id)}`);
     } catch {
       setSubmitError("Impossible de contacter l'API.");
     } finally {
@@ -277,7 +275,8 @@ export function CityEditForm({
               <AlertCircleIcon />
               <AlertTitle>Erreur</AlertTitle>
               <AlertDescription>
-                Impossible de vérifier les doublons. Réessayez ou reconnectez-vous.
+                Impossible de vérifier les doublons. Réessayez ou
+                reconnectez-vous.
               </AlertDescription>
             </Alert>
           ) : null}
@@ -288,9 +287,9 @@ export function CityEditForm({
               <AlertDescription className="space-y-2">
                 {existsResult.match && existsResult.match.id !== city.id ? (
                   <p>
-                    <strong>{existsResult.match.name}</strong>{" "}
-                    (slug: {existsResult.match.slug}) utilise déjà l&apos;un des
-                    champs : {existsResult.conflicts.join(", ")}.
+                    <strong>{existsResult.match.name}</strong> (slug:{" "}
+                    {existsResult.match.slug}) utilise déjà l&apos;un des champs
+                    : {existsResult.conflicts.join(", ")}.
                   </p>
                 ) : (
                   <p>
@@ -306,7 +305,10 @@ export function CityEditForm({
                 <FieldLabel htmlFor="city-country">Pays</FieldLabel>
                 <FieldContent>
                   <Select value={countryId} onValueChange={setCountryId}>
-                    <SelectTrigger id="city-country" className="w-full max-w-none">
+                    <SelectTrigger
+                      id="city-country"
+                      className="w-full max-w-none"
+                    >
                       <SelectValue placeholder="Choisir un pays" />
                     </SelectTrigger>
                     <SelectContent className="w-(--radix-select-trigger-width)">
@@ -341,7 +343,9 @@ export function CityEditForm({
                   <Input
                     id="city-slug"
                     value={slug}
-                    onChange={(event) => setSlug(slugify(event.target.value).slice(0, 150))}
+                    onChange={(event) =>
+                      setSlug(slugify(event.target.value).slice(0, 150))
+                    }
                     required
                     maxLength={150}
                     className="font-mono lowercase"
@@ -360,9 +364,6 @@ export function CityEditForm({
         <CardContent className="space-y-4">
           <Field>
             <FieldTitle>Point unique</FieldTitle>
-            <FieldDescription>
-              Cette ville garde un seul point sur la carte.
-            </FieldDescription>
             <FieldContent>
               <CityPointOsmEditor
                 latitude={latitude}
@@ -385,7 +386,11 @@ export function CityEditForm({
                   step="any"
                   value={latitude ?? ""}
                   onChange={(event) =>
-                    setLatitude(event.target.value === "" ? null : Number(event.target.value))
+                    setLatitude(
+                      event.target.value === ""
+                        ? null
+                        : Number(event.target.value),
+                    )
                   }
                 />
               </FieldContent>
@@ -399,7 +404,11 @@ export function CityEditForm({
                   step="any"
                   value={longitude ?? ""}
                   onChange={(event) =>
-                    setLongitude(event.target.value === "" ? null : Number(event.target.value))
+                    setLongitude(
+                      event.target.value === ""
+                        ? null
+                        : Number(event.target.value),
+                    )
                   }
                 />
               </FieldContent>
@@ -408,7 +417,9 @@ export function CityEditForm({
         </CardContent>
       </Card>
 
-      {submitError ? <p className="text-sm text-destructive">{submitError}</p> : null}
+      {submitError ? (
+        <p className="text-sm text-destructive">{submitError}</p>
+      ) : null}
 
       <div className="flex flex-wrap gap-2">
         <Button

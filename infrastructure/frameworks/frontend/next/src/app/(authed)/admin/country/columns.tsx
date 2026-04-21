@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import type { ColumnDef, FilterFn, HeaderContext } from "@tanstack/react-table";
+import type { ColumnDef, HeaderContext } from "@tanstack/react-table";
 import {
   ArrowUpDown,
   EyeIcon,
@@ -30,46 +30,6 @@ import type { CountryRow } from "@pictures/contracts";
 
 export type { CountryRow };
 
-export function filterCountriesBySearch(
-  rows: CountryRow[],
-  query: string,
-): CountryRow[] {
-  const search = query.trim().toLowerCase();
-  if (!search) {
-    return rows;
-  }
-
-  return rows.filter((country) => {
-    const values = [
-      country.id,
-      country.continent?.name ?? "",
-      country.name,
-      country.iso2,
-      country.iso3 ?? "",
-      formatDate(country.createdAt, { mode: "date-hour" }),
-      formatDate(country.updatedAt, { mode: "date-hour" }),
-      country.deletedAt
-        ? formatDate(country.deletedAt, { mode: "date-hour" })
-        : "",
-    ];
-    return values.some((value) => value.toLowerCase().includes(search));
-  });
-}
-
-export const countryGlobalFilterFn: FilterFn<CountryRow> = (
-  row,
-  _columnId,
-  filterValue,
-) => {
-  const q = String(filterValue ?? "")
-    .trim()
-    .toLowerCase();
-  if (!q) {
-    return true;
-  }
-  return filterCountriesBySearch([row.original], q).length > 0;
-};
-
 function sortHeader(label: string) {
   function CountryColumnSortHeader({
     column,
@@ -91,66 +51,65 @@ function sortHeader(label: string) {
   return CountryColumnSortHeader;
 }
 
-function buildCountryDataColumns(sortableHeaders: boolean): ColumnDef<CountryRow>[] {
+function buildCountryDataColumns(
+  sortableHeaders: boolean,
+): ColumnDef<CountryRow>[] {
   const header = (label: string) =>
     sortableHeaders ? sortHeader(label) : label;
 
   return [
-  {
-    accessorKey: "id",
-    header: header("ID"),
-    cell: ({ row }) => {
-      const id = row.getValue("id") as string;
-      return (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span>{id.slice(0, 10)}</span>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{id}</p>
-          </TooltipContent>
-        </Tooltip>
-      );
+    {
+      accessorKey: "id",
+      header: header("ID"),
+      cell: ({ row }) => {
+        const id = row.getValue("id") as string;
+        return (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>{id.slice(0, 10)}</span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{id}</p>
+            </TooltipContent>
+          </Tooltip>
+        );
+      },
     },
-  },
-  {
-    id: "continent",
-    accessorFn: (row) => row.continent?.name ?? "",
-    header: header("Continent"),
-    cell: ({ row }) => row.original.continent?.name ?? "-",
-  },
-  {
-    accessorKey: "name",
-    header: header("Nom"),
-    cell: ({ row }) => (
-      <ContryFlag
-        name={row.original.name}
-        iso2={row.original.iso2}
-      />
-    ),
-  },
-  {
-    accessorKey: "iso2",
-    header: header("ISO 2"),
-  },
-  {
-    accessorKey: "iso3",
-    header: header("ISO 3"),
-    cell: ({ row }) => row.original.iso3 ?? "-",
-  },
-  {
-    accessorKey: "createdAt",
-    header: header("Date de création"),
-    cell: ({ row }) =>
-      formatDate(row.original.createdAt, { mode: "date-hour" }),
-  },
-  {
-    accessorKey: "updatedAt",
-    header: header("Date de modification"),
-    cell: ({ row }) =>
-      formatDate(row.original.updatedAt, { mode: "date-hour" }),
-  },
-];
+    {
+      id: "continent",
+      accessorFn: (row) => row.continent?.name ?? "",
+      header: header("Continent"),
+      cell: ({ row }) => row.original.continent?.name ?? "-",
+    },
+    {
+      accessorKey: "name",
+      header: header("Nom"),
+      cell: ({ row }) => (
+        <ContryFlag name={row.original.name} iso2={row.original.iso2} />
+      ),
+    },
+    {
+      accessorKey: "iso2",
+      header: header("ISO 2"),
+    },
+    {
+      accessorKey: "iso3",
+      header: header("ISO 3"),
+      cell: ({ row }) => row.original.iso3 ?? "-",
+    },
+    {
+      accessorKey: "createdAt",
+      header: header("Date de création"),
+      cell: ({ row }) =>
+        formatDate(row.original.createdAt, { mode: "date-hour" }),
+    },
+    {
+      accessorKey: "updatedAt",
+      header: header("Date de modification"),
+      cell: ({ row }) =>
+        formatDate(row.original.updatedAt, { mode: "date-hour" }),
+    },
+  ];
 }
 
 export function createActiveCountryColumns(

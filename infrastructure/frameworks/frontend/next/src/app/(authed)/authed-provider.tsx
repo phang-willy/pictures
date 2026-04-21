@@ -13,15 +13,11 @@ import {
 import { notFound, usePathname, useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import {
-  consumePendingAuthFeedback,
-  stashAuthFeedbackForNextPage,
-} from "@/lib/auth-feedback-handoff";
-import {
   clearLegacyAccessTokenStorage,
   clearTwoFactorLoginToken,
   logoutAuthSession,
 } from "@/lib/auth-session";
-import { useAuthFeedback } from "@/components/auth-floating-provider";
+import { toast } from "sonner";
 
 export type AuthedUser = { email: string; role: string };
 
@@ -48,7 +44,6 @@ export function useAuthed(): AuthedContextValue {
 export function AuthedProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { notify } = useAuthFeedback();
   const [user, setUser] = useState<AuthedUser | null>(null);
   const [status, setStatus] = useState<AuthedStatus>("loading");
   const firstLoadDone = useRef(false);
@@ -122,20 +117,13 @@ export function AuthedProvider({ children }: { children: React.ReactNode }) {
     if (status !== "authenticated") {
       return;
     }
-    const pending = consumePendingAuthFeedback();
-    if (pending) {
-      notify(pending.variant, pending.message);
-    }
-  }, [status, notify]);
+  }, [status]);
 
   const logout = useCallback(() => {
     firstLoadDone.current = false;
     void logoutAuthSession().finally(() => {
       clearTwoFactorLoginToken();
-      stashAuthFeedbackForNextPage({
-        variant: "info",
-        message: "Vous êtes bien déconnecté.",
-      });
+      toast.info("Vous êtes bien déconnecté.");
       startTransition(() => {
         setUser(null);
         setStatus("unauthenticated");

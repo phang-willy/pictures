@@ -95,8 +95,7 @@ export function useApiDataTable<TData>(
   React.useEffect(() => {
     let cancelled = false;
     (async () => {
-      const searchChanged =
-        lastSuccessfulSearchRef.current !== debouncedQuery;
+      const searchChanged = lastSuccessfulSearchRef.current !== debouncedQuery;
       const pageToFetch = searchChanged ? 1 : pagination.pageIndex + 1;
 
       setLoading(true);
@@ -172,9 +171,7 @@ export function useApiDataTable<TData>(
   const pageCount = Math.max(1, meta?.total_pages ?? 1);
   const { pageIndex, pageSize: currentPageSize } = pagination;
   const fromRow =
-    total === 0 || rows.length === 0
-      ? 0
-      : pageIndex * currentPageSize + 1;
+    total === 0 || rows.length === 0 ? 0 : pageIndex * currentPageSize + 1;
   const toRow =
     total === 0 || rows.length === 0
       ? 0

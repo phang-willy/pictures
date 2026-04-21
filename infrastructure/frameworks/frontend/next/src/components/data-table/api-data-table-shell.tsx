@@ -150,10 +150,7 @@ export function ApiDataTableDataPanel<TData>({
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
-                    {flexRender(
-                      cell.column.columnDef.cell,
-                      cell.getContext(),
-                    )}
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
               </TableRow>
@@ -217,7 +214,7 @@ export function ApiDataTablePaginationBar({
                 onClick={onFirst}
                 disabled={!canPrev || loading}
                 aria-label="Première page"
-                >
+              >
                 <ChevronsLeft />
               </Button>
             </TooltipTrigger>
@@ -234,7 +231,7 @@ export function ApiDataTablePaginationBar({
                 onClick={onPrev}
                 disabled={!canPrev || loading}
                 aria-label="Page précédente"
-                >
+              >
                 <ChevronLeft />
               </Button>
             </TooltipTrigger>
@@ -251,7 +248,7 @@ export function ApiDataTablePaginationBar({
                 onClick={onNext}
                 disabled={!canNext || loading}
                 aria-label="Page suivante"
-                >
+              >
                 <ChevronRight />
               </Button>
             </TooltipTrigger>
@@ -268,7 +265,7 @@ export function ApiDataTablePaginationBar({
                 onClick={onLast}
                 disabled={!canNext || loading}
                 aria-label="Dernière page"
-                >
+              >
                 <ChevronsRight />
               </Button>
             </TooltipTrigger>

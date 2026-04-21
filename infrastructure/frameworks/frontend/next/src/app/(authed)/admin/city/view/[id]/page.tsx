@@ -64,18 +64,31 @@ export default async function AdminCityViewPage({
         <CardContent>
           <dl>
             <DetailRow label="ID" value={city.id} />
-            <DetailRow label="Pays" value={
-              <ContryFlag name={city.country.name} iso2={city.country.iso2} />
-            } />
+            <DetailRow
+              label="Pays"
+              value={
+                <ContryFlag name={city.country.name} iso2={city.country.iso2} />
+              }
+            />
             <DetailRow label="Nom" value={city.name} />
             <DetailRow label="Slug" value={city.slug} />
             <DetailRow label="Latitude" value={city.latitude.toFixed(6)} />
             <DetailRow label="Longitude" value={city.longitude.toFixed(6)} />
-            <DetailRow label="Créé le" value={formatDate(city.createdAt, { mode: "date-hour" })} />
-            <DetailRow label="Mis à jour le" value={formatDate(city.updatedAt, { mode: "date-hour" })} />
+            <DetailRow
+              label="Créé le"
+              value={formatDate(city.createdAt, { mode: "date-hour" })}
+            />
+            <DetailRow
+              label="Mis à jour le"
+              value={formatDate(city.updatedAt, { mode: "date-hour" })}
+            />
             <DetailRow
               label="Supprimé le"
-              value={city.deletedAt ? formatDate(city.deletedAt, { mode: "date-hour" }) : "-"}
+              value={
+                city.deletedAt
+                  ? formatDate(city.deletedAt, { mode: "date-hour" })
+                  : "-"
+              }
             />
           </dl>
         </CardContent>

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { registerFormSchema } from "@/modules/auth/forms/auth.form.schemas";
 import { apiUrl } from "@/lib/api";
-import { useAuthFeedback } from "@/components/auth-floating-provider";
+import { toast } from "sonner";
 
 type FormSubmitEvent = Parameters<
   NonNullable<React.ComponentProps<"form">["onSubmit"]>
@@ -35,7 +35,6 @@ function summarizeZodIssues(messages: string[]): string {
 }
 
 const RegisterPage = () => {
-  const { notify } = useAuthFeedback();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [form, setForm] = useState({
@@ -77,7 +76,7 @@ const RegisterPage = () => {
         messages.push(issue.message);
       }
       setErrors(nextErrors);
-      notify("destructive", summarizeZodIssues(messages));
+      toast.error(summarizeZodIssues(messages));
       return;
     }
 
@@ -100,16 +99,16 @@ const RegisterPage = () => {
       };
 
       if (!response.ok) {
-        notify(
-          "destructive",
-          payload.message ?? "Impossible de contacter le serveur, réessayez.",
+        toast.error(
+          payload.message ??
+            "Impossible de contacter le serveur, veuillez réessayer.",
         );
         return;
       }
 
       if (payload.success === false) {
         if (payload.field === "email") {
-          notify("destructive", payload.message ?? DUPLICATE_EMAIL_MESSAGE);
+          toast.error(payload.message ?? DUPLICATE_EMAIL_MESSAGE);
           return;
         }
 
@@ -118,29 +117,27 @@ const RegisterPage = () => {
           payload.field === "confirmPassword"
         ) {
           setErrors({ [payload.field]: payload.message ?? "Champ invalide" });
-          notify("destructive", payload.message ?? "Une erreur est survenue.");
+          toast.error(payload.message ?? "Une erreur est survenue.");
           return;
         }
 
-        notify(
-          "destructive",
-          payload.message ?? "Impossible de créer le compte, réessayez.",
+        toast.error(
+          payload.message ??
+            "Impossible de créer le compte, veuillez réessayer.",
         );
         return;
       }
 
       if (payload.success !== true) {
-        notify("destructive", "Réponse inattendue du serveur.");
+        toast.error("Réponse inattendue du serveur.");
         return;
       }
 
-      notify(
-        "success",
+      toast.success(
         "Inscription enregistrée. Consultez vos e-mails pour confirmer votre compte avant de vous connecter.",
       );
     } catch {
-      notify(
-        "destructive",
+      toast.error(
         "Erreur réseau, veuillez vérifier votre connexion puis réessayer.",
       );
     } finally {

@@ -15,14 +15,10 @@ import { twoFactorFormSchema } from "@/modules/auth/forms/auth.form.schemas";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { apiFetch } from "@/lib/api";
 import {
-  consumePendingAuthFeedback,
-  stashAuthFeedbackForNextPage,
-} from "@/lib/auth-feedback-handoff";
-import {
   clearTwoFactorLoginToken,
   getTwoFactorLoginToken,
 } from "@/lib/auth-session";
-import { useAuthFeedback } from "@/components/auth-floating-provider";
+import { toast } from "sonner";
 
 type FormSubmitEvent = Parameters<
   NonNullable<React.ComponentProps<"form">["onSubmit"]>
@@ -30,7 +26,6 @@ type FormSubmitEvent = Parameters<
 
 const TwoAuthPage = () => {
   const router = useRouter();
-  const { notify } = useAuthFeedback();
   const [code, setCode] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -40,11 +35,7 @@ const TwoAuthPage = () => {
       router.replace("/login");
       return;
     }
-    const pending = consumePendingAuthFeedback();
-    if (pending) {
-      notify(pending.variant, pending.message);
-    }
-  }, [router, notify]);
+  }, [router]);
 
   const handleSubmit = async (event: FormSubmitEvent) => {
     event.preventDefault();
@@ -54,13 +45,13 @@ const TwoAuthPage = () => {
       const codeError = parsed.error.issues.find(
         (issue: core.$ZodIssue) => issue.path[0] === "code",
       )?.message;
-      notify("destructive", codeError ?? "Code invalide.");
+      toast.error(codeError ?? "Code invalide.");
       return;
     }
 
     const twoFactorToken = getTwoFactorLoginToken();
     if (!twoFactorToken) {
-      notify("destructive", "Session expirée. Reconnectez-vous.");
+      toast.error("Session expirée. Reconnectez-vous.");
       router.replace("/login");
       return;
     }
@@ -81,31 +72,27 @@ const TwoAuthPage = () => {
       };
 
       if (!response.ok) {
-        notify(
-          "destructive",
+        toast.error(
           payload.message ?? "Impossible de contacter le serveur, réessayez.",
         );
         return;
       }
 
       if (payload.success === false) {
-        notify("destructive", payload.message ?? "Code invalide ou expiré.");
+        toast.error(payload.message ?? "Code invalide ou expiré.");
         return;
       }
 
       if (payload.success !== true) {
-        notify("destructive", "Réponse inattendue du serveur.");
+        toast.error("Réponse inattendue du serveur.");
         return;
       }
 
       clearTwoFactorLoginToken();
-      stashAuthFeedbackForNextPage({
-        variant: "success",
-        message: "Connexion validée.",
-      });
+      toast.success("Connexion validée.");
       router.push("/profile");
     } catch {
-      notify("destructive", "Erreur réseau, réessayez dans quelques instants.");
+      toast.error("Erreur réseau, réessayez dans quelques instants.");
     } finally {
       setIsSubmitting(false);
     }
@@ -114,7 +101,7 @@ const TwoAuthPage = () => {
   const handleResendCode = async () => {
     const twoFactorToken = getTwoFactorLoginToken();
     if (!twoFactorToken) {
-      notify("destructive", "Session expirée. Reconnectez-vous.");
+      toast.error("Session expirée. Reconnectez-vous.");
       router.replace("/login");
       return;
     }
@@ -131,29 +118,27 @@ const TwoAuthPage = () => {
       };
 
       if (!response.ok) {
-        notify(
-          "destructive",
+        toast.error(
           payload.message ?? "Impossible de contacter le serveur, réessayez.",
         );
         return;
       }
 
       if (payload.success === false) {
-        notify(
-          "destructive",
+        toast.error(
           payload.message ?? "Impossible de renvoyer le code pour le moment.",
         );
         return;
       }
 
       if (payload.success !== true) {
-        notify("destructive", "Réponse inattendue du serveur.");
+        toast.error("Réponse inattendue du serveur.");
         return;
       }
 
-      notify("success", "Un nouveau code vous a été envoyé.");
+      toast.success("Un nouveau code vous a été envoyé.");
     } catch {
-      notify("destructive", "Erreur réseau pendant le renvoi du code.");
+      toast.error("Erreur réseau pendant le renvoi du code.");
     }
   };
 
