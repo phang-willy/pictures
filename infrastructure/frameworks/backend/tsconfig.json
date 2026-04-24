@@ -6,7 +6,7 @@
     "rootDir": "../../../",
     "ignoreDeprecations": "6.0",
     "strict": true,
-    "types": ["node", "jest", "bcrypt"],
+    "types": ["node", "bcrypt"],
     "typeRoots": [
       "../../../infrastructure/frameworks/backend/node_modules/@types",
       "../../../infrastructure/frameworks/frontend/next/node_modules/@types"
@@ -20,7 +20,6 @@
     "paths": {
       "*": ["../../../*"],
       "@/*": ["../../../*"],
-      "@domains/*": ["../../../domains/*"],
       "@domain/*": ["../../../domain/*"],
       "@application/*": ["../../../application/*"],
       "@infrastructure/*": ["../../../infrastructure/*"],

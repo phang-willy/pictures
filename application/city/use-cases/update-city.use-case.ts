@@ -40,12 +40,12 @@ export class UpdateCityUseCase {
       throw new Error(`City already exists (conflicting ${duplicate.conflicts.join(', ')}).`);
     }
 
-    const nextdesactivatedAt =
-      input.desactivatedAt === undefined
-        ? existing.desactivatedAt
-        : input.desactivatedAt === null
+    const nextdeactivatedAt =
+      input.deactivatedAt === undefined
+        ? existing.deactivatedAt
+        : input.deactivatedAt === null
           ? null
-          : new Date(input.desactivatedAt);
+          : new Date(input.deactivatedAt);
 
     const nextLatitude =
       input.latitude === undefined ? existing.latitude : input.latitude;
@@ -59,7 +59,7 @@ export class UpdateCityUseCase {
       slug: new CitySlugVo(nextSlug),
       latitude: nextLatitude,
       longitude: nextLongitude,
-      desactivatedAt: nextdesactivatedAt,
+      deactivatedAt: nextdeactivatedAt,
       createdAt: existing.toPrimitives().createdAt,
       updatedAt: new Date(),
     });

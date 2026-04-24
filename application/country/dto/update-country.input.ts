@@ -6,7 +6,7 @@ export type UpdateCountryInput = {
   slug?: string;
   continentId?: string;
   /** ISO string pour soft-delete, `null` pour réactiver ; omis = inchangé */
-  desactivatedAt?: string | null;
+  deactivatedAt?: string | null;
   geometry?: {
     type: 'Polygon' | 'MultiPolygon';
     coordinate: unknown;

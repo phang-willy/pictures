@@ -1,3 +1,5 @@
+import type { CityHttpDetail } from "@/types/admin-city.types";
+
 function resolveApiBaseUrl(): string {
   if (typeof window === "undefined") {
     const serverOnly =
@@ -156,4 +158,39 @@ export async function serverFetchApiItems<T>(
     throw new Error(`Réponse invalide : items attendu (${path}).`);
   }
   return json.items as T[];
+}
+
+/**
+ * RSC : agrège toutes les pages `GET /api/city` (villes actives) jusqu’à `has_next` faux.
+ * L’API borne `per_page` à 100 ; ce helper évite de tronquer la liste dans les formulaires.
+ */
+export async function serverFetchAllActiveCities(
+  cookieHeader: string | undefined,
+): Promise<CityHttpDetail[]> {
+  const all: CityHttpDetail[] = [];
+  let page = 1;
+  const perPage = 100;
+  for (;;) {
+    const res = await serverFetchApi(
+      `/api/city?page=${page}&per_page=${perPage}`,
+      cookieHeader,
+    );
+    if (!res.ok) {
+      throw new Error(`L'API a répondu ${res.status} (liste villes).`);
+    }
+    const json = (await res.json()) as {
+      success?: boolean;
+      items?: CityHttpDetail[];
+      pagination?: { has_next?: boolean };
+    };
+    if (json.success === false || !Array.isArray(json.items)) {
+      throw new Error("Réponse invalide (liste villes).");
+    }
+    all.push(...json.items);
+    if (!json.pagination?.has_next) {
+      break;
+    }
+    page += 1;
+  }
+  return all;
 }

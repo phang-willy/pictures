@@ -48,7 +48,7 @@ export class CreateCountryUseCase {
       slug: new CountrySlugVo(candidateSlug),
       continent,
       geometry: input.geometry ?? null,
-      desactivatedAt: null,
+      deactivatedAt: null,
       createdAt: now,
       updatedAt: now,
     });

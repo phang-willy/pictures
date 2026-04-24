@@ -4,7 +4,7 @@ export type CityHttpDetail = {
   slug: string;
   latitude: number;
   longitude: number;
-  desactivatedAt: string | null;
+  deactivatedAt: string | null;
   createdAt: string;
   updatedAt: string;
   country: {

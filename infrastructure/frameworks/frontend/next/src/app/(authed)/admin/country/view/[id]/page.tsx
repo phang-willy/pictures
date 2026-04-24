@@ -85,8 +85,8 @@ export default async function AdminCountryViewPage({
             <DetailRow
               label="Désactivé le"
               value={
-                country.desactivatedAt
-                  ? formatDate(country.desactivatedAt, { mode: "date-hour" })
+                country.deactivatedAt
+                  ? formatDate(country.deactivatedAt, { mode: "date-hour" })
                   : "-"
               }
             />

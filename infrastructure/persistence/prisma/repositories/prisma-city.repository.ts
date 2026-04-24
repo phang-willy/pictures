@@ -16,7 +16,7 @@ type CityRow = {
   slug: string;
   latitude: number;
   longitude: number;
-  desactivatedAt: Date | null;
+  deactivatedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
   country: {
@@ -25,14 +25,14 @@ type CityRow = {
     iso2: string;
     iso3: string | null;
     slug: string;
-    desactivatedAt: Date | null;
+    deactivatedAt: Date | null;
     createdAt: Date;
     updatedAt: Date;
     continent: {
       id: string;
       code: string;
       name: string;
-      desactivatedAt: Date | null;
+      deactivatedAt: Date | null;
       createdAt: Date;
       updatedAt: Date;
     };
@@ -50,7 +50,7 @@ export class PrismaCityRepository implements CityRepository {
       id: row.country.continent.id,
       code: new ContinentCodeVo(row.country.continent.code),
       name: row.country.continent.name,
-      desactivatedAt: row.country.continent.desactivatedAt,
+      deactivatedAt: row.country.continent.deactivatedAt,
       createdAt: row.country.continent.createdAt,
       updatedAt: row.country.continent.updatedAt,
     });
@@ -62,7 +62,7 @@ export class PrismaCityRepository implements CityRepository {
       slug: new CountrySlugVo(row.country.slug),
       continent,
       geometry: null,
-      desactivatedAt: row.country.desactivatedAt,
+      deactivatedAt: row.country.deactivatedAt,
       createdAt: row.country.createdAt,
       updatedAt: row.country.updatedAt,
     });
@@ -73,7 +73,7 @@ export class PrismaCityRepository implements CityRepository {
       slug: new CitySlugVo(row.slug),
       latitude: row.latitude,
       longitude: row.longitude,
-      desactivatedAt: row.desactivatedAt,
+      deactivatedAt: row.deactivatedAt,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     });
@@ -85,7 +85,7 @@ export class PrismaCityRepository implements CityRepository {
     slug: true,
     latitude: true,
     longitude: true,
-    desactivatedAt: true,
+    deactivatedAt: true,
     createdAt: true,
     updatedAt: true,
     country: {
@@ -95,7 +95,7 @@ export class PrismaCityRepository implements CityRepository {
         iso2: true,
         iso3: true,
         slug: true,
-        desactivatedAt: true,
+        deactivatedAt: true,
         createdAt: true,
         updatedAt: true,
         continent: {
@@ -103,7 +103,7 @@ export class PrismaCityRepository implements CityRepository {
             id: true,
             code: true,
             name: true,
-            desactivatedAt: true,
+            deactivatedAt: true,
             createdAt: true,
             updatedAt: true,
           },
@@ -123,7 +123,7 @@ export class PrismaCityRepository implements CityRepository {
           slug: p.slug,
           latitude: p.latitude,
           longitude: p.longitude,
-          desactivatedAt: p.desactivatedAt,
+          deactivatedAt: p.deactivatedAt,
         },
       });
       await tx.$executeRaw`
@@ -153,7 +153,7 @@ export class PrismaCityRepository implements CityRepository {
           slug: p.slug,
           latitude: p.latitude,
           longitude: p.longitude,
-          desactivatedAt: p.desactivatedAt,
+          deactivatedAt: p.deactivatedAt,
         },
       });
       await tx.$executeRaw`
@@ -187,7 +187,7 @@ export class PrismaCityRepository implements CityRepository {
     const rows = await this.prisma.city.findMany({
       where: {
         id: { not: PrismaCityRepository.NULL_UUID },
-        ...(activeOnly ? { desactivatedAt: null } : {}),
+        ...(activeOnly ? { deactivatedAt: null } : {}),
       },
       orderBy: { name: 'asc' },
       select: this.baseSelect,
@@ -200,7 +200,7 @@ export class PrismaCityRepository implements CityRepository {
       where: {
         id: { not: PrismaCityRepository.NULL_UUID },
         countryId,
-        ...(activeOnly ? { desactivatedAt: null } : {}),
+        ...(activeOnly ? { deactivatedAt: null } : {}),
       },
       orderBy: { name: 'asc' },
       select: this.baseSelect,
