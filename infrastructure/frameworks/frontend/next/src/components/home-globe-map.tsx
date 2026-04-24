@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTheme } from "next-themes";
 import maplibregl from "maplibre-gl";
 import type { Map as MapLibreMap, MapLayerMouseEvent } from "maplibre-gl";
@@ -12,6 +12,7 @@ import { apiUrl } from "@/lib/api";
 import type {
   ApiCity,
   ApiCountry,
+  ApiPost,
   CountryFeature,
   CountryFeatureCollection,
   GeoJsonGeometry,
@@ -19,10 +20,17 @@ import type {
 import { maplibreMapNew } from "@/lib/maplibre-map-new";
 import { slugify } from "@/domain/utils/slugify";
 import { MaplibreMapPinHtml } from "@/components/maplibre-map-pin-html";
+import { MapHistory } from "@/components/map-history";
 
 const COUNTRY_SHAPES_SOURCE_ID = "countries-shapes-source";
 const COUNTRY_SHAPES_FILL_LAYER_ID = "countries-shapes-fill";
 const COUNTRY_SHAPES_OUTLINE_LAYER_ID = "countries-shapes-outline";
+
+const ZOOM_WORLD = 2;
+const ZOOM_CONTINENT = 3;
+const ZOOM_COUNTRY = 6;
+const ZOOM_CITY = 14;
+const ZOOM_POST = 17;
 
 function parseCityListPayload(data: unknown): ApiCity[] {
   const rawItems = Array.isArray(data)
@@ -111,6 +119,7 @@ function parseCountryListItems(data: unknown): ApiCountry[] {
       name?: unknown;
       iso2?: unknown;
       slug?: unknown;
+      continent?: { id?: unknown; code?: unknown; name?: unknown };
       geometry?: unknown;
     };
     const id = typeof candidate.id === "string" ? candidate.id : null;
@@ -128,7 +137,84 @@ function parseCountryListItems(data: unknown): ApiCountry[] {
       name,
       iso2,
       slug,
+      continent:
+        candidate.continent &&
+        typeof candidate.continent === "object" &&
+        typeof candidate.continent.id === "string" &&
+        typeof candidate.continent.code === "string" &&
+        typeof candidate.continent.name === "string"
+          ? {
+              id: candidate.continent.id,
+              code: candidate.continent.code,
+              name: candidate.continent.name,
+            }
+          : undefined,
       geometry: (candidate.geometry as ApiCountry["geometry"]) ?? null,
+    });
+  }
+  return out;
+}
+
+function parsePostListPayload(data: unknown): ApiPost[] {
+  const rawItems = Array.isArray(data)
+    ? data
+    : data &&
+        typeof data === "object" &&
+        "items" in data &&
+        Array.isArray((data as { items?: unknown }).items)
+      ? (data as { items: unknown[] }).items
+      : null;
+  if (!rawItems) {
+    return [];
+  }
+  const out: ApiPost[] = [];
+  for (const item of rawItems) {
+    if (!item || typeof item !== "object") {
+      continue;
+    }
+    const row = item as {
+      id?: unknown;
+      name?: unknown;
+      slug?: unknown;
+      latitude?: unknown;
+      longitude?: unknown;
+      cityId?: unknown;
+      city?: { id?: unknown };
+    };
+    const id = typeof row.id === "string" ? row.id : null;
+    const name = typeof row.name === "string" ? row.name : null;
+    const slug = typeof row.slug === "string" ? row.slug : null;
+    const lat =
+      typeof row.latitude === "number"
+        ? row.latitude
+        : Number.parseFloat(String(row.latitude ?? ""));
+    const lng =
+      typeof row.longitude === "number"
+        ? row.longitude
+        : Number.parseFloat(String(row.longitude ?? ""));
+    const cityId =
+      typeof row.cityId === "string"
+        ? row.cityId
+        : typeof row.city?.id === "string"
+          ? row.city.id
+          : null;
+    if (
+      !id ||
+      !name ||
+      !slug ||
+      !cityId ||
+      !Number.isFinite(lat) ||
+      !Number.isFinite(lng)
+    ) {
+      continue;
+    }
+    out.push({
+      id,
+      cityId,
+      name,
+      slug,
+      latitude: lat,
+      longitude: lng,
     });
   }
   return out;
@@ -291,6 +377,7 @@ function renderCityMarkers(
   map: MapLibreMap,
   markers: maplibregl.Marker[],
   cities: ApiCity[],
+  onCityClick: (city: ApiCity) => void,
 ): void {
   clearCityMarkers(markers);
 
@@ -303,9 +390,10 @@ function renderCityMarkers(
     element.innerHTML = MaplibreMapPinHtml(city.name);
     element.addEventListener("click", (event) => {
       event.stopPropagation();
+      onCityClick(city);
       map.flyTo({
         center: [city.longitude, city.latitude],
-        zoom: Math.max(map.getZoom(), 9),
+        zoom: Math.max(map.getZoom(), ZOOM_CITY),
         essential: true,
         duration: 900,
       });
@@ -318,14 +406,64 @@ function renderCityMarkers(
   }
 }
 
+function renderPostMarkers(
+  map: MapLibreMap,
+  markers: maplibregl.Marker[],
+  posts: ApiPost[],
+  onPostClick: (post: ApiPost) => void,
+): void {
+  clearCityMarkers(markers);
+
+  for (const post of posts) {
+    const element = document.createElement("button");
+    element.type = "button";
+    element.className = "cursor-pointer bg-transparent border-0 p-0 m-0";
+    element.style.zIndex = "25";
+    element.setAttribute("aria-label", `Post: ${post.name}`);
+    element.innerHTML = MaplibreMapPinHtml(post.name);
+    element.addEventListener("click", (event) => {
+      event.stopPropagation();
+      onPostClick(post);
+      map.flyTo({
+        center: [post.longitude, post.latitude],
+        zoom: Math.max(map.getZoom(), ZOOM_POST),
+        essential: true,
+        duration: 900,
+      });
+    });
+
+    const marker = new maplibregl.Marker({ element, anchor: "bottom" })
+      .setLngLat([post.longitude, post.latitude])
+      .addTo(map);
+    markers.push(marker);
+  }
+}
+
 export function HomeGlobeMap() {
+  const [selectedContinentName, setSelectedContinentName] = useState<
+    string | null
+  >(null);
+  const [selectedCountryName, setSelectedCountryName] = useState<string | null>(
+    null,
+  );
+  const [selectedCountryIso2, setSelectedCountryIso2] = useState<string | null>(
+    null,
+  );
+  const [selectedCityName, setSelectedCityName] = useState<string | null>(null);
+  const [selectedPostName, setSelectedPostName] = useState<string | null>(null);
+  const selectedCountryCenterRef = useRef<[number, number] | null>(null);
+  const selectedCityCenterRef = useRef<[number, number] | null>(null);
+  const selectedPostCenterRef = useRef<[number, number] | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const appliedStyleUrlRef = useRef<string | null>(null);
   const countriesGeoJsonRef = useRef<CountryFeatureCollection | null>(null);
+  const countriesByIdRef = useRef<Map<string, ApiCountry>>(new Map());
   const cityMarkersRef = useRef<maplibregl.Marker[]>([]);
+  const postMarkersRef = useRef<maplibregl.Marker[]>([]);
   const selectedCountryKeyRef = useRef<string | null>(null);
   const cityCacheRef = useRef<Map<string, ApiCity[]>>(new Map());
+  const postCacheRef = useRef<Map<string, ApiPost[]>>(new Map());
   const reapplyCityMarkersRef = useRef<(() => void) | null>(null);
   const { resolvedTheme } = useTheme();
   const mapThemeClass =
@@ -342,12 +480,14 @@ export function HomeGlobeMap() {
       container,
       initialStyle,
       center: [2.3522, 48.8566],
-      zoom: 2,
+      zoom: ZOOM_WORLD,
     });
     mapRef.current = map;
     appliedStyleUrlRef.current = initialStyle;
     const cityMarkers = cityMarkersRef.current;
+    const postMarkers = postMarkersRef.current;
     const cityCache = cityCacheRef.current;
+    const postCache = postCacheRef.current;
     let isDisposed = false;
 
     const tryAddCountryLayers = () => {
@@ -401,18 +541,38 @@ export function HomeGlobeMap() {
       const selectedKey = selectedCountryKeyRef.current;
       if (!selectedKey) {
         clearCityMarkers(cityMarkers);
+        clearCityMarkers(postMarkers);
         return;
       }
       const cached = cityCache.get(selectedKey);
       if (!cached) {
         clearCityMarkers(cityMarkers);
+        clearCityMarkers(postMarkers);
         return;
       }
-      renderCityMarkers(map, cityMarkers, cached);
+      renderCityMarkers(map, cityMarkers, cached, (city) => {
+        setSelectedCityName(city.name);
+        setSelectedPostName(null);
+        selectedCityCenterRef.current = [city.longitude, city.latitude];
+        selectedPostCenterRef.current = null;
+        void loadPostsForCity(city.id);
+      });
     };
 
     reapplyCityMarkersRef.current = () => {
       applyMarkersForSelectedCountry();
+    };
+
+    const applyMarkersForSelectedCity = (cityId: string) => {
+      const cached = postCache.get(cityId);
+      if (!cached) {
+        clearCityMarkers(postMarkers);
+        return;
+      }
+      renderPostMarkers(map, postMarkers, cached, (post) => {
+        setSelectedPostName(post.name);
+        selectedPostCenterRef.current = [post.longitude, post.latitude];
+      });
     };
 
     const loadCitiesForCountry = async (
@@ -462,6 +622,36 @@ export function HomeGlobeMap() {
       tryAddCityMarkers();
     };
 
+    const loadPostsForCity = async (cityId: string) => {
+      const cachedPosts = postCache.get(cityId);
+      if (cachedPosts) {
+        applyMarkersForSelectedCity(cityId);
+        return;
+      }
+      try {
+        const response = await fetch(
+          apiUrl(`/api/post?city_id=${encodeURIComponent(cityId)}&per_page=100`),
+        );
+        if (!response.ok) {
+          throw new Error("post api fetch failed");
+        }
+        const json = (await response.json()) as unknown;
+        const posts = parsePostListPayload(json);
+        if (isDisposed || mapRef.current !== map) {
+          return;
+        }
+        postCache.set(cityId, posts);
+        applyMarkersForSelectedCity(cityId);
+      } catch (error) {
+        console.error("impossible de charger les posts", error);
+        if (isDisposed || mapRef.current !== map) {
+          return;
+        }
+        postCache.delete(cityId);
+        clearCityMarkers(postMarkers);
+      }
+    };
+
     const onStyleLoad = () => {
       applyGlobeAndFrenchLabels(map);
       tryAddCountryLayers();
@@ -490,6 +680,7 @@ export function HomeGlobeMap() {
         }
         const json = (await response.json()) as unknown;
         const countries = parseCountryListItems(json) as ApiCountry[];
+        countriesByIdRef.current = new Map(countries.map((country) => [country.id, country]));
         const filtered: CountryFeatureCollection = {
           type: "FeatureCollection",
           features: (countries ?? [])
@@ -555,15 +746,35 @@ export function HomeGlobeMap() {
       if (!selection) {
         selectedCountryKeyRef.current = null;
         clearCityMarkers(cityMarkers);
+        clearCityMarkers(postMarkers);
+        setSelectedCountryName(null);
+        setSelectedCountryIso2(null);
+        setSelectedContinentName(null);
+        setSelectedCityName(null);
+        setSelectedPostName(null);
         tryAddCityMarkers();
         return;
       }
+      const selectedCountry =
+        feature.properties?.countryId
+          ? countriesByIdRef.current.get(feature.properties.countryId)
+          : undefined;
+      setSelectedCountryName(feature.properties?.name ?? null);
+      setSelectedCountryIso2(selectedCountry?.iso2 ?? null);
+      setSelectedContinentName(selectedCountry?.continent?.name ?? null);
+      setSelectedCityName(null);
+      setSelectedPostName(null);
+      selectedPostCenterRef.current = null;
       fitToFeature(map, feature);
+      const center = map.getCenter();
+      selectedCountryCenterRef.current = [center.lng, center.lat];
+      selectedCityCenterRef.current = null;
       if (selectedCountryKeyRef.current === selection.key) {
         return;
       }
       selectedCountryKeyRef.current = selection.key;
       clearCityMarkers(cityMarkers);
+      clearCityMarkers(postMarkers);
       tryAddCityMarkers();
       void loadCitiesForCountry(selection.query, selection.key);
     };
@@ -585,13 +796,16 @@ export function HomeGlobeMap() {
       map.off("mouseenter", COUNTRY_SHAPES_FILL_LAYER_ID, onPointerEnter);
       map.off("mouseleave", COUNTRY_SHAPES_FILL_LAYER_ID, onPointerLeave);
       clearCityMarkers(cityMarkers);
+      clearCityMarkers(postMarkers);
       reapplyCityMarkersRef.current = null;
       map.remove();
       mapRef.current = null;
       appliedStyleUrlRef.current = null;
       countriesGeoJsonRef.current = null;
+      countriesByIdRef.current.clear();
       selectedCountryKeyRef.current = null;
       cityCache.clear();
+      postCache.clear();
     };
     // Carte créée une seule fois ; le style suit le thème dans l’effet suivant.
     // eslint-disable-next-line react-hooks/exhaustive-deps -- évite de recréer la carte à chaque changement de thème
@@ -647,13 +861,117 @@ export function HomeGlobeMap() {
     map.once("style.load", onStyleLoad);
   }, [resolvedTheme]);
 
+  function focusWorld() {
+    const map = mapRef.current;
+    if (!map) {
+      return;
+    }
+    selectedCountryKeyRef.current = null;
+    clearCityMarkers(cityMarkersRef.current);
+    clearCityMarkers(postMarkersRef.current);
+    setSelectedContinentName(null);
+    setSelectedCountryName(null);
+    setSelectedCountryIso2(null);
+    setSelectedCityName(null);
+    setSelectedPostName(null);
+    selectedCountryCenterRef.current = null;
+    selectedCityCenterRef.current = null;
+    selectedPostCenterRef.current = null;
+    map.flyTo({
+      center: [2.3522, 48.8566],
+      zoom: ZOOM_WORLD,
+      essential: true,
+      duration: 900,
+    });
+  }
+
+  function focusContinent() {
+    const map = mapRef.current;
+    if (!map || !selectedContinentName) {
+      return;
+    }
+    setSelectedCountryName(null);
+    setSelectedCountryIso2(null);
+    setSelectedCityName(null);
+    setSelectedPostName(null);
+    selectedCityCenterRef.current = null;
+    selectedPostCenterRef.current = null;
+    selectedCountryKeyRef.current = null;
+    clearCityMarkers(cityMarkersRef.current);
+    clearCityMarkers(postMarkersRef.current);
+    map.flyTo({
+      center: selectedCountryCenterRef.current ?? [10, 25],
+      zoom: ZOOM_CONTINENT,
+      essential: true,
+      duration: 900,
+    });
+  }
+
+  function focusCountry() {
+    const map = mapRef.current;
+    if (!map || !selectedCountryName) {
+      return;
+    }
+    setSelectedCityName(null);
+    setSelectedPostName(null);
+    selectedPostCenterRef.current = null;
+    clearCityMarkers(postMarkersRef.current);
+    map.flyTo({
+      center: selectedCountryCenterRef.current ?? map.getCenter(),
+      zoom: ZOOM_COUNTRY,
+      essential: true,
+      duration: 900,
+    });
+  }
+
+  function focusCity() {
+    const map = mapRef.current;
+    if (!map || !selectedCityName || !selectedCityCenterRef.current) {
+      return;
+    }
+    setSelectedPostName(null);
+    selectedPostCenterRef.current = null;
+    clearCityMarkers(postMarkersRef.current);
+    map.flyTo({
+      center: selectedCityCenterRef.current,
+      zoom: ZOOM_CITY,
+      essential: true,
+      duration: 900,
+    });
+  }
+
+  function focusPost() {
+    const map = mapRef.current;
+    if (!map || !selectedPostName || !selectedPostCenterRef.current) {
+      return;
+    }
+    map.flyTo({
+      center: selectedPostCenterRef.current,
+      zoom: ZOOM_POST,
+      essential: true,
+      duration: 900,
+    });
+  }
+
   return (
     <div
       className={`absolute inset-0 min-h-0 h-dvh w-full ${mapThemeClass}`}
       role="application"
       aria-label="Carte interactive : globe en vue large, carte plane en zoom rapproché, toponymes en français lorsque disponibles"
     >
-      <div
+      <MapHistory
+        selectedContinentName={selectedContinentName}
+        selectedCountryName={selectedCountryName}
+        selectedCountryIso2={selectedCountryIso2}
+        selectedCityName={selectedCityName}
+        selectedPostName={selectedPostName}
+        onFocusWorld={focusWorld}
+        onFocusContinent={focusContinent}
+        onFocusCountry={focusCountry}
+        onFocusCity={focusCity}
+        onFocusPost={focusPost}
+      />
+        <div
         ref={containerRef}
         className="absolute inset-0 min-h-0 h-full w-full"
       />

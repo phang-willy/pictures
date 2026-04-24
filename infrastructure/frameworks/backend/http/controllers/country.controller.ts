@@ -148,7 +148,7 @@ export class CountryController {
       iso3?: string | null;
       slug?: string;
       continentId?: string;
-      desactivatedAt?: string | null;
+      deactivatedAt?: string | null;
       geometry?: {
         type: 'Polygon' | 'MultiPolygon';
         coordinate: unknown;
@@ -164,7 +164,7 @@ export class CountryController {
         iso3: body.iso3,
         slug: body.slug,
         continentId: body.continentId,
-        desactivatedAt: body.desactivatedAt,
+        deactivatedAt: body.deactivatedAt,
         geometry: body.geometry,
       });
     } catch (error) {

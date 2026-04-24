@@ -64,12 +64,12 @@ export class UpdateCountryUseCase {
       );
     }
 
-    const nextdesactivatedAt =
-      input.desactivatedAt === undefined
-        ? persisted.desactivatedAt
-        : input.desactivatedAt === null
+    const nextdeactivatedAt =
+      input.deactivatedAt === undefined
+        ? persisted.deactivatedAt
+        : input.deactivatedAt === null
           ? null
-          : new Date(input.desactivatedAt);
+          : new Date(input.deactivatedAt);
 
     const updated = new CountryEntity({
       id: existing.id,
@@ -85,7 +85,7 @@ export class UpdateCountryUseCase {
       continent,
       geometry:
         input.geometry === undefined ? existing.geometry : input.geometry,
-      desactivatedAt: nextdesactivatedAt,
+      deactivatedAt: nextdeactivatedAt,
       createdAt: persisted.createdAt,
       updatedAt: new Date(),
     });

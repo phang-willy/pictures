@@ -38,7 +38,7 @@ export class CreateCityUseCase {
       slug: new CitySlugVo(candidateSlug),
       latitude: input.latitude,
       longitude: input.longitude,
-      desactivatedAt: null,
+      deactivatedAt: null,
       createdAt: now,
       updatedAt: now,
     });

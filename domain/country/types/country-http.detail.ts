@@ -14,7 +14,7 @@ export type CountryHttpDetail = {
   slug: string;
   createdAt: string;
   updatedAt: string;
-  desactivatedAt: string | null;
+  deactivatedAt: string | null;
   continent: {
     id: string;
     code: string;

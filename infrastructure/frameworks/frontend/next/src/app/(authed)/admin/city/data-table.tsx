@@ -59,8 +59,8 @@ function isApiPagination(value: unknown): value is ApiPagination {
 export function CityAdmin() {
   const [listsVersion, setListsVersion] = useState(0);
   const [cityToDesactivate, setCityToDesactivate] = useState<CityRow | null>(null);
-  const [desactivateSubmitting, setDesactivateSubmitting] = useState(false);
-  const [desactivateError, setDesactivateError] = useState<string | null>(null);
+  const [deactivateSubmitting, setDesactivateSubmitting] = useState(false);
+  const [deactivateError, setDesactivateError] = useState<string | null>(null);
   const [cityToActivate, setCityToActivate] = useState<CityRow | null>(null);
   const [activateSubmitting, setActivateSubmitting] = useState(false);
   const [activateError, setActivateError] = useState<string | null>(null);
@@ -149,7 +149,7 @@ export function CityAdmin() {
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ desactivatedAt: new Date().toISOString() }),
+          body: JSON.stringify({ deactivatedAt: new Date().toISOString() }),
         },
       );
       const data = (await res.json().catch(() => ({}))) as {
@@ -181,7 +181,7 @@ export function CityAdmin() {
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ desactivatedAt: null }),
+          body: JSON.stringify({ deactivatedAt: null }),
         },
       );
       const data = (await res.json().catch(() => ({}))) as {
@@ -291,15 +291,15 @@ export function CityAdmin() {
                 : ""}
             </DialogDescription>
           </DialogHeader>
-          {desactivateError ? (
-            <p className="text-sm text-destructive">{desactivateError}</p>
+          {deactivateError ? (
+            <p className="text-sm text-destructive">{deactivateError}</p>
           ) : null}
           <DialogFooter>
             <DialogClose asChild>
               <Button
                 type="button"
                 variant="outline"
-                disabled={desactivateSubmitting}
+                disabled={deactivateSubmitting}
               >
                 Annuler
               </Button>
@@ -307,10 +307,10 @@ export function CityAdmin() {
             <Button
               type="button"
               variant="destructive"
-              disabled={desactivateSubmitting}
+              disabled={deactivateSubmitting}
               onClick={() => void confirmDesactivate()}
             >
-              {desactivateSubmitting ? "Désactivation…" : "Désactiver"}
+              {deactivateSubmitting ? "Désactivation…" : "Désactiver"}
             </Button>
           </DialogFooter>
         </DialogContent>

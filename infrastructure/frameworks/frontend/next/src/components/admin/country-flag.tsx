@@ -1,6 +1,8 @@
 import * as FlagSvgStrings from "country-flag-icons/string/3x2";
+import { cn } from "@/lib/utils";
 
 type ContryFlagProps = {
+  className?: string;
   name?: string;
   iso2: string;
   show_name?: boolean;
@@ -20,6 +22,7 @@ const flagHostClassName =
   "inline-flex h-[1.15em] w-[1.725em] shrink-0 items-center justify-center overflow-hidden [&>svg]:h-full [&>svg]:w-full [&>svg]:block";
 
 export function ContryFlag({
+  className,
   name,
   iso2,
   show_name = true || false,
@@ -28,7 +31,7 @@ export function ContryFlag({
   const svgMarkup = resolveFlagSvg(iso2);
 
   return (
-    <span className="inline-flex items-center gap-2">
+    <span className={cn("inline-flex items-center gap-2", className)}>
       {svgMarkup ? (
         <span
           className={flagHostClassName}

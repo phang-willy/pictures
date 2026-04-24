@@ -4,7 +4,7 @@ export type ContinentEntityProps = {
   id: string;
   code: ContinentCodeVo;
   name: string;
-  desactivatedAt: Date | null;
+  deactivatedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -24,8 +24,8 @@ export class ContinentEntity {
     return this.props.name;
   }
 
-  get desactivatedAt() {
-    return this.props.desactivatedAt;
+  get deactivatedAt() {
+    return this.props.deactivatedAt;
   }
 
   toPrimitives() {
@@ -33,7 +33,7 @@ export class ContinentEntity {
       id: this.props.id,
       code: this.props.code.value,
       name: this.props.name,
-      desactivatedAt: this.props.desactivatedAt,
+      deactivatedAt: this.props.deactivatedAt,
       createdAt: this.props.createdAt,
       updatedAt: this.props.updatedAt,
     };

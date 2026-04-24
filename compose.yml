@@ -10,12 +10,11 @@ services:
     environment:
       CHOKIDAR_USEPOLLING: "true"
       WATCHPACK_POLLING: "true"
-      FRONTEND_PORT: ${FRONTEND_PORT:-3000}
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:${BACKEND_PORT:-3001}}
-      # RSC / fetch serveur : le backend est un autre conteneur (pas localhost dans Docker)
-      INTERNAL_API_URL: http://backend:${BACKEND_PORT:-3001}
+      FRONTEND_PORT: ${FRONTEND_PORT}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      INTERNAL_API_URL: http://backend:${BACKEND_PORT}
     ports:
-      - "${FRONTEND_PORT:-3000}:3000"
+      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
     volumes:
       - .:/workspace
       - front_node_modules:/workspace/infrastructure/frameworks/frontend/next/node_modules
@@ -93,8 +92,8 @@ services:
   maildev:
     image: maildev/maildev:latest
     ports:
-      - "${MAILDEV_SMTP_PORT:-1025}:1025"
-      - "${MAILDEV_WEB_PORT:-1080}:1080"
+      - "${MAILDEV_SMTP_PORT}:${MAILDEV_SMTP_PORT}"
+      - "${MAILDEV_WEB_PORT}:${MAILDEV_WEB_PORT}"
     restart: unless-stopped
     networks:
       - app_network

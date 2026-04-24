@@ -175,12 +175,12 @@ export function createDeactivatedCityColumns(
   return [
     ...buildCityDataColumns(sortableHeaders),
     {
-      accessorKey: "desactivatedAt",
+      accessorKey: "deactivatedAt",
       header: sortableHeaders
         ? sortHeader("Date de désactivation")
         : "Date de désactivation",
       cell: ({ row }) =>
-        formatDate(row.original.desactivatedAt, { mode: "date-hour" }),
+        formatDate(row.original.deactivatedAt, { mode: "date-hour" }),
     },
     {
       id: "actions",

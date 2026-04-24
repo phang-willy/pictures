@@ -19,7 +19,7 @@ export class PrismaCountryRepository implements CountryRepository {
     id: string;
     code: string;
     name: string;
-    desactivatedAt: Date | null;
+    deactivatedAt: Date | null;
     createdAt: Date;
     updatedAt: Date;
   }): ContinentEntity {
@@ -27,7 +27,7 @@ export class PrismaCountryRepository implements CountryRepository {
       id: row.id,
       code: new ContinentCodeVo(row.code),
       name: row.name,
-      desactivatedAt: row.desactivatedAt,
+      deactivatedAt: row.deactivatedAt,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     });
@@ -44,11 +44,11 @@ export class PrismaCountryRepository implements CountryRepository {
       id: string;
       code: string;
       name: string;
-      desactivatedAt: Date | null;
+      deactivatedAt: Date | null;
       createdAt: Date;
       updatedAt: Date;
     };
-    desactivatedAt: Date | null;
+    deactivatedAt: Date | null;
     createdAt: Date;
     updatedAt: Date;
     geometry?: {
@@ -72,7 +72,7 @@ export class PrismaCountryRepository implements CountryRepository {
             coordinate: row.geometry.coordinate,
           }
         : null,
-      desactivatedAt: row.desactivatedAt,
+      deactivatedAt: row.deactivatedAt,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     });
@@ -105,7 +105,7 @@ export class PrismaCountryRepository implements CountryRepository {
             id: true,
             code: true,
             name: true,
-            desactivatedAt: true,
+            deactivatedAt: true,
             createdAt: true,
             updatedAt: true,
           },
@@ -128,7 +128,7 @@ export class PrismaCountryRepository implements CountryRepository {
         iso3: data.iso3,
         slug: data.slug,
         continentId: data.continent.id,
-        desactivatedAt: data.desactivatedAt,
+        deactivatedAt: data.deactivatedAt,
         ...(data.geometry === null
           ? { geometry: { deleteMany: {} } }
           : data.geometry
@@ -154,7 +154,7 @@ export class PrismaCountryRepository implements CountryRepository {
             id: true,
             code: true,
             name: true,
-            desactivatedAt: true,
+            deactivatedAt: true,
             createdAt: true,
             updatedAt: true,
           },
@@ -179,7 +179,7 @@ export class PrismaCountryRepository implements CountryRepository {
             id: true,
             code: true,
             name: true,
-            desactivatedAt: true,
+            deactivatedAt: true,
             createdAt: true,
             updatedAt: true,
           },
@@ -208,7 +208,7 @@ export class PrismaCountryRepository implements CountryRepository {
             id: true,
             code: true,
             name: true,
-            desactivatedAt: true,
+            deactivatedAt: true,
             createdAt: true,
             updatedAt: true,
           },
@@ -233,7 +233,7 @@ export class PrismaCountryRepository implements CountryRepository {
             id: true,
             code: true,
             name: true,
-            desactivatedAt: true,
+            deactivatedAt: true,
             createdAt: true,
             updatedAt: true,
           },
@@ -252,7 +252,7 @@ export class PrismaCountryRepository implements CountryRepository {
             id: true,
             code: true,
             name: true,
-            desactivatedAt: true,
+            deactivatedAt: true,
             createdAt: true,
             updatedAt: true,
           },
@@ -277,7 +277,7 @@ export class PrismaCountryRepository implements CountryRepository {
             id: true,
             code: true,
             name: true,
-            desactivatedAt: true,
+            deactivatedAt: true,
             createdAt: true,
             updatedAt: true,
           },
@@ -333,9 +333,9 @@ export class PrismaCountryRepository implements CountryRepository {
   ) {
     const modeWhere =
       mode === 'active'
-        ? { desactivatedAt: null }
+        ? { deactivatedAt: null }
         : mode === 'inactive'
-          ? { desactivatedAt: { not: null } }
+          ? { deactivatedAt: { not: null } }
           : null;
 
     const trimmed = q?.trim();
@@ -385,7 +385,7 @@ export class PrismaCountryRepository implements CountryRepository {
                   id: true,
                   code: true,
                   name: true,
-                  desactivatedAt: true,
+                  deactivatedAt: true,
                   createdAt: true,
                   updatedAt: true,
                 },
@@ -402,7 +402,7 @@ export class PrismaCountryRepository implements CountryRepository {
                   id: true,
                   code: true,
                   name: true,
-                  desactivatedAt: true,
+                  deactivatedAt: true,
                   createdAt: true,
                   updatedAt: true,
                 },
@@ -417,7 +417,7 @@ export class PrismaCountryRepository implements CountryRepository {
     return this.prisma.continent.findMany({
       where: {
         id: { not: PrismaCountryRepository.NULL_UUID },
-        desactivatedAt: null,
+        deactivatedAt: null,
       },
       orderBy: { name: 'asc' },
       select: { id: true, code: true, name: true },

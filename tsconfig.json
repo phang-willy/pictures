@@ -6,7 +6,7 @@
     "moduleResolution": "Bundler",
     "ignoreDeprecations": "6.0",
     "strict": true,
-    "types": ["node", "jest"],
+    "types": ["node"],
     "typeRoots": [
       "./infrastructure/frameworks/backend/node_modules/@types",
       "./infrastructure/frameworks/frontend/next/node_modules/@types"
@@ -18,7 +18,6 @@
     "paths": {
       "*": ["./*"],
       "@/*": ["./*"],
-      "@domains/*": ["./domains/*"],
       "@domain/*": ["./domain/*"],
       "@application/*": ["./application/*"],
       "@infrastructure/*": ["./infrastructure/*"],
@@ -31,7 +30,7 @@
     }
   },
   "include": [
-    "domains/**/*",
+    "domain/**/*",
     "application/**/*",
     "infrastructure/**/*",
     "shared/**/*"

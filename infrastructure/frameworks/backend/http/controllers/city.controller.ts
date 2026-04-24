@@ -102,7 +102,7 @@ export class CityController {
     });
     const filteredItems =
       mode === 'inactive'
-        ? items.filter((city) => city.desactivatedAt !== null)
+        ? items.filter((city) => city.deactivatedAt !== null)
         : items;
     const total = filteredItems.length;
     const totalPages = Math.max(1, Math.ceil(total / perPage));
@@ -154,7 +154,7 @@ export class CityController {
       slug?: string;
       latitude?: number;
       longitude?: number;
-      desactivatedAt?: string | null;
+      deactivatedAt?: string | null;
     },
   ) {
     this.assertAdmin(req);
@@ -166,7 +166,7 @@ export class CityController {
         slug: body.slug,
         latitude: body.latitude,
         longitude: body.longitude,
-        desactivatedAt: body.desactivatedAt,
+        deactivatedAt: body.deactivatedAt,
       });
       return success({ item: toCityListItemHttp(city) });
     } catch (error) {

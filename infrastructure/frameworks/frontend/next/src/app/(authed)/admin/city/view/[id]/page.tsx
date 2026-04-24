@@ -85,8 +85,8 @@ export default async function AdminCityViewPage({
             <DetailRow
               label="Désactivé le"
               value={
-                city.desactivatedAt
-                  ? formatDate(city.desactivatedAt, { mode: "date-hour" })
+                city.deactivatedAt
+                  ? formatDate(city.deactivatedAt, { mode: "date-hour" })
                   : "-"
               }
             />

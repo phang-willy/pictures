@@ -15,6 +15,12 @@ import { DeleteCityUseCase } from '@/application/city/use-cases/delete-city.use-
 import { GetCityByIdUseCase } from '@/application/city/use-cases/get-city-by-id.use-case';
 import { ListCitiesUseCase } from '@/application/city/use-cases/list-cities.use-case';
 import { UpdateCityUseCase } from '@/application/city/use-cases/update-city.use-case';
+import { CheckPostDuplicateUseCase } from '@/application/post/use-cases/check-post-duplicate.use-case';
+import { CreatePostUseCase } from '@/application/post/use-cases/create-post.use-case';
+import { DeletePostUseCase } from '@/application/post/use-cases/delete-post.use-case';
+import { GetPostByIdUseCase } from '@/application/post/use-cases/get-post-by-id.use-case';
+import { ListPostsUseCase } from '@/application/post/use-cases/list-posts.use-case';
+import { UpdatePostUseCase } from '@/application/post/use-cases/update-post.use-case';
 import { LoginUseCase } from '@/application/auth/use-cases/login.use-case';
 import { LogoutUseCase } from '@/application/auth/use-cases/logout.use-case';
 import { RefreshSessionUseCase } from '@/application/auth/use-cases/refresh-session.use-case';
@@ -42,6 +48,7 @@ import {
 } from '@/application/auth/ports/di-tokens';
 import { COUNTRY_REPOSITORY } from '@/application/country/ports/country.tokens';
 import { CITY_REPOSITORY } from '@/application/city/ports/city.tokens';
+import { POST_REPOSITORY } from '@/application/post/ports/post.tokens';
 import { USER_REPOSITORY } from '@/application/user/ports/user.tokens';
 import { NodemailerMailSenderAdapter } from '@/infrastructure/adapters/mail/nodemailer-mail-sender.adapter';
 import { BcryptPasswordHasherAdapter } from '@/infrastructure/adapters/security/bcrypt-password-hasher.adapter';
@@ -50,12 +57,14 @@ import { SystemClockAdapter } from '@/infrastructure/adapters/time/system-clock.
 import { IpApiClientLocationAdapter } from '@/infrastructure/adapters/geo/ip-api-client-location.adapter';
 import { PrismaCountryRepository } from '@/infrastructure/persistence/prisma/repositories/prisma-country.repository';
 import { PrismaCityRepository } from '@/infrastructure/persistence/prisma/repositories/prisma-city.repository';
+import { PrismaPostRepository } from '@/infrastructure/persistence/prisma/repositories/prisma-post.repository';
 import { PrismaUserRepository } from '@/infrastructure/persistence/prisma/repositories/prisma-user.repository';
 import { PrismaTwoFactorCodeRepository } from '@/infrastructure/persistence/prisma/repositories/prisma-two-factor-code.repository';
 import { PrismaPasswordResetTokenRepository } from '@/infrastructure/persistence/prisma/repositories/prisma-password-reset-token.repository';
 import { InMemoryAuthSessionRepository } from '@/infrastructure/persistence/prisma/repositories/in-memory-auth-session.repository';
 import type { CountryRepository } from '@/domain/country/repositories/country.repository';
 import type { CityRepository } from '@/domain/city/repositories/city.repository';
+import type { PostRepository } from '@/domain/post/repositories/post.repository';
 import type { UserRepository } from '@/domain/user/repositories/user.repository';
 import type { TwoFactorCodeRepository } from '@/domain/auth/repositories/two-factor-code.repository';
 import type { PasswordResetTokenRepository } from '@/domain/auth/repositories/password-reset-token.repository';
@@ -84,6 +93,7 @@ import { TokenSignerModule } from '@/infrastructure/frameworks/backend/token-sig
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: COUNTRY_REPOSITORY, useClass: PrismaCountryRepository },
     { provide: CITY_REPOSITORY, useClass: PrismaCityRepository },
+    { provide: POST_REPOSITORY, useClass: PrismaPostRepository },
     { provide: USER_REPOSITORY, useClass: PrismaUserRepository },
     { provide: PASSWORD_HASHER_PORT, useClass: BcryptPasswordHasherAdapter },
     { provide: MAIL_SENDER_PORT, useClass: NodemailerMailSenderAdapter },
@@ -134,6 +144,28 @@ import { TokenSignerModule } from '@/infrastructure/frameworks/backend/token-sig
         countryRepository: CountryRepository,
         checkDuplicate: CheckCityDuplicateUseCase,
       ) => new UpdateCityUseCase(cityRepository, countryRepository, checkDuplicate),
+    },
+    { provide: ListPostsUseCase, inject: [POST_REPOSITORY], useFactory: (repository: PostRepository) => new ListPostsUseCase(repository) },
+    { provide: GetPostByIdUseCase, inject: [POST_REPOSITORY], useFactory: (repository: PostRepository) => new GetPostByIdUseCase(repository) },
+    { provide: DeletePostUseCase, inject: [POST_REPOSITORY], useFactory: (repository: PostRepository) => new DeletePostUseCase(repository) },
+    { provide: CheckPostDuplicateUseCase, inject: [POST_REPOSITORY], useFactory: (repository: PostRepository) => new CheckPostDuplicateUseCase(repository) },
+    {
+      provide: CreatePostUseCase,
+      inject: [POST_REPOSITORY, CITY_REPOSITORY, CheckPostDuplicateUseCase],
+      useFactory: (
+        postRepository: PostRepository,
+        cityRepository: CityRepository,
+        checkDuplicate: CheckPostDuplicateUseCase,
+      ) => new CreatePostUseCase(postRepository, cityRepository, checkDuplicate),
+    },
+    {
+      provide: UpdatePostUseCase,
+      inject: [POST_REPOSITORY, CITY_REPOSITORY, CheckPostDuplicateUseCase],
+      useFactory: (
+        postRepository: PostRepository,
+        cityRepository: CityRepository,
+        checkDuplicate: CheckPostDuplicateUseCase,
+      ) => new UpdatePostUseCase(postRepository, cityRepository, checkDuplicate),
     },
     { provide: ListContinentsUseCase, inject: [COUNTRY_REPOSITORY], useFactory: (repository: CountryRepository) => new ListContinentsUseCase(repository) },
     { provide: CreateUserUseCase, inject: [USER_REPOSITORY], useFactory: (repository: UserRepository) => new CreateUserUseCase(repository) },

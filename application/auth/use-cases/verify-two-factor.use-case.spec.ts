@@ -1,35 +1,37 @@
+import { describe, expect, it, vi } from 'vitest';
+
 import { VerifyTwoFactorUseCase } from './verify-two-factor.use-case';
 
 describe('VerifyTwoFactorUseCase', () => {
   it('returns access token when code is valid', async () => {
     const tokenSigner = {
-      verify: jest.fn(() => ({ email: 'john@example.com' })),
-      sign: jest.fn(() => 'access-token'),
+      verify: vi.fn(() => ({ email: 'john@example.com' })),
+      sign: vi.fn(() => 'access-token'),
     };
-    const passwordHasher = { verify: jest.fn(async () => true) };
-    const mailSender = { send: jest.fn(async () => undefined) };
-    const clientLocation = { resolveLabelForIp: jest.fn(async () => 'Testville') };
+    const passwordHasher = { verify: vi.fn(async () => true) };
+    const mailSender = { send: vi.fn(async () => undefined) };
+    const clientLocation = { resolveLabelForIp: vi.fn(async () => 'Testville') };
     const userRepository = {
-      findByEmail: jest.fn(async () => ({
+      findByEmail: vi.fn(async () => ({
         id: 'u1',
         email: { value: 'john@example.com' },
         role: { value: 'USER' },
       })),
     };
     const twoFactorCodeRepository = {
-      findLatestActiveByUserId: jest.fn(async () => ({
+      findLatestActiveByUserId: vi.fn(async () => ({
         toPrimitives: () => ({
           id: 'c1',
           attempts: 0,
           codeHash: 'hash-code',
         }),
       })),
-      markAsUsed: jest.fn(async () => undefined),
-      incrementAttempts: jest.fn(async () => undefined),
-      deleteAllActiveByUserId: jest.fn(async () => undefined),
+      markAsUsed: vi.fn(async () => undefined),
+      incrementAttempts: vi.fn(async () => undefined),
+      deleteAllActiveByUserId: vi.fn(async () => undefined),
     };
     const authSessionRepository = {
-      create: jest.fn(async (session) => session),
+      create: vi.fn(async (session) => session),
     };
 
     const useCase = new VerifyTwoFactorUseCase(

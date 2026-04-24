@@ -20,6 +20,11 @@ export type ApiCountry = {
   iso2: string;
   name: string;
   slug: string;
+  continent?: {
+    id: string;
+    code: string;
+    name: string;
+  };
   geometry?: {
     type: Geometry["type"];
     coordinate: unknown;
@@ -29,6 +34,15 @@ export type ApiCountry = {
 export type ApiCity = {
   id: string;
   countryId: string;
+  name: string;
+  slug: string;
+  latitude: number;
+  longitude: number;
+};
+
+export type ApiPost = {
+  id: string;
+  cityId: string;
   name: string;
   slug: string;
   latitude: number;

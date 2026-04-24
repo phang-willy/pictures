@@ -43,8 +43,8 @@ export function CountryAdmin() {
   const [countryToDesactivate, setCountryToDesactivate] = useState<CountryRow | null>(
     null,
   );
-  const [desactivateSubmitting, setDesactivateSubmitting] = useState(false);
-  const [desactivateError, setDesactivateError] = useState<string | null>(null);
+  const [deactivateSubmitting, setDesactivateSubmitting] = useState(false);
+  const [deactivateError, setDesactivateError] = useState<string | null>(null);
 
   const [countryToActivate, setCountryToActivate] = useState<CountryRow | null>(
     null,
@@ -146,7 +146,7 @@ export function CountryAdmin() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ desactivatedAt: new Date().toISOString() }),
+          body: JSON.stringify({ deactivatedAt: new Date().toISOString() }),
         },
       );
       const data = (await res.json().catch(() => ({}))) as {
@@ -186,7 +186,7 @@ export function CountryAdmin() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ desactivatedAt: null }),
+          body: JSON.stringify({ deactivatedAt: null }),
         },
       );
       setCountryToActivate(null);
@@ -301,9 +301,9 @@ export function CountryAdmin() {
                 </div>
               </DialogDescription>
             </DialogHeader>
-            {desactivateError ? (
+            {deactivateError ? (
               <p className="text-sm text-destructive" role="alert">
-                {desactivateError}
+                {deactivateError}
               </p>
             ) : null}
             <DialogFooter>
@@ -311,7 +311,7 @@ export function CountryAdmin() {
                 <Button
                   type="button"
                   variant="outline"
-                  disabled={desactivateSubmitting}
+                  disabled={deactivateSubmitting}
                 >
                   Annuler
                 </Button>
@@ -319,10 +319,10 @@ export function CountryAdmin() {
               <Button
                 type="button"
                 variant="destructive"
-                disabled={desactivateSubmitting}
+                disabled={deactivateSubmitting}
                 onClick={() => void confirmDesactivate()}
               >
-                {desactivateSubmitting ? "Désactivation…" : "Désactiver"}
+                {deactivateSubmitting ? "Désactivation…" : "Désactiver"}
               </Button>
             </DialogFooter>
           </DialogContent>
