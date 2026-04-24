@@ -52,16 +52,23 @@ function sortHeader(label: string) {
   return CountryColumnSortHeader;
 }
 
+function countryLabeledHeader(sortableHeaders: boolean, label: string) {
+  return {
+    header: sortableHeaders ? sortHeader(label) : label,
+    meta: { dataCellLabel: label },
+  };
+}
+
 function buildCountryDataColumns(
   sortableHeaders: boolean,
 ): ColumnDef<CountryRow>[] {
-  const header = (label: string) =>
-    sortableHeaders ? sortHeader(label) : label;
+  const labeledHeader = (label: string) =>
+    countryLabeledHeader(sortableHeaders, label);
 
   return [
     {
       accessorKey: "id",
-      header: header("ID"),
+      ...labeledHeader("ID"),
       cell: ({ row }) => {
         const id = row.getValue("id") as string;
         return (
@@ -79,34 +86,34 @@ function buildCountryDataColumns(
     {
       id: "continent",
       accessorFn: (row) => row.continent?.name ?? "",
-      header: header("Continent"),
+      ...labeledHeader("Continent"),
       cell: ({ row }) => row.original.continent?.name ?? "-",
     },
     {
       accessorKey: "name",
-      header: header("Nom"),
+      ...labeledHeader("Nom"),
       cell: ({ row }) => (
         <ContryFlag name={row.original.name} iso2={row.original.iso2} />
       ),
     },
     {
       accessorKey: "iso2",
-      header: header("ISO 2"),
+      ...labeledHeader("ISO 2"),
     },
     {
       accessorKey: "iso3",
-      header: header("ISO 3"),
+      ...labeledHeader("ISO 3"),
       cell: ({ row }) => row.original.iso3 ?? "-",
     },
     {
       accessorKey: "createdAt",
-      header: header("Date de création"),
+      ...labeledHeader("Créé le"),
       cell: ({ row }) =>
         formatDate(row.original.createdAt, { mode: "date-hour" }),
     },
     {
       accessorKey: "updatedAt",
-      header: header("Date de modification"),
+      ...labeledHeader("Modifié le"),
       cell: ({ row }) =>
         formatDate(row.original.updatedAt, { mode: "date-hour" }),
     },
@@ -133,7 +140,7 @@ export function createActiveCountryColumns(
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
-                variant="ghost"
+                variant="outline"
                 size="icon-sm"
                 className="size-8"
                 aria-label="Actions pour ce pays"
@@ -189,9 +196,7 @@ export function createDeactivatedCountryColumns(
     ...buildCountryDataColumns(sortableHeaders),
     {
       accessorKey: "deactivatedAt",
-      header: sortableHeaders
-        ? sortHeader("Date de désactivation")
-        : "Date de désactivation",
+      ...countryLabeledHeader(sortableHeaders, "Désactivé le"),
       cell: ({ row }) =>
         formatDate(row.original.deactivatedAt, { mode: "date-hour" }),
     },
@@ -206,7 +211,7 @@ export function createDeactivatedCountryColumns(
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
-                variant="ghost"
+                variant="outline"
                 size="icon-sm"
                 className="size-8"
                 aria-label="Actions pour ce pays desactive"

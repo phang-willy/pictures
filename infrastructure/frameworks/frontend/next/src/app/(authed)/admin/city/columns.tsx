@@ -50,14 +50,21 @@ function sortHeader(label: string) {
   return CityColumnSortHeader;
 }
 
+function cityLabeledHeader(sortableHeaders: boolean, label: string) {
+  return {
+    header: sortableHeaders ? sortHeader(label) : label,
+    meta: { dataCellLabel: label },
+  };
+}
+
 function buildCityDataColumns(sortableHeaders: boolean): ColumnDef<CityRow>[] {
-  const header = (label: string) =>
-    sortableHeaders ? sortHeader(label) : label;
+  const labeledHeader = (label: string) =>
+    cityLabeledHeader(sortableHeaders, label);
 
   return [
     {
       accessorKey: "id",
-      header: header("ID"),
+      ...labeledHeader("ID"),
       cell: ({ row }) => {
         const id = row.getValue("id") as string;
         return (
@@ -74,17 +81,17 @@ function buildCityDataColumns(sortableHeaders: boolean): ColumnDef<CityRow>[] {
     },
     {
       accessorKey: "name",
-      header: header("Ville"),
+      ...labeledHeader("Ville"),
       cell: ({ row }) => row.original.name,
     },
     {
       accessorKey: "slug",
-      header: header("Slug"),
+      ...labeledHeader("Slug"),
       cell: ({ row }) => row.original.slug,
     },
     {
       id: "country",
-      header: header("Pays"),
+      ...labeledHeader("Pays"),
       cell: ({ row }) => (
         <ContryFlag
           name={row.original.country.name}
@@ -94,13 +101,13 @@ function buildCityDataColumns(sortableHeaders: boolean): ColumnDef<CityRow>[] {
     },
     {
       accessorKey: "createdAt",
-      header: header("Date de création"),
+      ...labeledHeader("Créé le"),
       cell: ({ row }) =>
         formatDate(row.original.createdAt, { mode: "date-hour" }),
     },
     {
       accessorKey: "updatedAt",
-      header: header("Date de modification"),
+      ...labeledHeader("Modifié le"),
       cell: ({ row }) =>
         formatDate(row.original.updatedAt, { mode: "date-hour" }),
     },
@@ -124,7 +131,7 @@ export function createActiveCityColumns(
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon-sm" className="size-8">
+              <Button variant="outline" size="icon-sm" className="size-8">
                 <MoreHorizontal className="size-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -176,9 +183,7 @@ export function createDeactivatedCityColumns(
     ...buildCityDataColumns(sortableHeaders),
     {
       accessorKey: "deactivatedAt",
-      header: sortableHeaders
-        ? sortHeader("Date de désactivation")
-        : "Date de désactivation",
+      ...cityLabeledHeader(sortableHeaders, "Désactivé le"),
       cell: ({ row }) =>
         formatDate(row.original.deactivatedAt, { mode: "date-hour" }),
     },
@@ -192,7 +197,7 @@ export function createDeactivatedCityColumns(
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon-sm" className="size-8">
+              <Button variant="outline" size="icon-sm" className="size-8">
                 <MoreHorizontal className="size-4" />
               </Button>
             </DropdownMenuTrigger>

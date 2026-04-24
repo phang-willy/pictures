@@ -50,14 +50,21 @@ function sortHeader(label: string) {
   return PostColumnSortHeader;
 }
 
+function postLabeledHeader(sortableHeaders: boolean, label: string) {
+  return {
+    header: sortableHeaders ? sortHeader(label) : label,
+    meta: { dataCellLabel: label },
+  };
+}
+
 function buildPostDataColumns(sortableHeaders: boolean): ColumnDef<PostRow>[] {
-  const header = (label: string) =>
-    sortableHeaders ? sortHeader(label) : label;
+  const labeledHeader = (label: string) =>
+    postLabeledHeader(sortableHeaders, label);
 
   return [
     {
       accessorKey: "id",
-      header: header("ID"),
+      ...labeledHeader("ID"),
       cell: ({ row }) => {
         const id = row.getValue("id") as string;
         return (
@@ -74,7 +81,7 @@ function buildPostDataColumns(sortableHeaders: boolean): ColumnDef<PostRow>[] {
     },
     {
       id: "city",
-      header: header("Ville"),
+      ...labeledHeader("Ville"),
       cell: ({ row }) => (
         <span className="inline-flex items-center gap-2">
           <ContryFlag
@@ -91,23 +98,23 @@ function buildPostDataColumns(sortableHeaders: boolean): ColumnDef<PostRow>[] {
     },
     {
       accessorKey: "name",
-      header: header("Post"),
+      ...labeledHeader("Post"),
       cell: ({ row }) => row.original.name,
     },
     {
       accessorKey: "slug",
-      header: header("Slug"),
+      ...labeledHeader("Slug"),
       cell: ({ row }) => row.original.slug,
     },
     {
       accessorKey: "createdAt",
-      header: header("Date de création"),
+      ...labeledHeader("Créé le"),
       cell: ({ row }) =>
         formatDate(row.original.createdAt, { mode: "date-hour" }),
     },
     {
       accessorKey: "updatedAt",
-      header: header("Date de modification"),
+      ...labeledHeader("Modifié le"),
       cell: ({ row }) =>
         formatDate(row.original.updatedAt, { mode: "date-hour" }),
     },
@@ -131,7 +138,7 @@ export function createActivePostColumns(
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon-sm" className="size-8">
+              <Button variant="outline" size="icon-sm" className="size-8">
                 <MoreHorizontal className="size-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -183,9 +190,7 @@ export function createDeactivatedPostColumns(
     ...buildPostDataColumns(sortableHeaders),
     {
       accessorKey: "deactivatedAt",
-      header: sortableHeaders
-        ? sortHeader("Date de désactivation")
-        : "Date de désactivation",
+      ...postLabeledHeader(sortableHeaders, "Désactivé le"),
       cell: ({ row }) =>
         formatDate(row.original.deactivatedAt, { mode: "date-hour" }),
     },
@@ -199,7 +204,7 @@ export function createDeactivatedPostColumns(
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon-sm" className="size-8">
+              <Button variant="outline" size="icon-sm" className="size-8">
                 <MoreHorizontal className="size-4" />
               </Button>
             </DropdownMenuTrigger>
