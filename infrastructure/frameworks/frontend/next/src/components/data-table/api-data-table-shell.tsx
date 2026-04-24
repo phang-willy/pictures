@@ -26,14 +26,28 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-import type { ApiDataTableSearchField } from "@/types/api-data-table.types";
-
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+
+import type { ApiDataTableSearchField } from "@/types/api-data-table.types";
+
+function resolveDataCellAttribute<TData>(
+  columnDef: ColumnDef<TData, unknown>,
+  columnId: string,
+): string {
+  const fromMeta = columnDef.meta?.dataCellLabel;
+  if (typeof fromMeta === "string" && fromMeta.length > 0) {
+    return fromMeta;
+  }
+  const h = columnDef.header;
+  if (typeof h === "string") {
+    return h;
+  }
+  return columnId;
+}
 
 type ToolbarProps = {
   showSearch: boolean;
@@ -61,7 +75,7 @@ export function ApiDataTableToolbar(_props: ToolbarProps) {
   } = _props;
 
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex flex-col md:flex-row items-center justify-between gap-2">
       {showSearch && searchField ? (
         <Input
           placeholder={searchField.placeholder}
@@ -73,7 +87,7 @@ export function ApiDataTableToolbar(_props: ToolbarProps) {
           disabled={searchDisabled}
         />
       ) : null}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-row-reverse md:flex-row justify-end w-full md:w-auto">
         <span className="text-sm text-muted-foreground whitespace-nowrap">
           Lignes
         </span>
@@ -149,7 +163,13 @@ export function ApiDataTableDataPanel<TData>({
                 className="odd:bg-muted/50 hover:bg-muted/80"
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <TableCell
+                    key={cell.id}
+                    data-cell={resolveDataCellAttribute(
+                      cell.column.columnDef,
+                      cell.column.id,
+                    )}
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
