@@ -9,23 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AdminGeometryMap } from "@/components/admin/admin-geometry-map";
 import { ContryFlag } from "@/components/admin/country-flag";
 import { ArrowLeftIcon } from "lucide-react";
+import { DetailRow } from "@/components/admin/detail-row";
 
 export const dynamic = "force-dynamic";
-
-function DetailRow({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | React.ReactNode;
-}) {
-  return (
-    <div className="grid gap-1 border-b border-border/60 py-2 last:border-0 sm:grid-cols-[minmax(8rem,14rem)_1fr] sm:gap-4">
-      <dt className="font-medium text-muted-foreground">{label}</dt>
-      <dd className="min-w-0 wrap-break-word">{value}</dd>
-    </div>
-  );
-}
 
 export default async function AdminCountryViewPage({
   params,

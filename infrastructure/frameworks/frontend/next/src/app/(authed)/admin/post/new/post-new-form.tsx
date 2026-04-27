@@ -28,8 +28,8 @@ import { ContryFlag } from "@/components/admin/country-flag";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircleIcon } from "lucide-react";
 import { slugify } from "@/domain/utils/slugify";
-import { cn } from "@/lib/utils";
 import type { CityHttpDetail } from "@/types/admin-city.types";
+import Tiptap from "@/components/tiptap";
 
 type ExistsResponse = {
   exists: boolean;
@@ -40,10 +40,6 @@ type ExistsResponse = {
     slug: string;
   };
 };
-
-const textareaClassName = cn(
-  "flex min-h-[88px] w-full rounded-lg border border-input bg-card px-2.5 py-2 text-base transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 md:text-sm dark:bg-input/30",
-);
 
 export function PostNewForm({ cities }: { cities: CityHttpDetail[] }) {
   const router = useRouter();
@@ -359,14 +355,10 @@ export function PostNewForm({ cities }: { cities: CityHttpDetail[] }) {
                   Description
                 </FieldLabel>
                 <FieldContent>
-                  <textarea
-                    id="new-post-description"
+                  <Tiptap
                     value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    rows={4}
-                    maxLength={8000}
-                    className={textareaClassName}
-                    placeholder="Optionnel"
+                    onChange={setDescription}
+                    className="min-h-[120px] rounded-lg border border-input bg-card px-2.5 py-2"
                   />
                 </FieldContent>
               </Field>

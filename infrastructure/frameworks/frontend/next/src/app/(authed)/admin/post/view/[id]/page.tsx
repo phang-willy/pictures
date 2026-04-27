@@ -9,23 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CityPointMap } from "@/components/admin/city-point-map";
 import { ContryFlag } from "@/components/admin/country-flag";
+import { PostDescriptionHtml } from "@/components/admin/post-description-html";
+import { DetailRow } from "@/components/admin/detail-row";
 
 export const dynamic = "force-dynamic";
-
-function DetailRow({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | React.ReactNode;
-}) {
-  return (
-    <div className="grid gap-1 border-b border-border/60 py-2 last:border-0 sm:grid-cols-[minmax(8rem,14rem)_1fr] sm:gap-4">
-      <dt className="font-medium text-muted-foreground">{label}</dt>
-      <dd className="min-w-0 wrap-break-word">{value}</dd>
-    </div>
-  );
-}
 
 export default async function AdminPostViewPage({
   params,
@@ -83,8 +70,15 @@ export default async function AdminPostViewPage({
             <DetailRow label="Nom" value={post.name} />
             <DetailRow label="Slug" value={post.slug} />
             <DetailRow
+              layout="stacked"
               label="Description"
-              value={post.description?.trim() ? post.description : "-"}
+              value={
+                post.description?.trim() ? (
+                  <PostDescriptionHtml html={post.description} />
+                ) : (
+                  "-"
+                )
+              }
             />
             <DetailRow label="Latitude" value={post.latitude.toFixed(6)} />
             <DetailRow label="Longitude" value={post.longitude.toFixed(6)} />
