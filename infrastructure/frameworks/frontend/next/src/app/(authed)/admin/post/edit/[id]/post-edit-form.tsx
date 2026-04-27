@@ -30,7 +30,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircleIcon } from "lucide-react";
 import { ContryFlag } from "@/components/admin/country-flag";
 import { slugify } from "@/domain/utils/slugify";
-import { cn } from "@/lib/utils";
+import Tiptap from "@/components/tiptap";
 
 type ExistsResponse = {
   exists: boolean;
@@ -41,10 +41,6 @@ type ExistsResponse = {
     slug: string;
   };
 };
-
-const textareaClassName = cn(
-  "flex min-h-[88px] w-full rounded-lg border border-input bg-card px-2.5 py-2 text-base transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 md:text-sm dark:bg-input/30",
-);
 
 function parseCoord(value: unknown): number | null {
   if (typeof value === "number" && Number.isFinite(value)) {
@@ -324,14 +320,10 @@ export function PostEditForm({
               <Field>
                 <FieldLabel htmlFor="post-description">Description</FieldLabel>
                 <FieldContent>
-                  <textarea
-                    id="post-description"
+                  <Tiptap
                     value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    rows={4}
-                    maxLength={8000}
-                    className={textareaClassName}
-                    placeholder="Optionnel"
+                    onChange={setDescription}
+                    className="min-h-[120px] rounded-lg border border-input bg-card px-2.5 py-2"
                   />
                 </FieldContent>
               </Field>
