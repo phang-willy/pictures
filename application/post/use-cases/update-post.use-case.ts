@@ -1,4 +1,5 @@
 import type { UpdatePostInput } from '@/application/post/dto/update-post.input';
+import { assertPostShortDescriptionLength } from '@/application/post/post-short-description.policy';
 import { CheckPostDuplicateUseCase } from '@/application/post/use-cases/check-post-duplicate.use-case';
 import type { CityRepository } from '@/domain/city/repositories/city.repository';
 import { PostEntity } from '@/domain/post/entities/post.entity';
@@ -57,7 +58,20 @@ export class UpdatePostUseCase {
         ? existing.description
         : input.description === null
           ? null
-          : String(input.description).trim() || null;
+          : (() => {
+              const t = String(input.description).trim();
+              if (!t) {
+                return null;
+              }
+              return assertPostShortDescriptionLength(t);
+            })();
+
+    const nextContent =
+      input.content === undefined
+        ? existing.content
+        : input.content === null
+          ? null
+          : String(input.content).trim() || null;
 
     const updated = new PostEntity({
       id: existing.id,
@@ -65,6 +79,7 @@ export class UpdatePostUseCase {
       name: nextName,
       slug: new PostSlugVo(nextSlug),
       description: nextDescription,
+      content: nextContent,
       latitude: nextLatitude,
       longitude: nextLongitude,
       deactivatedAt: nextDeactivatedAt,

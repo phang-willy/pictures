@@ -1,4 +1,6 @@
-import type { CityHttpDetail } from "@/types/admin-city.types";
+import type { CityHttpDetail } from "@/types/city.types.ts";
+import type { CountryListHttpItem } from "@/types/country.types";
+import type { PostHttpDetail } from "@/types/post.types";
 
 function resolveApiBaseUrl(): string {
   if (typeof window === "undefined") {
@@ -117,7 +119,7 @@ export function serverFetchApi(
 }
 
 /**
- * RSC : réponse Nest `success({ item })` — 404 → `null`.
+ * RSC : réponse Nest `success({ item })` - 404 → `null`.
  */
 export async function serverFetchApiItem<T>(
   path: string,
@@ -161,20 +163,28 @@ export async function serverFetchApiItems<T>(
 }
 
 /**
- * RSC : agrège toutes les pages `GET /api/city` (villes actives) jusqu’à `has_next` faux.
+ * RSC : agrège toutes les pages `GET /api/city` jusqu’à `has_next` faux.
+ * N’inclut que les villes **actives** (`activate=true`, puis filtre défensif sur `deactivatedAt`).
+ * Passe `countryId` pour limiter aux villes d’un pays (`country_id`).
  * L’API borne `per_page` à 100 ; ce helper évite de tronquer la liste dans les formulaires.
  */
 export async function serverFetchAllActiveCities(
   cookieHeader: string | undefined,
+  opts?: { countryId?: string },
 ): Promise<CityHttpDetail[]> {
   const all: CityHttpDetail[] = [];
   let page = 1;
   const perPage = 100;
   for (;;) {
-    const res = await serverFetchApi(
-      `/api/city?page=${page}&per_page=${perPage}`,
-      cookieHeader,
-    );
+    const qs = new URLSearchParams({
+      page: String(page),
+      per_page: String(perPage),
+      activate: "true",
+    });
+    if (opts?.countryId) {
+      qs.set("country_id", opts.countryId);
+    }
+    const res = await serverFetchApi(`/api/city?${qs}`, cookieHeader);
     if (!res.ok) {
       throw new Error(`L'API a répondu ${res.status} (liste villes).`);
     }
@@ -185,6 +195,95 @@ export async function serverFetchAllActiveCities(
     };
     if (json.success === false || !Array.isArray(json.items)) {
       throw new Error("Réponse invalide (liste villes).");
+    }
+    all.push(...json.items);
+    if (!json.pagination?.has_next) {
+      break;
+    }
+    page += 1;
+  }
+  return all.filter((c) => c.deactivatedAt == null);
+}
+
+/**
+ * RSC : agrège toutes les pages `GET /api/post` jusqu’à `has_next` faux.
+ * N’inclut que les posts **actifs** (`activate=true`, puis filtre défensif sur `deactivatedAt`).
+ * Passe `cityId` ou `countryId` pour filtrer (`city_id` / `country_id`).
+ */
+export async function serverFetchAllActivePosts(
+  cookieHeader: string | undefined,
+  opts?: { cityId?: string; countryId?: string },
+): Promise<PostHttpDetail[]> {
+  const all: PostHttpDetail[] = [];
+  let page = 1;
+  const perPage = 100;
+  for (;;) {
+    const qs = new URLSearchParams({
+      page: String(page),
+      per_page: String(perPage),
+      activate: "true",
+    });
+    if (opts?.cityId) {
+      qs.set("city_id", opts.cityId);
+    } else if (opts?.countryId) {
+      qs.set("country_id", opts.countryId);
+    }
+    const res = await serverFetchApi(`/api/post?${qs}`, cookieHeader);
+    if (!res.ok) {
+      throw new Error(`L'API a répondu ${res.status} (liste posts).`);
+    }
+    const json = (await res.json()) as {
+      success?: boolean;
+      items?: PostHttpDetail[];
+      pagination?: { has_next?: boolean };
+    };
+    if (json.success === false || !Array.isArray(json.items)) {
+      throw new Error("Réponse invalide (liste posts).");
+    }
+    all.push(...json.items);
+    if (!json.pagination?.has_next) {
+      break;
+    }
+    page += 1;
+  }
+  return all.filter((p) => p.deactivatedAt == null);
+}
+
+/**
+ * RSC : agrège toutes les pages `GET /api/country` jusqu’à `has_next` faux.
+ * N’inclut que les pays **actifs** (`deactivatedAt` null), comme `activate=true` côté API.
+ * Accepte `continent_id` pour ne garder que les pays du continent concerné.
+ */
+export async function serverFetchAllCountries(
+  cookieHeader: string | undefined,
+  opts?: { continentId?: string; geometry?: boolean },
+): Promise<CountryListHttpItem[]> {
+  const all: CountryListHttpItem[] = [];
+  let page = 1;
+  const perPage = 100;
+  for (;;) {
+    const qs = new URLSearchParams({
+      page: String(page),
+      per_page: String(perPage),
+      activate: "true",
+    });
+    if (opts?.continentId) {
+      qs.set("continent_id", opts.continentId);
+    }
+    if (opts?.geometry) {
+      qs.set("geometry", "true");
+    }
+    const res = await serverFetchApi(`/api/country?${qs}`, cookieHeader);
+    if (!res.ok) {
+      throw new Error(`L'API a répondu ${res.status} (liste pays).`);
+    }
+    const json = (await res.json()) as {
+      success?: boolean;
+      items?: CountryListHttpItem[];
+      pagination?: { has_next?: boolean };
+    };
+    if (json.success === false || !Array.isArray(json.items)) {
+      throw new Error("Réponse invalide (liste pays).");
     }
     all.push(...json.items);
     if (!json.pagination?.has_next) {

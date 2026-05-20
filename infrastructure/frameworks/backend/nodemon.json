@@ -12,8 +12,8 @@
     "nest",
     "."
   ],
-  "ext": "ts,json",
+  "ext": "ts,json,prisma",
   "ignore": ["**/node_modules/**", "**/.git/**"],
   "delay": "800",
-  "exec": "node -r ts-node/register/transpile-only -r tsconfig-paths/register -e \"require('./main').bootstrap().catch((e)=>{console.error(e);process.exit(1);})\""
+  "exec": "npx prisma generate --schema prisma/schema.prisma && node -r ts-node/register/transpile-only -r tsconfig-paths/register -e \"require('./main').bootstrap().catch((e)=>{console.error(e);process.exit(1);})\""
 }

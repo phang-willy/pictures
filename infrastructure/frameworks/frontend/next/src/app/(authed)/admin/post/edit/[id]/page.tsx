@@ -7,7 +7,7 @@ import {
   serverFetchAllActiveCities,
   toCookieHeader,
 } from "@/lib/api";
-import type { PostHttpDetail } from "@/types/admin-post.types";
+import type { PostHttpDetail } from "@/types/post.types";
 import { Button } from "@/components/ui/button";
 import { PostEditForm } from "./post-edit-form";
 

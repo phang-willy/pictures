@@ -28,7 +28,7 @@ import { apiFetch } from "@/lib/api";
 import type {
   ContinentOption,
   CountryHttpDetail,
-} from "@/types/admin-country.types";
+} from "@/types/country.types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircleIcon } from "lucide-react";
 import { toast } from "sonner";

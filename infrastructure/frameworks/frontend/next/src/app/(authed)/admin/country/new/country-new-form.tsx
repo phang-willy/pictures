@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { apiFetch } from "@/lib/api";
-import type { ContinentOption } from "@/types/admin-country.types";
+import type { ContinentOption } from "@/types/country.types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircleIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -710,7 +710,7 @@ export function CountryNewForm({
                       size="sm"
                       onClick={acknowledgeDuplicateConflict}
                     >
-                      Compris — vider le formulaire
+                      Compris - vider le formulaire
                     </Button>
                   </AlertDescription>
                 </Alert>
@@ -889,7 +889,7 @@ export function CountryNewForm({
                 geometryType={geomType}
                 geomJson={geomJson}
                 onGeomJsonChange={setGeomJson}
-                ariaLabel={`Nouveau pays — édition géométrie ${name || "pays"} sur le globe`}
+                ariaLabel={`Nouveau pays - édition géométrie ${name || "pays"} sur le globe`}
               />
               <FieldError>{geometryJsonError}</FieldError>
             </FieldContent>

@@ -79,6 +79,7 @@ export class CountryController {
     @Query('page') pageRaw?: string,
     @Query('per_page') perPageRaw?: string,
     @Query('q') q?: string,
+    @Query('continent_id') continentIdRaw?: string,
   ) {
     const includeGeometry = geometry === 'true';
     const page = parsePage(pageRaw);
@@ -90,19 +91,22 @@ export class CountryController {
         : activate === 'false'
           ? 'all'
           : 'active';
-    return this.listCountriesUseCase.execute(mode, includeGeometry, search).then((items) => {
-      const total = items.length;
-      const totalPages = Math.max(1, Math.ceil(total / perPage));
-      const safePage = Math.min(page, totalPages);
-      const start = (safePage - 1) * perPage;
-      const payload = items
-        .slice(start, start + perPage)
-        .map((country) => toCountryListItemHttp(country, includeGeometry));
-      return success({
-        items: payload,
-        pagination: toPagination(safePage, perPage, total),
+    const continentId = continentIdRaw?.trim() || undefined;
+    return this.listCountriesUseCase
+      .execute(mode, includeGeometry, search, continentId)
+      .then((items) => {
+        const total = items.length;
+        const totalPages = Math.max(1, Math.ceil(total / perPage));
+        const safePage = Math.min(page, totalPages);
+        const start = (safePage - 1) * perPage;
+        const payload = items
+          .slice(start, start + perPage)
+          .map((country) => toCountryListItemHttp(country, includeGeometry));
+        return success({
+          items: payload,
+          pagination: toPagination(safePage, perPage, total),
+        });
       });
-    });
   }
 
   @Get('exists')

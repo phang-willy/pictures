@@ -17,6 +17,7 @@ import {
   FieldTitle,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -24,11 +25,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { PostHttpDetail } from "@/types/admin-post.types";
-import type { CityHttpDetail } from "@/types/admin-city.types";
+import type { PostHttpDetail } from "@/types/post.types";
+import type { CityHttpDetail } from "@/types/city.types.ts";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircleIcon } from "lucide-react";
-import { ContryFlag } from "@/components/admin/country-flag";
+import { CountryFlag } from "@/components/country-flag";
+import {
+  POST_SHORT_DESCRIPTION_MAX_LEN,
+  POST_SHORT_DESCRIPTION_MIN_LEN,
+} from "@/lib/post-short-description";
+import { normalizeTiptapHtmlForStorage } from "@/lib/tiptap-html";
 import { slugify } from "@/domain/utils/slugify";
 import Tiptap from "@/components/tiptap";
 
@@ -61,7 +67,10 @@ export function PostEditForm({
   const [cityId, setCityId] = useState(post.city.id);
   const [name, setName] = useState(post.name);
   const [slug, setSlug] = useState(post.slug);
-  const [description, setDescription] = useState(post.description ?? "");
+  const [shortDescription, setShortDescription] = useState(
+    post.description ?? "",
+  );
+  const [content, setContent] = useState(post.content ?? "");
   const [latitude, setLatitude] = useState<number | null>(() =>
     parseCoord(post.latitude),
   );
@@ -75,14 +84,28 @@ export function PostEditForm({
   const [existsFetchError, setExistsFetchError] = useState(false);
   const existsCheckGenRef = useRef(0);
 
+  const shortDescLen = shortDescription.trim().length;
+  const shortDescriptionOk =
+    shortDescLen === 0 ||
+    (shortDescLen >= POST_SHORT_DESCRIPTION_MIN_LEN &&
+      shortDescLen <= POST_SHORT_DESCRIPTION_MAX_LEN);
+
   const canSubmit = useMemo(
     () =>
       !!cityId &&
       name.trim().length > 0 &&
       slug.trim().length > 0 &&
+      shortDescriptionOk &&
       latitude !== null &&
       longitude !== null,
-    [cityId, name, slug, latitude, longitude],
+    [
+      cityId,
+      name,
+      slug,
+      shortDescriptionOk,
+      latitude,
+      longitude,
+    ],
   );
 
   const canCheckExists =
@@ -177,6 +200,7 @@ export function PostEditForm({
       return;
     }
     setSaving(true);
+    const normalizedContent = normalizeTiptapHtmlForStorage(content);
     try {
       const res = await apiFetch(`/api/post/${encodeURIComponent(post.id)}`, {
         method: "PATCH",
@@ -185,7 +209,11 @@ export function PostEditForm({
           cityId,
           name: name.trim(),
           slug: slugify(slug),
-          description: description.trim() || null,
+          description:
+            shortDescription.trim().length === 0
+              ? null
+              : shortDescription.trim(),
+          content: normalizedContent || null,
           latitude,
           longitude,
         }),
@@ -270,7 +298,7 @@ export function PostEditForm({
                       {cities.map((city) => (
                         <SelectItem key={city.id} value={city.id}>
                           <span className="flex items-center gap-2">
-                            <ContryFlag
+                            <CountryFlag
                               name={city.country.name}
                               iso2={city.country.iso2}
                               show_name={false}
@@ -318,11 +346,42 @@ export function PostEditForm({
                 </FieldContent>
               </Field>
               <Field>
-                <FieldLabel htmlFor="post-description">Description</FieldLabel>
+                <FieldLabel htmlFor="post-short-description">
+                  Description (court)
+                </FieldLabel>
+                <FieldContent className="space-y-1">
+                  <textarea
+                    id="post-short-description"
+                    value={shortDescription}
+                    onChange={(event) =>
+                      setShortDescription(
+                        event.target.value.slice(
+                          0,
+                          POST_SHORT_DESCRIPTION_MAX_LEN,
+                        ),
+                      )
+                    }
+                    rows={4}
+                    maxLength={POST_SHORT_DESCRIPTION_MAX_LEN}
+                    placeholder={`${POST_SHORT_DESCRIPTION_MIN_LEN}–${POST_SHORT_DESCRIPTION_MAX_LEN} caractères si renseignée …`}
+                    className={cn(
+                      "min-h-[72px] w-full resize-y rounded-lg border border-input bg-card px-2.5 py-2 text-base outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30",
+                      shortDescriptionOk ? "" : "border-destructive",
+                    )}
+                  />
+                  <p className="text-muted-foreground text-xs">
+                    {shortDescription.length}/{POST_SHORT_DESCRIPTION_MAX_LEN}{" "}
+                    - vide autorisé ; sinon entre {POST_SHORT_DESCRIPTION_MIN_LEN}{" "}
+                    et {POST_SHORT_DESCRIPTION_MAX_LEN} caractères
+                  </p>
+                </FieldContent>
+              </Field>
+              <Field>
+                <FieldLabel>Contenu</FieldLabel>
                 <FieldContent>
                   <Tiptap
-                    value={description}
-                    onChange={setDescription}
+                    value={content}
+                    onChange={setContent}
                     className="min-h-[120px] rounded-lg border border-input bg-card px-2.5 py-2"
                   />
                 </FieldContent>

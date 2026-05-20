@@ -26,7 +26,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ContryFlag } from "@/components/admin/country-flag";
+import { CountryFlag } from "@/components/country-flag";
 import type { CountryRow } from "@pictures/contracts";
 
 export type { CountryRow };
@@ -93,7 +93,7 @@ function buildCountryDataColumns(
       accessorKey: "name",
       ...labeledHeader("Nom"),
       cell: ({ row }) => (
-        <ContryFlag name={row.original.name} iso2={row.original.iso2} />
+        <CountryFlag name={row.original.name} iso2={row.original.iso2} />
       ),
     },
     {

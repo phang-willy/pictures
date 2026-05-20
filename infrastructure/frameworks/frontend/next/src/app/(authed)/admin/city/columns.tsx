@@ -21,8 +21,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ContryFlag } from "@/components/admin/country-flag";
-import type { CityHttpDetail } from "@/types/admin-city.types";
+import { CountryFlag } from "@/components/country-flag";
+import type { CityHttpDetail } from "@/types/city.types.ts";
 import {
   Tooltip,
   TooltipContent,
@@ -93,7 +93,7 @@ function buildCityDataColumns(sortableHeaders: boolean): ColumnDef<CityRow>[] {
       id: "country",
       ...labeledHeader("Pays"),
       cell: ({ row }) => (
-        <ContryFlag
+        <CountryFlag
           name={row.original.country.name}
           iso2={row.original.country.iso2}
         />

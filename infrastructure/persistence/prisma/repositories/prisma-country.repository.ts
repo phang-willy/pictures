@@ -257,6 +257,9 @@ export class PrismaCountryRepository implements CountryRepository {
             updatedAt: true,
           },
         },
+        geometry: {
+          select: { type: true, coordinate: true },
+        },
       },
     });
     if (!row || row.id === PrismaCountryRepository.NULL_UUID) {
@@ -330,6 +333,7 @@ export class PrismaCountryRepository implements CountryRepository {
     mode: 'active' | 'inactive' | 'all',
     includeGeometry: boolean,
     q?: string,
+    continentId?: string,
   ) {
     const modeWhere =
       mode === 'active'
@@ -368,7 +372,13 @@ export class PrismaCountryRepository implements CountryRepository {
           }
         : null;
 
-    const parts = [modeWhere, searchWhere].filter(
+    const trimmedContinentId = continentId?.trim();
+    const continentWhere =
+      trimmedContinentId && trimmedContinentId.length > 0
+        ? { continentId: trimmedContinentId }
+        : null;
+
+    const parts = [modeWhere, searchWhere, continentWhere].filter(
       (p): p is NonNullable<typeof p> => p != null,
     );
     const where: Prisma.CountryWhereInput = {

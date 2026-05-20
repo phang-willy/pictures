@@ -1,13 +1,14 @@
 import { cn } from "@/lib/utils";
+import { normalizePostContentHtml } from "@/lib/post-content-html";
 
-type PostDescriptionHtmlProps = {
+type PostContentHtmlProps = {
   html: string;
   className?: string;
 };
 
-export function PostDescriptionHtml({ html, className }: PostDescriptionHtmlProps) {
-  const trimmed = html.trim();
-  if (!trimmed) {
+export function PostContentHtml({ html, className }: PostContentHtmlProps) {
+  const sanitized = normalizePostContentHtml(html);
+  if (!sanitized) {
     return null;
   }
 
@@ -25,7 +26,7 @@ export function PostDescriptionHtml({ html, className }: PostDescriptionHtmlProp
         "[&_hr]:my-4 [&_hr]:border-border",
         className,
       )}
-      dangerouslySetInnerHTML={{ __html: trimmed }}
+      dangerouslySetInnerHTML={{ __html: sanitized }}
     />
   );
 }

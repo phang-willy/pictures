@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/components/theme-provider";
 import maplibregl from "maplibre-gl";
 import type { Map as MapLibreMap, MapLayerMouseEvent } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -57,7 +57,11 @@ function parseCityListPayload(data: unknown): ApiCity[] {
       longitude?: unknown;
       countryId?: unknown;
       country?: { id?: unknown };
+      deactivatedAt?: unknown;
     };
+    if (row.deactivatedAt != null) {
+      continue;
+    }
     const id = typeof row.id === "string" ? row.id : null;
     const name = typeof row.name === "string" ? row.name : null;
     const slug = typeof row.slug === "string" ? row.slug : null;
@@ -180,7 +184,11 @@ function parsePostListPayload(data: unknown): ApiPost[] {
       longitude?: unknown;
       cityId?: unknown;
       city?: { id?: unknown };
+      deactivatedAt?: unknown;
     };
+    if (row.deactivatedAt != null) {
+      continue;
+    }
     const id = typeof row.id === "string" ? row.id : null;
     const name = typeof row.name === "string" ? row.name : null;
     const slug = typeof row.slug === "string" ? row.slug : null;
@@ -585,7 +593,7 @@ export function HomeGlobeMap() {
       const countryQuery = countryKey.countryId
         ? `country_id=${encodeURIComponent(countryKey.countryId)}`
         : `country_slug=${encodeURIComponent(countryKey.countrySlug ?? "")}`;
-      const query = `${countryQuery}&per_page=100`;
+      const query = `${countryQuery}&per_page=100&activate=true`;
       const cachedCities = cityCache.get(cacheKey);
       if (cachedCities) {
         applyMarkersForSelectedCountry();
@@ -630,7 +638,9 @@ export function HomeGlobeMap() {
       }
       try {
         const response = await fetch(
-          apiUrl(`/api/post?city_id=${encodeURIComponent(cityId)}&per_page=100`),
+          apiUrl(
+            `/api/post?city_id=${encodeURIComponent(cityId)}&per_page=100&activate=true`,
+          ),
         );
         if (!response.ok) {
           throw new Error("post api fetch failed");

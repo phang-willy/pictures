@@ -1,17 +1,20 @@
-type MaplibreMapNewProps = {
+import maplibregl from "maplibre-gl";
+
+export type MaplibreMapNewProps = {
   container: HTMLElement;
   initialStyle: string;
   center: [number, number];
   zoom?: number;
+  /** Si défini, remplace le comportement par défaut du contrôle d’attribution MapLibre. */
+  attributionControl?: false | { compact?: boolean; customAttribution?: string };
 };
-
-import maplibregl from "maplibre-gl";
 
 export function maplibreMapNew({
   container,
   initialStyle,
   center,
   zoom,
+  attributionControl,
 }: MaplibreMapNewProps): maplibregl.Map {
   return new maplibregl.Map({
     container,
@@ -20,6 +23,7 @@ export function maplibreMapNew({
     zoom: zoom ?? 9,
     minZoom: 0,
     maxZoom: 20,
+    ...(attributionControl !== undefined ? { attributionControl } : {}),
     locale: {
       "Map.Title": "Carte",
       "NavigationControl.ResetBearing":

@@ -2,7 +2,7 @@ import type { Map } from "maplibre-gl";
 
 /**
  * Après `setStyle`, changement de layout ou thème, le canvas MapLibre peut
- * garder une mauvaise taille — double rAF + resize corrige le décalage.
+ * garder une mauvaise taille - double rAF + resize corrige le décalage.
  */
 export function scheduleMapResize(map: Map): void {
   requestAnimationFrame(() => {

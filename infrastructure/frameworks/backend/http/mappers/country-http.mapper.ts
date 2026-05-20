@@ -1,7 +1,7 @@
 import type { CountryEntity } from '@/domain/country/entities/country.entity';
 
 /**
- * Objet JSON pour `GET /country/:id` — pas l’instance d’entité (sinon sérialisation `{ props: … }`).
+ * Objet JSON pour `GET /country/:id` - pas l’instance d’entité (sinon sérialisation `{ props: … }`).
  */
 export function toCountryDetailHttp(country: CountryEntity, includeGeometry: boolean) {
   const data = country.toPrimitives();

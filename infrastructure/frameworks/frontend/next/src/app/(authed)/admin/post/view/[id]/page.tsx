@@ -3,13 +3,13 @@ import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { ArrowLeftIcon } from "lucide-react";
 import { serverFetchApiItem, toCookieHeader } from "@/lib/api";
-import type { PostHttpDetail } from "@/types/admin-post.types";
+import type { PostHttpDetail } from "@/types/post.types";
 import { formatDate } from "@/lib/format-date";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CityPointMap } from "@/components/admin/city-point-map";
-import { ContryFlag } from "@/components/admin/country-flag";
-import { PostDescriptionHtml } from "@/components/admin/post-description-html";
+import { CountryFlag } from "@/components/country-flag";
+import { PostContentHtml } from "@/components/admin/post-content-html";
 import { DetailRow } from "@/components/admin/detail-row";
 
 export const dynamic = "force-dynamic";
@@ -55,7 +55,7 @@ export default async function AdminPostViewPage({
               label="Ville"
               value={
                 <span className="inline-flex flex-wrap items-center gap-2">
-                  <ContryFlag
+                  <CountryFlag
                     name={post.city.country.name}
                     iso2={post.city.country.iso2}
                     show_name={false}
@@ -71,10 +71,21 @@ export default async function AdminPostViewPage({
             <DetailRow label="Slug" value={post.slug} />
             <DetailRow
               layout="stacked"
-              label="Description"
+              label="Description (court)"
               value={
                 post.description?.trim() ? (
-                  <PostDescriptionHtml html={post.description} />
+                  <span className="whitespace-pre-wrap">{post.description}</span>
+                ) : (
+                  "-"
+                )
+              }
+            />
+            <DetailRow
+              layout="stacked"
+              label="Contenu"
+              value={
+                post.content?.trim() ? (
+                  <PostContentHtml html={post.content} />
                 ) : (
                   "-"
                 )

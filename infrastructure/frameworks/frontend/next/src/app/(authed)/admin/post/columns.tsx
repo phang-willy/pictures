@@ -21,8 +21,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ContryFlag } from "@/components/admin/country-flag";
-import type { PostHttpDetail } from "@/types/admin-post.types";
+import { CountryFlag } from "@/components/country-flag";
+import type { PostHttpDetail } from "@/types/post.types";
 import {
   Tooltip,
   TooltipContent,
@@ -84,7 +84,7 @@ function buildPostDataColumns(sortableHeaders: boolean): ColumnDef<PostRow>[] {
       ...labeledHeader("Ville"),
       cell: ({ row }) => (
         <span className="inline-flex items-center gap-2">
-          <ContryFlag
+          <CountryFlag
             name={row.original.city.country.name}
             iso2={row.original.city.country.iso2}
             show_name={false}

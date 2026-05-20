@@ -24,10 +24,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { CityHttpDetail } from "@/types/admin-city.types";
+import type { CityHttpDetail } from "@/types/city.types.ts";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircleIcon } from "lucide-react";
-import { ContryFlag } from "@/components/admin/country-flag";
+import { CountryFlag } from "@/components/country-flag";
 import { slugify } from "@/domain/utils/slugify";
 
 type CountryOption = { id: string; name: string; iso2: string };
@@ -314,7 +314,7 @@ export function CityEditForm({
                     <SelectContent className="w-(--radix-select-trigger-width)">
                       {countries.map((country) => (
                         <SelectItem key={country.id} value={country.id}>
-                          <ContryFlag name={country.name} iso2={country.iso2} />
+                          <CountryFlag name={country.name} iso2={country.iso2} />
                         </SelectItem>
                       ))}
                     </SelectContent>

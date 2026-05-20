@@ -7,6 +7,7 @@ export type PostEntityProps = {
   name: string;
   slug: PostSlugVo;
   description: string | null;
+  content: string | null;
   latitude: number;
   longitude: number;
   deactivatedAt: Date | null;
@@ -37,6 +38,10 @@ export class PostEntity {
     return this.props.description;
   }
 
+  get content() {
+    return this.props.content;
+  }
+
   get latitude() {
     return this.props.latitude;
   }
@@ -56,6 +61,7 @@ export class PostEntity {
       name: this.props.name,
       slug: this.props.slug.value,
       description: this.props.description,
+      content: this.props.content,
       latitude: this.props.latitude,
       longitude: this.props.longitude,
       deactivatedAt: this.props.deactivatedAt,
