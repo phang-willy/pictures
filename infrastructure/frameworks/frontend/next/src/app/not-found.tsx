@@ -4,7 +4,7 @@ import { appName } from "@/config/app-name";
 
 export const metadata: Metadata = {
   title: "Page introuvable",
-  description: `Page introuvable — ${appName}`,
+  description: `Page introuvable - ${appName}`,
 };
 
 export default function NotFound() {

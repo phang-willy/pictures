@@ -10,13 +10,18 @@ import { Toaster } from "@/components/ui/sonner";
 const outfitHeading = Outfit({
   subsets: ["latin"],
   variable: "--font-heading",
+  preload: false
 });
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  preload: false
+});
 
 export const metadata: Metadata = {
   title: {
-    default: `${appName} - Home`,
+    default: `${appName} - Accueil`,
     template: `${appName} - %s`,
   },
   description: `${appName} web application`,
@@ -24,7 +29,7 @@ export const metadata: Metadata = {
     icon: "/favicon.ico",
   },
   openGraph: {
-    title: `${appName} - Home`,
+    title: `${appName} - Accueil`,
     description: `${appName} web application`,
     siteName: appName,
     type: "website",

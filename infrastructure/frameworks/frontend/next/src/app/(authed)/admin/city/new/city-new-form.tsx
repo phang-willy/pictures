@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ContryFlag } from "@/components/admin/country-flag";
+import { CountryFlag } from "@/components/country-flag";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircleIcon } from "lucide-react";
 import { slugify } from "@/domain/utils/slugify";
@@ -324,7 +324,7 @@ export function CityNewForm({
                       size="sm"
                       onClick={acknowledgeDuplicateConflict}
                     >
-                      Compris — vider le formulaire
+                      Compris - vider le formulaire
                     </Button>
                   </AlertDescription>
                 </Alert>
@@ -346,7 +346,7 @@ export function CityNewForm({
                     <SelectContent className="w-(--radix-select-trigger-width)">
                       {countries.map((country) => (
                         <SelectItem key={country.id} value={country.id}>
-                          <ContryFlag name={country.name} iso2={country.iso2} />
+                          <CountryFlag name={country.name} iso2={country.iso2} />
                         </SelectItem>
                       ))}
                     </SelectContent>

@@ -2,12 +2,12 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { serverFetchApiItem, toCookieHeader } from "@/lib/api";
-import type { CountryHttpDetail } from "@/types/admin-country.types";
+import type { CountryHttpDetail } from "@/types/country.types";
 import { formatDate } from "@/lib/format-date";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AdminGeometryMap } from "@/components/admin/admin-geometry-map";
-import { ContryFlag } from "@/components/admin/country-flag";
+import { CountryFlag } from "@/components/country-flag";
 import { ArrowLeftIcon } from "lucide-react";
 import { DetailRow } from "@/components/admin/detail-row";
 
@@ -55,7 +55,7 @@ export default async function AdminCountryViewPage({
             <DetailRow label="Continent" value={continentLabel} />
             <DetailRow
               label="Nom"
-              value={<ContryFlag name={country.name} iso2={country.iso2} />}
+              value={<CountryFlag name={country.name} iso2={country.iso2} />}
             />
             <DetailRow label="Slug" value={country.slug} />
             <DetailRow label="ISO 2" value={country.iso2} />

@@ -9,6 +9,7 @@ export function toPostListItemHttp(post: PostEntity) {
     name: data.name,
     slug: data.slug,
     description: data.description,
+    content: data.content,
     latitude: data.latitude,
     longitude: data.longitude,
     deactivatedAt: data.deactivatedAt,

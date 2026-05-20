@@ -17,6 +17,7 @@ import {
   FieldTitle,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -24,11 +25,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ContryFlag } from "@/components/admin/country-flag";
+import { CountryFlag } from "@/components/country-flag";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircleIcon } from "lucide-react";
+import {
+  POST_SHORT_DESCRIPTION_MAX_LEN,
+  POST_SHORT_DESCRIPTION_MIN_LEN,
+} from "@/lib/post-short-description";
+import { normalizeTiptapHtmlForStorage } from "@/lib/tiptap-html";
 import { slugify } from "@/domain/utils/slugify";
-import type { CityHttpDetail } from "@/types/admin-city.types";
+import type { CityHttpDetail } from "@/types/city.types.ts";
 import Tiptap from "@/components/tiptap";
 
 type ExistsResponse = {
@@ -46,7 +52,8 @@ export function PostNewForm({ cities }: { cities: CityHttpDetail[] }) {
   const [cityId, setCityId] = useState(cities[0]?.id ?? "");
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
-  const [description, setDescription] = useState("");
+  const [shortDescription, setShortDescription] = useState("");
+  const [content, setContent] = useState("");
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -58,14 +65,27 @@ export function PostNewForm({ cities }: { cities: CityHttpDetail[] }) {
   const [existsFetchError, setExistsFetchError] = useState(false);
   const existsCheckGenRef = useRef(0);
 
+  const shortDescLen = shortDescription.trim().length;
+  const shortDescriptionOk =
+    shortDescLen >= POST_SHORT_DESCRIPTION_MIN_LEN &&
+    shortDescLen <= POST_SHORT_DESCRIPTION_MAX_LEN;
+
   const canSubmit = useMemo(
     () =>
       !!cityId &&
       name.trim().length > 0 &&
       slug.trim().length > 0 &&
+      shortDescriptionOk &&
       latitude !== null &&
       longitude !== null,
-    [cityId, name, slug, latitude, longitude],
+    [
+      cityId,
+      name,
+      slug,
+      shortDescriptionOk,
+      latitude,
+      longitude,
+    ],
   );
 
   const canCheckExists =
@@ -104,7 +124,8 @@ export function PostNewForm({ cities }: { cities: CityHttpDetail[] }) {
     setCityId(cities[0]?.id ?? "");
     setName("");
     setSlug("");
-    setDescription("");
+    setShortDescription("");
+    setContent("");
     setLatitude(null);
     setLongitude(null);
   }
@@ -191,6 +212,7 @@ export function PostNewForm({ cities }: { cities: CityHttpDetail[] }) {
       return;
     }
     setSaving(true);
+    const normalizedContent = normalizeTiptapHtmlForStorage(content);
     try {
       const res = await apiFetch("/api/post", {
         method: "POST",
@@ -199,7 +221,8 @@ export function PostNewForm({ cities }: { cities: CityHttpDetail[] }) {
           cityId,
           name: name.trim(),
           slug: slugify(slug),
-          description: description.trim() || null,
+          description: shortDescription.trim(),
+          content: normalizedContent || null,
           latitude,
           longitude,
         }),
@@ -280,7 +303,7 @@ export function PostNewForm({ cities }: { cities: CityHttpDetail[] }) {
                       size="sm"
                       onClick={acknowledgeDuplicateConflict}
                     >
-                      Compris — vider le formulaire
+                      Compris - vider le formulaire
                     </Button>
                   </AlertDescription>
                 </Alert>
@@ -303,7 +326,7 @@ export function PostNewForm({ cities }: { cities: CityHttpDetail[] }) {
                       {cities.map((city) => (
                         <SelectItem key={city.id} value={city.id}>
                           <span className="flex items-center gap-2">
-                            <ContryFlag
+                            <CountryFlag
                               name={city.country.name}
                               iso2={city.country.iso2}
                               show_name={false}
@@ -351,13 +374,46 @@ export function PostNewForm({ cities }: { cities: CityHttpDetail[] }) {
                 </FieldContent>
               </Field>
               <Field>
-                <FieldLabel htmlFor="new-post-description">
-                  Description
+                <FieldLabel htmlFor="new-post-short-description">
+                  Description (court, obligatoire)
                 </FieldLabel>
+                <FieldContent className="space-y-1">
+                  <textarea
+                    id="new-post-short-description"
+                    value={shortDescription}
+                    onChange={(event) =>
+                      setShortDescription(
+                        event.target.value.slice(
+                          0,
+                          POST_SHORT_DESCRIPTION_MAX_LEN,
+                        ),
+                      )
+                    }
+                    rows={4}
+                    required
+                    minLength={POST_SHORT_DESCRIPTION_MIN_LEN}
+                    maxLength={POST_SHORT_DESCRIPTION_MAX_LEN}
+                    placeholder={`${POST_SHORT_DESCRIPTION_MIN_LEN}–${POST_SHORT_DESCRIPTION_MAX_LEN} caractères (méta / chapô)…`}
+                    className={cn(
+                      "min-h-[72px] w-full resize-y rounded-lg border border-input bg-card px-2.5 py-2 text-base outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30",
+                      shortDescriptionOk || shortDescLen === 0
+                        ? ""
+                        : "border-destructive",
+                    )}
+                  />
+                  <p className="text-muted-foreground text-xs">
+                    {shortDescription.length}/{POST_SHORT_DESCRIPTION_MAX_LEN}{" "}
+                    - obligatoire entre {POST_SHORT_DESCRIPTION_MIN_LEN} et{" "}
+                    {POST_SHORT_DESCRIPTION_MAX_LEN} caractères
+                  </p>
+                </FieldContent>
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="new-post-content">Contenu</FieldLabel>
                 <FieldContent>
                   <Tiptap
-                    value={description}
-                    onChange={setDescription}
+                    value={content}
+                    onChange={setContent}
                     className="min-h-[120px] rounded-lg border border-input bg-card px-2.5 py-2"
                   />
                 </FieldContent>

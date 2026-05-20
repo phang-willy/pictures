@@ -42,6 +42,7 @@ export class PostController {
       name: string;
       slug?: string;
       description?: string | null;
+      content?: string | null;
       latitude: number;
       longitude: number;
     },
@@ -63,6 +64,7 @@ export class PostController {
     @Query('activate') activate?: string,
     @Query('inactive_only') inactiveOnly?: string,
     @Query('city_id') cityIdRaw?: string,
+    @Query('country_id') countryIdRaw?: string,
     @Query('page') pageRaw?: string,
     @Query('per_page') perPageRaw?: string,
   ) {
@@ -76,10 +78,15 @@ export class PostController {
     const perPage = parsePerPage(perPageRaw);
 
     const cityId = cityIdRaw?.trim();
+    const countryId = countryIdRaw?.trim();
 
     const items = await this.listPostsUseCase.execute({
       activeOnly: mode === 'active',
-      ...(cityId ? { cityId } : {}),
+      ...(cityId
+        ? { cityId }
+        : countryId
+          ? { countryId }
+          : {}),
     });
     const filteredItems =
       mode === 'inactive'
@@ -147,6 +154,7 @@ export class PostController {
         name: body.name,
         slug: body.slug,
         description: body.description,
+        content: body.content,
         latitude: body.latitude,
         longitude: body.longitude,
         deactivatedAt: body.deactivatedAt,

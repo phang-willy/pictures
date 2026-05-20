@@ -14,7 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ContryFlag } from "@/components/admin/country-flag";
+import { CountryFlag } from "@/components/country-flag";
 import { ApiDataTable, type LoadPageArgs } from "@/components/data-table";
 import { DATA_TABLE_DEFAULT_PAGE_SIZE } from "@/components/ui/data-table";
 import type { CountryRow } from "@pictures/contracts";
@@ -279,7 +279,7 @@ export function CountryAdmin() {
                     <>
                       <p>
                         <span className="font-medium text-foreground flex items-center gap-0.5">
-                          <ContryFlag
+                          <CountryFlag
                             name={countryToDesactivate.name}
                             iso2={countryToDesactivate.iso2}
                             show_name
@@ -363,7 +363,7 @@ export function CountryAdmin() {
                     <>
                       <p>
                         <span className="font-medium text-foreground flex items-center gap-0.5">
-                          <ContryFlag
+                          <CountryFlag
                             name={countryToActivate.name}
                             iso2={countryToActivate.iso2}
                             show_name
@@ -427,7 +427,7 @@ export function CountryAdmin() {
                     <>
                       <p>
                         <span className="font-medium text-foreground flex items-center gap-0.5">
-                          <ContryFlag
+                          <CountryFlag
                             name={countryToDelete.name}
                             iso2={countryToDelete.iso2}
                             show_name

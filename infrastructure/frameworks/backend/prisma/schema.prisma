@@ -132,7 +132,8 @@ model Post {
   city        City                                  @relation(fields: [cityId], references: [id], onDelete: Restrict)
   name        String                                @db.VarChar(255)
   slug        String                                @db.VarChar(255)
-  description String?
+  description String?                               @db.VarChar(160)
+  content     String?
   latitude    Float                                 @db.DoublePrecision
   longitude   Float                                 @db.DoublePrecision
   location    Unsupported("geography(Point, 4326)")?

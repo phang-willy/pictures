@@ -5,7 +5,7 @@ import { CameraIcon, EarthIcon, HistoryIcon, Map, MapPin, X } from "lucide-react
 
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
-import { ContryFlag } from "./admin/country-flag";
+import { CountryFlag } from "./country-flag";
 
 type MapHistoryProps = {
   selectedContinentName: string | null;
@@ -106,7 +106,7 @@ export function MapHistory({
                     className="h-auto justify-start text-left"
                   >
                     {selectedCountryIso2 ? (
-                      <ContryFlag
+                      <CountryFlag
                         name={selectedCountryName}
                         iso2={selectedCountryIso2}
                         className="flex items-center gap-1.5"

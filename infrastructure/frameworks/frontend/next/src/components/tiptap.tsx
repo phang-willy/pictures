@@ -22,6 +22,7 @@ import {
   FieldLabel,
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
+import { normalizeTiptapHtmlForStorage } from '@/lib/tiptap-html'
 import {
   Select,
   SelectContent,
@@ -71,7 +72,11 @@ const Tiptap = ({ value, onChange, className }: TiptapProps) => {
     // Don't render immediately on the server to avoid SSR issues
     immediatelyRender: false,
     onUpdate: ({ editor: currentEditor }) => {
-      onChange(currentEditor.getHTML())
+      onChange(
+        currentEditor.isEmpty
+          ? ''
+          : normalizeTiptapHtmlForStorage(currentEditor.getHTML()),
+      )
     },
   })
 

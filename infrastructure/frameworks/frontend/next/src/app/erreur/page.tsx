@@ -24,7 +24,7 @@ export async function generateMetadata({
   const status = parseStatus(params.code) ?? 400;
   return {
     title: `${appName} - Erreur ${status}`,
-    description: `${appName} — Erreur HTTP ${status}`,
+    description: `${appName} - Erreur HTTP ${status}`,
   };
 }
 

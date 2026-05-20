@@ -46,6 +46,7 @@ type PostRow = {
   name: string;
   slug: string;
   description: string | null;
+  content: string | null;
   latitude: number;
   longitude: number;
   deactivatedAt: Date | null;
@@ -99,6 +100,7 @@ export class PrismaPostRepository implements PostRepository {
       name: row.name,
       slug: new PostSlugVo(row.slug),
       description: row.description,
+      content: row.content,
       latitude: row.latitude,
       longitude: row.longitude,
       deactivatedAt: row.deactivatedAt,
@@ -112,6 +114,7 @@ export class PrismaPostRepository implements PostRepository {
     name: true,
     slug: true,
     description: true,
+    content: true,
     latitude: true,
     longitude: true,
     deactivatedAt: true,
@@ -163,6 +166,7 @@ export class PrismaPostRepository implements PostRepository {
           name: p.name,
           slug: p.slug,
           description: p.description,
+          content: p.content,
           latitude: p.latitude,
           longitude: p.longitude,
           deactivatedAt: p.deactivatedAt,
@@ -194,6 +198,7 @@ export class PrismaPostRepository implements PostRepository {
           name: p.name,
           slug: p.slug,
           description: p.description,
+          content: p.content,
           latitude: p.latitude,
           longitude: p.longitude,
           deactivatedAt: p.deactivatedAt,
@@ -238,6 +243,18 @@ export class PrismaPostRepository implements PostRepository {
     const rows = await this.prisma.post.findMany({
       where: {
         cityId,
+        ...(activeOnly ? { deactivatedAt: null } : {}),
+      },
+      orderBy: { name: 'asc' },
+      select: this.baseSelect,
+    });
+    return rows.map((row: PostRow) => this.toDomain(row));
+  }
+
+  async findByCountryId(countryId: string, activeOnly: boolean): Promise<PostEntity[]> {
+    const rows = await this.prisma.post.findMany({
+      where: {
+        city: { countryId },
         ...(activeOnly ? { deactivatedAt: null } : {}),
       },
       orderBy: { name: 'asc' },

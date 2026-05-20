@@ -1,4 +1,5 @@
 import type { CreatePostInput } from '@/application/post/dto/create-post.input';
+import { assertPostShortDescriptionLength } from '@/application/post/post-short-description.policy';
 import { CheckPostDuplicateUseCase } from '@/application/post/use-cases/check-post-duplicate.use-case';
 import type { CityRepository } from '@/domain/city/repositories/city.repository';
 import { PostEntity } from '@/domain/post/entities/post.entity';
@@ -30,12 +31,21 @@ export class CreatePostUseCase {
       throw new Error(`Post already exists (conflicting ${duplicate.conflicts.join(', ')}).`);
     }
 
-    const description =
-      input.description === undefined
+    if (input.description === undefined || input.description === null) {
+      throw new Error(
+        'La description est obligatoire (120 à 160 caractères).',
+      );
+    }
+    const description = assertPostShortDescriptionLength(
+      String(input.description),
+    );
+
+    const content =
+      input.content === undefined
         ? null
-        : input.description === null
+        : input.content === null
           ? null
-          : String(input.description).trim() || null;
+          : String(input.content).trim() || null;
 
     const now = new Date();
     const entity = new PostEntity({
@@ -44,6 +54,7 @@ export class CreatePostUseCase {
       name,
       slug: new PostSlugVo(candidateSlug),
       description,
+      content,
       latitude: input.latitude,
       longitude: input.longitude,
       deactivatedAt: null,

@@ -7,7 +7,13 @@ export class ListCountriesUseCase {
     mode: 'active' | 'inactive' | 'all' = 'active',
     includeGeometry = false,
     search?: string,
+    continentId?: string,
   ) {
-    return this.countryRepository.list(mode, includeGeometry, search);
+    return this.countryRepository.list(
+      mode,
+      includeGeometry,
+      search,
+      continentId,
+    );
   }
 }

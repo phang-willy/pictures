@@ -9,11 +9,11 @@ import {
 import type {
   ContinentOption,
   CountryHttpDetail,
-} from "@/types/admin-country.types";
+} from "@/types/country.types";
 import { Button } from "@/components/ui/button";
 import { CountryEditForm } from "./country-edit-form";
 import { ArrowLeftIcon } from "lucide-react";
-import { ContryFlag } from "@/components/admin/country-flag";
+import { CountryFlag } from "@/components/country-flag";
 export const dynamic = "force-dynamic";
 
 export default async function AdminCountryEditPage({
@@ -47,7 +47,7 @@ export default async function AdminCountryEditPage({
           </Link>
         </Button>
         <h1 className="text-2xl font-semibold flex items-center gap-2">
-          Modifier : <ContryFlag name={country.name} iso2={country.iso2} />
+          Modifier : <CountryFlag name={country.name} iso2={country.iso2} />
         </h1>
       </div>
       <CountryEditForm country={country} continents={continents} />{" "}

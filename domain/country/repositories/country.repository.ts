@@ -15,6 +15,7 @@ export interface CountryRepository {
     mode: 'active' | 'inactive' | 'all',
     includeGeometry: boolean,
     search?: string,
+    continentId?: string,
   ): Promise<CountryEntity[]>;
   listContinentsForSelect(): Promise<Array<{ id: string; code: string; name: string }>>;
 }

@@ -6,6 +6,7 @@ export interface PostRepository {
   findById(id: string): Promise<PostEntity | null>;
   list(activeOnly: boolean): Promise<PostEntity[]>;
   findByCityId(cityId: string, activeOnly: boolean): Promise<PostEntity[]>;
+  findByCountryId(countryId: string, activeOnly: boolean): Promise<PostEntity[]>;
   findByNameInsensitive(cityId: string, name: string): Promise<PostEntity | null>;
   findBySlug(cityId: string, slug: string): Promise<PostEntity | null>;
   deleteById(id: string): Promise<void>;

@@ -7,8 +7,8 @@ import {
   serverFetchApiItems,
   toCookieHeader,
 } from "@/lib/api";
-import type { CityHttpDetail } from "@/types/admin-city.types";
-import type { CountryHttpDetail } from "@/types/admin-country.types";
+import type { CityHttpDetail } from "@/types/city.types.ts";
+import type { CountryHttpDetail } from "@/types/country.types";
 import { Button } from "@/components/ui/button";
 import { CityEditForm } from "./city-edit-form";
 

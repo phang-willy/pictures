@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { serverFetchApiItems, toCookieHeader } from "@/lib/api";
-import type { ContinentOption } from "@/types/admin-country.types";
+import type { ContinentOption } from "@/types/country.types";
 import { Button } from "@/components/ui/button";
 import { CountryNewForm } from "./country-new-form";
 import { ArrowLeftIcon } from "lucide-react";

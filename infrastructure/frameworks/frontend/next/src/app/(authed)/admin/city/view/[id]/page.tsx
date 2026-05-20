@@ -3,12 +3,12 @@ import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { ArrowLeftIcon } from "lucide-react";
 import { serverFetchApiItem, toCookieHeader } from "@/lib/api";
-import type { CityHttpDetail } from "@/types/admin-city.types";
+import type { CityHttpDetail } from "@/types/city.types.ts";
 import { formatDate } from "@/lib/format-date";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CityPointMap } from "@/components/admin/city-point-map";
-import { ContryFlag } from "@/components/admin/country-flag";
+import { CountryFlag } from "@/components/country-flag";
 import { DetailRow } from "@/components/admin/detail-row";
 
 export const dynamic = "force-dynamic";
@@ -53,7 +53,7 @@ export default async function AdminCityViewPage({
             <DetailRow
               label="Pays"
               value={
-                <ContryFlag name={city.country.name} iso2={city.country.iso2} />
+                <CountryFlag name={city.country.name} iso2={city.country.iso2} />
               }
             />
             <DetailRow label="Nom" value={city.name} />
