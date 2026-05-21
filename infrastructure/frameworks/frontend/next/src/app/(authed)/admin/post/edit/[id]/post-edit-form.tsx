@@ -363,9 +363,9 @@ export function PostEditForm({
                     }
                     rows={4}
                     maxLength={POST_SHORT_DESCRIPTION_MAX_LEN}
-                    placeholder={`${POST_SHORT_DESCRIPTION_MIN_LEN}–${POST_SHORT_DESCRIPTION_MAX_LEN} caractères si renseignée …`}
+                    placeholder={`${POST_SHORT_DESCRIPTION_MIN_LEN}-${POST_SHORT_DESCRIPTION_MAX_LEN} caractères si renseignée …`}
                     className={cn(
-                      "min-h-[72px] w-full resize-y rounded-lg border border-input bg-card px-2.5 py-2 text-base outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30",
+                      "min-h-18 w-full resize-y rounded-lg border border-input bg-card px-2.5 py-2 text-base outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30",
                       shortDescriptionOk ? "" : "border-destructive",
                     )}
                   />
@@ -382,7 +382,7 @@ export function PostEditForm({
                   <Tiptap
                     value={content}
                     onChange={setContent}
-                    className="min-h-[120px] rounded-lg border border-input bg-card px-2.5 py-2"
+                    className="min-h-30 rounded-lg border border-input bg-card px-2.5 py-2"
                   />
                 </FieldContent>
               </Field>

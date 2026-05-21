@@ -393,7 +393,7 @@ export function PostNewForm({ cities }: { cities: CityHttpDetail[] }) {
                     required
                     minLength={POST_SHORT_DESCRIPTION_MIN_LEN}
                     maxLength={POST_SHORT_DESCRIPTION_MAX_LEN}
-                    placeholder={`${POST_SHORT_DESCRIPTION_MIN_LEN}–${POST_SHORT_DESCRIPTION_MAX_LEN} caractères (méta / chapô)…`}
+                    placeholder={`${POST_SHORT_DESCRIPTION_MIN_LEN}-${POST_SHORT_DESCRIPTION_MAX_LEN} caractères (méta / chapô)…`}
                     className={cn(
                       "min-h-[72px] w-full resize-y rounded-lg border border-input bg-card px-2.5 py-2 text-base outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30",
                       shortDescriptionOk || shortDescLen === 0

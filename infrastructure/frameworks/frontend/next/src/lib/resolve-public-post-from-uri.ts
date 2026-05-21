@@ -7,6 +7,26 @@ import type { CityHttpDetail } from "@/types/city.types";
 import type { PostHttpDetail } from "@/types/post.types";
 
 const citiesCatalog = cache(async () => serverFetchAllActiveCities(undefined));
+const postIndexCatalog = cache(async () => {
+  const posts = await serverFetchAllActivePosts(undefined);
+  const index = new Map<string, Map<string, PostHttpDetail>>();
+
+  for (const post of posts) {
+    if (post.deactivatedAt != null) {
+      continue;
+    }
+
+    let cityPosts = index.get(post.city.id);
+    if (!cityPosts) {
+      cityPosts = new Map<string, PostHttpDetail>();
+      index.set(post.city.id, cityPosts);
+    }
+
+    cityPosts.set(post.slug.toLowerCase(), post);
+  }
+
+  return index;
+});
 
 /**
  * Segment d’URL public : `{countrySlug}-{citySlug}-{postSlug}` (minuscules dans les liens).
@@ -29,6 +49,11 @@ export async function resolveActivePublicPostFromUriSegment(
     }))
     .sort((a, b) => b.prefix.length - a.prefix.length);
 
+  const matchingCandidates: Array<{
+    city: CityHttpDetail;
+    postSlug: string;
+  }> = [];
+
   for (const { city, prefix } of candidates) {
     if (!raw.startsWith(prefix)) {
       continue;
@@ -38,18 +63,21 @@ export async function resolveActivePublicPostFromUriSegment(
       continue;
     }
 
-    const posts = await serverFetchAllActivePosts(undefined, {
-      cityId: city.id,
-    });
-    const post = posts.find(
-      (p) => p.slug.toLowerCase() === postSlug.toLowerCase(),
-    );
-    if (!post || post.deactivatedAt != null) {
+    matchingCandidates.push({ city, postSlug });
+  }
+
+  if (matchingCandidates.length === 0) {
+    return null;
+  }
+
+  const postIndex = await postIndexCatalog();
+
+  for (const { city, postSlug } of matchingCandidates) {
+    const post = postIndex.get(city.id)?.get(postSlug);
+    if (!post) {
       continue;
     }
-    if (post.city.id !== city.id) {
-      continue;
-    }
+
     return { post, city };
   }
 

@@ -71,6 +71,12 @@ export async function resolveAdminPageMetaAsync(
       path: "post",
       article: "un",
     },
+    {
+      name: "Images",
+      singular: "image",
+      path: "image",
+      article: "une",
+    },
   ];
 
   const resource = resources.find((r) => r.path === segments[1]) ?? null;

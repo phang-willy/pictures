@@ -6,7 +6,7 @@ import maplibregl from "maplibre-gl";
 import type { Map as MapLibreMap } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { applyGlobeAndFrenchLabels } from "@/lib/maplibre-openmaptiles-fr";
-import { MaplibreMapPinHtml } from "@/components/maplibre-map-pin-html";
+import { createMaplibreMapPinElement } from "@/components/maplibre-map-pin-html";
 import { openfreemapStyleForTheme } from "@/lib/openfreemap-basemap";
 import {
   scheduleMapResize,
@@ -28,16 +28,6 @@ type CameraSnapshot = {
   bearing: number;
   pitch: number;
 };
-
-function buildPinElement(ariaLabel: string): HTMLButtonElement {
-  const element = document.createElement("button");
-  element.type = "button";
-  element.className = "cursor-pointer bg-transparent border-0 p-0 m-0";
-  element.style.zIndex = "20";
-  element.setAttribute("aria-label", ariaLabel);
-  element.innerHTML = MaplibreMapPinHtml(ariaLabel);
-  return element;
-}
 
 export function CityPointMap({
   latitude,
@@ -82,7 +72,9 @@ export function CityPointMap({
       markerRef.current?.remove();
       markerRef.current = null;
       const { latitude: lat, longitude: lng } = coordsRef.current;
-      const el = buildPinElement(ariaLabelRef.current);
+      const el = createMaplibreMapPinElement({
+        ariaLabel: ariaLabelRef.current,
+      });
       const marker = new maplibregl.Marker({ element: el, anchor: "bottom" })
         .setLngLat([lng, lat])
         .addTo(map);
@@ -182,7 +174,7 @@ export function CityPointMap({
     <div
       lang="fr"
       className={cn(
-        "h-[min(420px,55vh)] w-full min-h-[280px] overflow-hidden rounded-lg border",
+        "h-[min(420px,55vh)] w-full min-h-70 overflow-hidden rounded-lg border",
         mapThemeClass,
       )}
       role="application"

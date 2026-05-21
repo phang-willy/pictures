@@ -3,7 +3,8 @@ export function extractClientIp(req: {
   ip?: string;
   socket?: { remoteAddress?: string };
 }): string {
-  const forwardedFor = req.headers?.['x-forwarded-for'];
+  const forwardedFor =
+    process.env.TRUST_PROXY === 'true' ? req.headers?.['x-forwarded-for'] : undefined;
   const fromForwarded = Array.isArray(forwardedFor)
     ? forwardedFor[0]
     : forwardedFor?.split(',')[0];

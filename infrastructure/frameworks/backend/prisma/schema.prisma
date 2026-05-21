@@ -12,20 +12,20 @@ enum UserRole {
 }
 
 model User {
-  id             String               @id @default(uuid())
-  email          String               @unique
-  loginAttempt   Int                  @default(0)
+  id             String              @id @default(uuid())
+  email          String              @unique
+  loginAttempt   Int                 @default(0)
   lockUntil      DateTime?
-  token          String?              @unique
+  token          String?             @unique
   tokenExpiresAt DateTime?
-  role           UserRole             @default(USER)
+  role           UserRole            @default(USER)
   verifiedAt     DateTime?
-  isActive       Boolean              @default(true)
+  isActive       Boolean             @default(true)
   twoFactorCodes UserTwoFactorCode[]
   passwords      Password[]
   photos         Photo[]
-  createdAt      DateTime             @default(now())
-  updatedAt      DateTime             @updatedAt
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
 
   @@index([role])
 }
@@ -55,43 +55,43 @@ model ForgotPassword {
 }
 
 model UserTwoFactorCode {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Restrict)
   code      String
   expiresAt DateTime
   usedAt    DateTime?
-  attempts  Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  attempts  Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@index([userId, expiresAt])
   @@index([userId, code])
 }
 
 model Continent {
-  id        String    @id @default(uuid())
-  code      String    @unique @db.VarChar(8)
-  name      String    @unique @db.VarChar(255)
-  countries Country[]
+  id            String    @id @default(uuid())
+  code          String    @unique @db.VarChar(8)
+  name          String    @unique @db.VarChar(255)
+  countries     Country[]
   deactivatedAt DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model Country {
-  id          String           @id @default(uuid())
-  continentId String
-  continent   Continent        @relation(fields: [continentId], references: [id], onDelete: Restrict)
-  iso2        String           @unique @db.Char(2)
-  iso3        String?          @unique @db.Char(3)
-  name        String           @db.VarChar(255)
-  slug        String           @unique @db.VarChar(255)
-  geometry    CountryGeometry?
-  cities      City[]
-  deactivatedAt   DateTime?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  id            String           @id @default(uuid())
+  continentId   String
+  continent     Continent        @relation(fields: [continentId], references: [id], onDelete: Restrict)
+  iso2          String           @unique @db.Char(2)
+  iso3          String?          @unique @db.Char(3)
+  name          String           @db.VarChar(255)
+  slug          String           @unique @db.VarChar(255)
+  geometry      CountryGeometry?
+  cities        City[]
+  deactivatedAt DateTime?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
 
   @@index([continentId, name])
 }
@@ -109,63 +109,80 @@ model CountryGeometry {
 }
 
 model City {
-  id        String                                @id @default(uuid())
-  countryId String
-  country   Country                               @relation(fields: [countryId], references: [id], onDelete: Restrict)
-  name      String                                @db.VarChar(255)
-  slug      String                                @db.VarChar(255)
-  latitude  Float                                 @db.DoublePrecision
-  longitude Float                                 @db.DoublePrecision
-  location  Unsupported("geography(Point, 4326)")?
-  posts     Post[]
+  id            String                                 @id @default(uuid())
+  countryId     String
+  country       Country                                @relation(fields: [countryId], references: [id], onDelete: Restrict)
+  name          String                                 @db.VarChar(255)
+  slug          String                                 @db.VarChar(255)
+  latitude      Float                                  @db.DoublePrecision
+  longitude     Float                                  @db.DoublePrecision
+  location      Unsupported("geography(Point, 4326)")?
+  posts         Post[]
   deactivatedAt DateTime?
-  createdAt DateTime                              @default(now())
-  updatedAt DateTime                              @updatedAt
+  createdAt     DateTime                               @default(now())
+  updatedAt     DateTime                               @updatedAt
 
   @@unique([countryId, slug])
   @@index([countryId, name])
 }
 
 model Post {
-  id          String                                @id @default(uuid())
-  cityId      String
-  city        City                                  @relation(fields: [cityId], references: [id], onDelete: Restrict)
-  name        String                                @db.VarChar(255)
-  slug        String                                @db.VarChar(255)
-  description String?                               @db.VarChar(160)
-  content     String?
-  latitude    Float                                 @db.DoublePrecision
-  longitude   Float                                 @db.DoublePrecision
-  location    Unsupported("geography(Point, 4326)")?
-  photos      Photo[]
-  deactivatedAt   DateTime?
-  createdAt   DateTime                              @default(now())
-  updatedAt   DateTime                              @updatedAt
+  id            String                                 @id @default(uuid())
+  cityId        String
+  city          City                                   @relation(fields: [cityId], references: [id], onDelete: Restrict)
+  name          String                                 @db.VarChar(255)
+  slug          String                                 @db.VarChar(255)
+  description   String?                                @db.VarChar(160)
+  content       String?
+  latitude      Float                                  @db.DoublePrecision
+  longitude     Float                                  @db.DoublePrecision
+  location      Unsupported("geography(Point, 4326)")?
+  photos        Photo[]
+  deactivatedAt DateTime?
+  createdAt     DateTime                               @default(now())
+  updatedAt     DateTime                               @updatedAt
 
   @@unique([cityId, slug])
   @@index([cityId, name])
 }
 
 model Photo {
-  id               String   @id @default(uuid())
+  id               String    @id @default(uuid())
   postId           String
-  post             Post     @relation(fields: [postId], references: [id], onDelete: Restrict)
+  post             Post      @relation(fields: [postId], references: [id], onDelete: Restrict)
   uploadedByUserId String
-  uploadedByUser   User     @relation(fields: [uploadedByUserId], references: [id], onDelete: Restrict)
-  title            String?  @db.VarChar(200)
+  uploadedByUser   User      @relation(fields: [uploadedByUserId], references: [id], onDelete: Restrict)
+  title            String?   @db.VarChar(200)
   description      String?
   takenAt          DateTime?
-  sourceFileName   String?  @db.VarChar(255)
-  mimeType         String?  @db.VarChar(100)
+  sourceFileName   String?   @db.VarChar(255)
+  mimeType         String?   @db.VarChar(100)
   fileSizeBytes    BigInt?
   width            Int?
   height           Int?
-  webpUrl          String   @db.VarChar(2048)
-  webpThumbnailUrl String?  @db.VarChar(2048)
-  deactivatedAt        DateTime?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  webpUrl          String    @db.VarChar(2048)
+  webpThumbnailUrl String?   @db.VarChar(2048)
+  deactivatedAt    DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   @@index([postId, createdAt])
   @@index([uploadedByUserId, createdAt])
+}
+
+model ImageAsset {
+  id               String   @id @default(uuid())
+  title            String   @db.VarChar(200)
+  originalFileName String   @db.VarChar(255)
+  sourceMimeType   String   @db.VarChar(100)
+  sourceSizeBytes  BigInt
+  width            Int
+  height           Int
+  webpFileName     String   @unique @db.VarChar(255)
+  webpPath         String   @db.VarChar(2048)
+  webpUrl          String   @db.VarChar(2048)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([createdAt])
 }

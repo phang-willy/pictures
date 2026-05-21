@@ -191,7 +191,7 @@ export function useApiDataTable<TData>(
   const statsSummary = hasStats
     ? total === 0
       ? "0 résultat"
-      : `Affichage ${fromRow}–${toRow} sur ${total}`
+      : `Affichage ${fromRow}-${toRow} sur ${total}`
     : "…";
   const statsPage = hasStats ? `Page ${pageIndex + 1} / ${pageCount}` : "…";
 

@@ -11,7 +11,7 @@ const HomeGlobeMap = dynamic(
     ssr: false,
     loading: () => (
       <div className="h-full w-full">
-        <div className="max-w-7xl max-h-7xl w-full h-full animate-pulse bg-gray-200 rounded-full"></div>
+        <div className="w-1/4 xl:w-2/5 aspect-square mx-auto animate-pulse bg-gray-200 rounded-full"></div>
       </div>
     ),
   },

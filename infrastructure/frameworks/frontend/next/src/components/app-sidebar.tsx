@@ -44,6 +44,10 @@ export function AppSidebar() {
             url: "/admin/post",
           },
           {
+            title: "Médiathèque",
+            url: "/admin/image",
+          },
+          {
             title: "Pays",
             url: "/admin/country",
           },
@@ -51,6 +55,10 @@ export function AppSidebar() {
             title: "Villes",
             url: "/admin/city",
           },
+          {
+            title: 'Dashboard',
+            url: '/admin',
+          }
         ],
       },
     ],
