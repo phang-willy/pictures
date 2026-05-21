@@ -6,7 +6,7 @@ import maplibregl from "maplibre-gl";
 import type { Map as MapLibreMap } from "maplibre-gl";
 import type { FeatureCollection } from "geojson";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { MaplibreMapPinHtml } from "@/components/maplibre-map-pin-html";
+import { createMaplibreMapPinElement } from "@/components/maplibre-map-pin-html";
 import {
   scheduleMapResize,
   scheduleMapResizeRobust,
@@ -18,7 +18,10 @@ import {
   countryGeometryCenter,
   countryGeometryFeatureCollection,
 } from "@/lib/country-geometry-center";
-import { maplibreMapNew } from "@/lib/maplibre-map-new";
+import {
+  closeMaplibreAttributions,
+  maplibreMapNew,
+} from "@/lib/maplibre-map-new";
 import { openfreemapStyleForTheme } from "@/lib/openfreemap-basemap";
 import { cn } from "@/lib/utils";
 
@@ -49,14 +52,6 @@ function resolveEmbedZoom(opts: {
 const POLYGON_SOURCE_ID = "embed-map-country-geo";
 const POLYGON_FILL_LAYER_ID = "embed-map-country-fill";
 const POLYGON_OUTLINE_LAYER_ID = "embed-map-country-outline";
-
-/** Force le contrôle © MapLibre en mode compact et refermé (panneau texte ouvert). */
-function collapseMaplibreAttribution(mapContainer: HTMLElement) {
-  for (const el of mapContainer.querySelectorAll(".maplibregl-ctrl-attrib")) {
-    el.classList.add("maplibregl-compact");
-    el.classList.remove("maplibregl-ctrl-attrib-open");
-  }
-}
 
 function disableEmbedMapInteractions(map: MapLibreMap) {
   map.dragPan.disable();
@@ -153,16 +148,6 @@ type CameraSnapshot = {
   bearing: number;
   pitch: number;
 };
-
-function buildPinElement(ariaLabel: string): HTMLButtonElement {
-  const element = document.createElement("button");
-  element.type = "button";
-  element.className = "cursor-pointer border-0 bg-transparent p-0 m-0";
-  element.style.zIndex = "20";
-  element.setAttribute("aria-label", ariaLabel);
-  element.innerHTML = MaplibreMapPinHtml(ariaLabel);
-  return element;
-}
 
 export type EmbedMapProps = {
   latitude?: number;
@@ -281,7 +266,7 @@ export function EmbedMap({
   ]);
 
   useEffect(() => {
-    if (!valid || resolvedLat === null || resolvedLng === null) {
+    if (!valid) {
       return undefined;
     }
     const container = containerRef.current;
@@ -290,10 +275,11 @@ export function EmbedMap({
     }
 
     const initialStyle = openfreemapStyleForTheme(themeRef.current);
+    const { latitude: initialLat, longitude: initialLng } = coordsRef.current;
     const map = maplibreMapNew({
       container,
       initialStyle,
-      center: [resolvedLng, resolvedLat],
+      center: [initialLng, initialLat],
       zoom: zoomRef.current,
       attributionControl: false,
     });
@@ -311,7 +297,9 @@ export function EmbedMap({
       markerRef.current?.remove();
       markerRef.current = null;
       const { latitude: lat, longitude: lng } = coordsRef.current;
-      const el = buildPinElement(ariaLabelRef.current);
+      const el = createMaplibreMapPinElement({
+        ariaLabel: ariaLabelRef.current,
+      });
       const marker = new maplibregl.Marker({ element: el, anchor: "bottom" })
         .setLngLat([lng, lat])
         .addTo(map);
@@ -378,13 +366,13 @@ export function EmbedMap({
     const onStyleLoad = () => {
       applyOpenMapTilesFrenchLabelsWhenReady(map);
       disableEmbedMapInteractions(map);
-      collapseMaplibreAttribution(container);
+      closeMaplibreAttributions(container);
       scheduleMapResizeRobust(map);
       const preserve = cameraAfterStyleRef.current;
       cameraAfterStyleRef.current = null;
       applyPolygonOrMarker(preserve);
       map.once("idle", () => {
-        collapseMaplibreAttribution(container);
+        closeMaplibreAttributions(container);
         scheduleMapResizeRobust(map);
       });
     };
@@ -414,7 +402,6 @@ export function EmbedMap({
       latitude: resolvedLat ?? 0,
       longitude: resolvedLng ?? 0,
     };
-    geometryRef.current = countryGeometry ?? null;
     zoomRef.current = resolvedEmbedZoom;
 
     const fcNow = countryGeometryFeatureCollection(geometryRef.current);
@@ -446,7 +433,9 @@ export function EmbedMap({
     ];
     if (showPin) {
       if (!markerRef.current) {
-        const el = buildPinElement(ariaLabelRef.current);
+        const el = createMaplibreMapPinElement({
+          ariaLabel: ariaLabelRef.current,
+        });
         markerRef.current = new maplibregl.Marker({
           element: el,
           anchor: "bottom",

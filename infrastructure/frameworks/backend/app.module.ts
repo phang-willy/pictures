@@ -31,6 +31,11 @@ import { VerifyTwoFactorUseCase } from '@/application/auth/use-cases/verify-two-
 import { RegisterUseCase } from '@/application/auth/use-cases/register.use-case';
 import { ConfirmAccountUseCase } from '@/application/auth/use-cases/confirm-account.use-case';
 import { ChangePasswordUseCase } from '@/application/auth/use-cases/change-password.use-case';
+import { CreateImageAssetUseCase } from '@/application/image/use-cases/create-image-asset.use-case';
+import { DeleteImageAssetUseCase } from '@/application/image/use-cases/delete-image-asset.use-case';
+import { GetImageAssetByIdUseCase } from '@/application/image/use-cases/get-image-asset-by-id.use-case';
+import { ListImageAssetsUseCase } from '@/application/image/use-cases/list-image-assets.use-case';
+import { UpdateImageAssetUseCase } from '@/application/image/use-cases/update-image-asset.use-case';
 import { ChangeUserRoleUseCase } from '@/application/user/use-cases/change-user-role.use-case';
 import { CreateUserUseCase } from '@/application/user/use-cases/create-user.use-case';
 import { GetUserByIdUseCase } from '@/application/user/use-cases/get-user-by-id.use-case';
@@ -50,6 +55,10 @@ import { COUNTRY_REPOSITORY } from '@/application/country/ports/country.tokens';
 import { CITY_REPOSITORY } from '@/application/city/ports/city.tokens';
 import { POST_REPOSITORY } from '@/application/post/ports/post.tokens';
 import { USER_REPOSITORY } from '@/application/user/ports/user.tokens';
+import {
+  IMAGE_ASSET_REPOSITORY,
+  IMAGE_ASSET_STORAGE_PORT,
+} from '@/application/image/ports/image-asset.tokens';
 import { NodemailerMailSenderAdapter } from '@/infrastructure/adapters/mail/nodemailer-mail-sender.adapter';
 import { BcryptPasswordHasherAdapter } from '@/infrastructure/adapters/security/bcrypt-password-hasher.adapter';
 import { RandomOtpGeneratorAdapter } from '@/infrastructure/adapters/security/random-otp-generator.adapter';
@@ -61,7 +70,9 @@ import { PrismaPostRepository } from '@/infrastructure/persistence/prisma/reposi
 import { PrismaUserRepository } from '@/infrastructure/persistence/prisma/repositories/prisma-user.repository';
 import { PrismaTwoFactorCodeRepository } from '@/infrastructure/persistence/prisma/repositories/prisma-two-factor-code.repository';
 import { PrismaPasswordResetTokenRepository } from '@/infrastructure/persistence/prisma/repositories/prisma-password-reset-token.repository';
+import { PrismaImageAssetRepository } from '@/infrastructure/persistence/prisma/repositories/prisma-image-asset.repository';
 import { InMemoryAuthSessionRepository } from '@/infrastructure/persistence/prisma/repositories/in-memory-auth-session.repository';
+import { LocalWebpImageAssetStorageAdapter } from '@/infrastructure/adapters/storage/local-webp-image-asset-storage.adapter';
 import type { CountryRepository } from '@/domain/country/repositories/country.repository';
 import type { CityRepository } from '@/domain/city/repositories/city.repository';
 import type { PostRepository } from '@/domain/post/repositories/post.repository';
@@ -69,6 +80,8 @@ import type { UserRepository } from '@/domain/user/repositories/user.repository'
 import type { TwoFactorCodeRepository } from '@/domain/auth/repositories/two-factor-code.repository';
 import type { PasswordResetTokenRepository } from '@/domain/auth/repositories/password-reset-token.repository';
 import type { AuthSessionRepository } from '@/domain/auth/repositories/auth-session.repository';
+import type { ImageAssetRepository } from '@/domain/image/repositories/image-asset.repository';
+import type { ImageAssetStoragePort } from '@/application/image/ports/image-asset-storage.port';
 import type { TokenSignerPort } from '@/application/auth/ports/token-signer.port';
 import type { PasswordHasherPort } from '@/application/auth/ports/password-hasher.port';
 import type { OtpGeneratorPort } from '@/application/auth/ports/otp-generator.port';
@@ -95,6 +108,8 @@ import { TokenSignerModule } from '@/infrastructure/frameworks/backend/token-sig
     { provide: CITY_REPOSITORY, useClass: PrismaCityRepository },
     { provide: POST_REPOSITORY, useClass: PrismaPostRepository },
     { provide: USER_REPOSITORY, useClass: PrismaUserRepository },
+    { provide: IMAGE_ASSET_REPOSITORY, useClass: PrismaImageAssetRepository },
+    { provide: IMAGE_ASSET_STORAGE_PORT, useClass: LocalWebpImageAssetStorageAdapter },
     { provide: PASSWORD_HASHER_PORT, useClass: BcryptPasswordHasherAdapter },
     { provide: MAIL_SENDER_PORT, useClass: NodemailerMailSenderAdapter },
     { provide: CLIENT_LOCATION_PORT, useClass: IpApiClientLocationAdapter },
@@ -172,6 +187,42 @@ import { TokenSignerModule } from '@/infrastructure/frameworks/backend/token-sig
     { provide: GetUserByIdUseCase, inject: [USER_REPOSITORY], useFactory: (repository: UserRepository) => new GetUserByIdUseCase(repository) },
     { provide: UpdateUserProfileUseCase, inject: [USER_REPOSITORY], useFactory: (repository: UserRepository) => new UpdateUserProfileUseCase(repository) },
     { provide: ChangeUserRoleUseCase, inject: [USER_REPOSITORY], useFactory: (repository: UserRepository) => new ChangeUserRoleUseCase(repository) },
+    {
+      provide: CreateImageAssetUseCase,
+      inject: [IMAGE_ASSET_REPOSITORY, IMAGE_ASSET_STORAGE_PORT],
+      useFactory: (
+        repository: ImageAssetRepository,
+        storage: ImageAssetStoragePort,
+      ) => new CreateImageAssetUseCase(repository, storage),
+    },
+    {
+      provide: GetImageAssetByIdUseCase,
+      inject: [IMAGE_ASSET_REPOSITORY],
+      useFactory: (repository: ImageAssetRepository) =>
+        new GetImageAssetByIdUseCase(repository),
+    },
+    {
+      provide: ListImageAssetsUseCase,
+      inject: [IMAGE_ASSET_REPOSITORY],
+      useFactory: (repository: ImageAssetRepository) =>
+        new ListImageAssetsUseCase(repository),
+    },
+    {
+      provide: UpdateImageAssetUseCase,
+      inject: [IMAGE_ASSET_REPOSITORY, IMAGE_ASSET_STORAGE_PORT],
+      useFactory: (
+        repository: ImageAssetRepository,
+        storage: ImageAssetStoragePort,
+      ) => new UpdateImageAssetUseCase(repository, storage),
+    },
+    {
+      provide: DeleteImageAssetUseCase,
+      inject: [IMAGE_ASSET_REPOSITORY, IMAGE_ASSET_STORAGE_PORT],
+      useFactory: (
+        repository: ImageAssetRepository,
+        storage: ImageAssetStoragePort,
+      ) => new DeleteImageAssetUseCase(repository, storage),
+    },
     {
       provide: RegisterUseCase,
       inject: [USER_REPOSITORY, PASSWORD_HASHER_PORT, MAIL_SENDER_PORT, CLIENT_LOCATION_PORT],

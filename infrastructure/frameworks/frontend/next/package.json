@@ -69,5 +69,8 @@
     "ts-prune": "^0.10.3",
     "typescript": "^6.0.2",
     "vitest": "^3.2.4"
+  },
+  "overrides": {
+    "postcss": "8.5.10"
   }
 }

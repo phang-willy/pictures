@@ -24,7 +24,7 @@ export function PagesStack({ children }: { children: React.ReactNode }) {
       >
         <main
           className={cn(
-            "relative min-h-0 flex-1 xl:pt-16",
+            "relative min-h-0 flex-1",
             isHome && "overflow-hidden",
             !isHome &&
               "max-xl:overflow-y-auto max-xl:overflow-x-hidden xl:overflow-visible",

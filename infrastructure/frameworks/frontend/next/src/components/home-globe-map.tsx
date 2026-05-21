@@ -19,7 +19,7 @@ import type {
 } from "@/types/home-globe-map.types";
 import { maplibreMapNew } from "@/lib/maplibre-map-new";
 import { slugify } from "@/domain/utils/slugify";
-import { MaplibreMapPinHtml } from "@/components/maplibre-map-pin-html";
+import { createMaplibreMapPinElement } from "@/components/maplibre-map-pin-html";
 import { MapHistory } from "@/components/map-history";
 
 const COUNTRY_SHAPES_SOURCE_ID = "countries-shapes-source";
@@ -390,12 +390,11 @@ function renderCityMarkers(
   clearCityMarkers(markers);
 
   for (const city of cities) {
-    const element = document.createElement("button");
-    element.type = "button";
-    element.className = "cursor-pointer bg-transparent border-0 p-0 m-0";
-    element.style.zIndex = "20";
-    element.setAttribute("aria-label", `Ville: ${city.name}`);
-    element.innerHTML = MaplibreMapPinHtml(city.name);
+    const element = createMaplibreMapPinElement({
+      ariaLabel: `Ville: ${city.name}`,
+      text: city.name,
+      zIndex: 20,
+    });
     element.addEventListener("click", (event) => {
       event.stopPropagation();
       onCityClick(city);
@@ -423,12 +422,11 @@ function renderPostMarkers(
   clearCityMarkers(markers);
 
   for (const post of posts) {
-    const element = document.createElement("button");
-    element.type = "button";
-    element.className = "cursor-pointer bg-transparent border-0 p-0 m-0";
-    element.style.zIndex = "25";
-    element.setAttribute("aria-label", `Post: ${post.name}`);
-    element.innerHTML = MaplibreMapPinHtml(post.name);
+    const element = createMaplibreMapPinElement({
+      ariaLabel: `Post: ${post.name}`,
+      text: post.name,
+      zIndex: 25,
+    });
     element.addEventListener("click", (event) => {
       event.stopPropagation();
       onPostClick(post);
@@ -965,7 +963,7 @@ export function HomeGlobeMap() {
 
   return (
     <div
-      className={`absolute inset-0 min-h-0 h-dvh w-full ${mapThemeClass}`}
+      className={`absolute inset-0 min-h-0 h-full w-full ${mapThemeClass}`}
       role="application"
       aria-label="Carte interactive : globe en vue large, carte plane en zoom rapproché, toponymes en français lorsque disponibles"
     >

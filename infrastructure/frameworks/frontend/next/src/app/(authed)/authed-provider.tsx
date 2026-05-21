@@ -18,6 +18,7 @@ import {
   logoutAuthSession,
 } from "@/lib/auth-session";
 import { toast } from "sonner";
+import { LoaderCircle } from "lucide-react";
 
 export type AuthedUser = { email: string; role: string };
 
@@ -151,7 +152,8 @@ export function AuthedProvider({ children }: { children: React.ReactNode }) {
   if (status === "loading") {
     return (
       <div className="flex min-h-screen w-full items-center justify-center text-muted-foreground">
-        Chargement…
+        <span>Chargement</span>
+        <LoaderCircle className="ml-2 h-4 w-4 animate-spin" />
       </div>
     );
   }

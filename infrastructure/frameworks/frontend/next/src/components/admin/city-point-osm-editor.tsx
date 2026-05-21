@@ -6,7 +6,7 @@ import maplibregl from "maplibre-gl";
 import type { Map as MapLibreMap, MapMouseEvent } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { applyGlobeAndFrenchLabels } from "@/lib/maplibre-openmaptiles-fr";
-import { MaplibreMapPinHtml } from "@/components/maplibre-map-pin-html";
+import { createMaplibreMapPinElement } from "@/components/maplibre-map-pin-html";
 import { openfreemapStyleForTheme } from "@/lib/openfreemap-basemap";
 import {
   scheduleMapResize,
@@ -32,17 +32,6 @@ type CameraSnapshot = {
   bearing: number;
   pitch: number;
 };
-
-function buildPinElement(ariaLabel: string): HTMLButtonElement {
-  const element = document.createElement("button");
-  element.type = "button";
-  element.className =
-    "cursor-pointer bg-transparent border-0 p-0 m-0 touch-none";
-  element.style.zIndex = "20";
-  element.setAttribute("aria-label", ariaLabel);
-  element.innerHTML = MaplibreMapPinHtml(ariaLabel);
-  return element;
-}
 
 export function CityPointOsmEditor({
   latitude,
@@ -110,7 +99,10 @@ export function CityPointOsmEditor({
       if (markerRef.current) {
         markerRef.current.setLngLat(center);
       } else {
-        const el = buildPinElement(ariaLabelRef.current);
+        const el = createMaplibreMapPinElement({
+          ariaLabel: ariaLabelRef.current,
+          touchNone: true,
+        });
         const marker = new maplibregl.Marker({
           element: el,
           anchor: "bottom",
@@ -214,7 +206,10 @@ export function CityPointOsmEditor({
     if (markerRef.current) {
       markerRef.current.setLngLat(center);
     } else {
-      const el = buildPinElement(ariaLabelRef.current);
+      const el = createMaplibreMapPinElement({
+        ariaLabel: ariaLabelRef.current,
+        touchNone: true,
+      });
       const marker = new maplibregl.Marker({
         element: el,
         anchor: "bottom",
@@ -260,7 +255,7 @@ export function CityPointOsmEditor({
     <div
       lang="fr"
       className={cn(
-        "h-[min(460px,60vh)] w-full min-h-[300px] overflow-hidden rounded-lg border",
+        "h-[min(460px,60vh)] w-full min-h-75 overflow-hidden rounded-lg border",
         mapThemeClass,
         className,
       )}

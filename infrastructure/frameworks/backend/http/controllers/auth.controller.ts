@@ -9,7 +9,6 @@ import {
   Req,
   Res,
 } from '@nestjs/common';
-import { SkipThrottle } from '@nestjs/throttler';
 import { LoginUseCase } from '@/application/auth/use-cases/login.use-case';
 import { LogoutUseCase } from '@/application/auth/use-cases/logout.use-case';
 import { RefreshSessionUseCase } from '@/application/auth/use-cases/refresh-session.use-case';
@@ -29,8 +28,6 @@ import {
 import { extractClientIp } from '@/infrastructure/frameworks/backend/http/utils/client-ip.util';
 import { failure, success } from '@/infrastructure/frameworks/backend/nest/response.presenter';
 
-/** Les flux auth (login, 2FA, reset) ne doivent pas être bloqués par le quota global IP. */
-@SkipThrottle()
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -210,6 +207,7 @@ export class AuthController {
         }),
       );
     }
+    clearAccessTokenCookie(response);
     return response.status(HttpStatus.OK).json(success());
   }
 

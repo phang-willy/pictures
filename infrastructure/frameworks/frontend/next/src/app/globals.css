@@ -252,11 +252,10 @@
   filter: invert(1) brightness(1.15) contrast(1.05);
 }
 
-/* Mini-cartes ville : attribution © compacte (texte déplié au survol / focus clavier). */
-[data-embed-map] .maplibregl-ctrl-attrib.maplibregl-compact .maplibregl-ctrl-attrib-inner {
-  display: none;
+/* Attributions MapLibre : compactes par défaut, texte ouvert uniquement via le toggle natif. */
+.maplibregl-ctrl-attrib.maplibregl-compact:not([open]) .maplibregl-ctrl-attrib-inner {
+  display: none !important;
 }
-[data-embed-map] .maplibregl-ctrl-attrib.maplibregl-compact:hover .maplibregl-ctrl-attrib-inner,
-[data-embed-map] .maplibregl-ctrl-attrib.maplibregl-compact:focus-within .maplibregl-ctrl-attrib-inner {
-  display: block;
+.maplibregl-ctrl-attrib.maplibregl-compact[open] .maplibregl-ctrl-attrib-inner {
+  display: block !important;
 }

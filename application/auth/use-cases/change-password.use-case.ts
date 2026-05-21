@@ -5,6 +5,7 @@ import type { TokenSignerPort } from '@/application/auth/ports/token-signer.port
 import type { UserRepository } from '@/domain/user/repositories/user.repository';
 import type { TwoFactorCodeRepository } from '@/domain/auth/repositories/two-factor-code.repository';
 import { wrapWithSecurityFooter } from '@/application/auth/mail/security-email-html';
+import { changePasswordRequestSchema } from '@/application/auth/contracts/auth.request.schemas';
 
 export class ChangePasswordUseCase {
   constructor(
@@ -47,28 +48,18 @@ export class ChangePasswordUseCase {
       return { ok: false, message: 'Session invalid or expired.' };
     }
 
-    const body = input as {
-      oldPassword?: unknown;
-      newPassword?: unknown;
-      confirmPassword?: unknown;
-    };
-    const oldPassword =
-      typeof body?.oldPassword === 'string' ? body.oldPassword : '';
-    const newPassword =
-      typeof body?.newPassword === 'string' ? body.newPassword : '';
-    const confirmPassword =
-      typeof body?.confirmPassword === 'string' ? body.confirmPassword : '';
-
-    if (!oldPassword || !newPassword || !confirmPassword) {
-      return { ok: false, message: 'Invalid payload.' };
-    }
-    if (newPassword !== confirmPassword) {
+    const parsed = changePasswordRequestSchema.safeParse(input);
+    if (!parsed.success) {
+      const issue = parsed.error.issues[0];
+      const field = issue?.path[0];
       return {
         ok: false,
-        field: 'confirmPassword',
-        message: 'Passwords do not match.',
+        ...(typeof field === 'string' ? { field } : {}),
+        message: issue?.message ?? 'Invalid payload.',
       };
     }
+
+    const { oldPassword, newPassword } = parsed.data;
 
     const user = await this.userRepository.findById(tokenPayload.sub);
     if (!user) {

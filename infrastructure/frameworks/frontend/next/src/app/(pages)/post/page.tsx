@@ -59,7 +59,7 @@ export default async function PostPage() {
                     </CardTitle>
                     <p className="text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-1 pt-1 text-xs">
                       <Link
-                        href={`/pays/${encodeURIComponent(post.city.country.slug.toLowerCase())}`}
+                        href={`/country/${encodeURIComponent(post.city.country.slug.toLowerCase())}`}
                         className="hover:text-foreground inline-flex items-center gap-1 hover:underline"
                       >
                         <CountryFlag

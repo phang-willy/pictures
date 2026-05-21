@@ -248,7 +248,7 @@ export function DataTable<TData>({
           <span>
             {filteredRows === 0
               ? "0 résultat"
-              : `Affichage ${fromRow}–${toRow} sur ${filteredRows}`}
+              : `Affichage ${fromRow}-${toRow} sur ${filteredRows}`}
           </span>
           <span className="hidden sm:inline" aria-hidden>
             ·
