@@ -33,8 +33,8 @@ export default async function AdminPostEditPage({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-3">
+    <>
+      <section className="space-y-3">
         <Button variant="outline" asChild>
           <Link href="/admin/post">
             <span className="flex items-center gap-2">
@@ -44,8 +44,8 @@ export default async function AdminPostEditPage({
           </Link>
         </Button>
         <h1 className="text-2xl font-semibold">Modifier : {post.name}</h1>
-      </div>
+      </section>
       <PostEditForm post={post} cities={cities} />
-    </div>
+    </>
   );
 }

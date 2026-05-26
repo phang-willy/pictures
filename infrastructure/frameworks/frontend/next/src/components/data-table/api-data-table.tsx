@@ -68,7 +68,7 @@ export function ApiDataTable<TData>(props: ApiDataTableProps<TData>) {
   } = apiTable;
 
   return (
-    <div className="space-y-3">
+    <section className="space-y-3">
       {title ? <h2 className="text-lg font-semibold">{title}</h2> : null}
       <ApiDataTableToolbar
         showSearch={showSearch}
@@ -103,6 +103,6 @@ export function ApiDataTable<TData>(props: ApiDataTableProps<TData>) {
         canPrev={table.getCanPreviousPage()}
         canNext={table.getCanNextPage()}
       />
-    </div>
+    </section>
   );
 }

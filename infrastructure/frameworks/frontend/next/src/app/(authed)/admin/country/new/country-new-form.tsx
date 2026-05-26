@@ -656,271 +656,273 @@ export function CountryNewForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Identification</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {mledozeError || existsFetchError || pendingDuplicateAck?.exists ? (
-            <div className="space-y-2 text-sm">
-              {mledozeError ? (
-                <Alert variant="destructive">
-                  <AlertCircleIcon />
-                  <AlertTitle>Erreur</AlertTitle>
-                  <AlertDescription>{mledozeError}</AlertDescription>
-                </Alert>
-              ) : null}
-              {existsFetchError ? (
-                <Alert variant="destructive">
-                  <AlertCircleIcon />
-                  <AlertTitle>Erreur</AlertTitle>
-                  <AlertDescription>
-                    Impossible de vérifier les doublons. Réessayez ou
-                    reconnectez-vous.
-                  </AlertDescription>
-                </Alert>
-              ) : null}
-              {pendingDuplicateAck?.exists ? (
-                <Alert variant="destructive">
-                  <AlertCircleIcon />
-                  <AlertTitle>Doublon</AlertTitle>
-                  <AlertDescription className="space-y-3">
-                    {pendingDuplicateAck.match ? (
-                      <p>
-                        <strong>
-                          {pendingDuplicateAck.match.name} (
-                          {pendingDuplicateAck.match.iso2}{" "}
-                          {pendingDuplicateAck.match.iso3
-                            ? ` / ${pendingDuplicateAck.match.iso3}`
-                            : ""}
-                          )
-                        </strong>
-                        <span>
-                          {" "}
-                          existe déjà. Veuillez choisir un autre pays.
-                        </span>
-                      </p>
-                    ) : (
-                      <p>Un pays correspondant existe déjà en base.</p>
-                    )}
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="sm"
-                      onClick={acknowledgeDuplicateConflict}
-                    >
-                      Compris - vider le formulaire
-                    </Button>
-                  </AlertDescription>
-                </Alert>
-              ) : null}
-            </div>
-          ) : null}
+    <section>
+      <form onSubmit={onSubmit} className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Identification</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {mledozeError || existsFetchError || pendingDuplicateAck?.exists ? (
+              <div className="space-y-2 text-sm">
+                {mledozeError ? (
+                  <Alert variant="destructive">
+                    <AlertCircleIcon />
+                    <AlertTitle>Erreur</AlertTitle>
+                    <AlertDescription>{mledozeError}</AlertDescription>
+                  </Alert>
+                ) : null}
+                {existsFetchError ? (
+                  <Alert variant="destructive">
+                    <AlertCircleIcon />
+                    <AlertTitle>Erreur</AlertTitle>
+                    <AlertDescription>
+                      Impossible de vérifier les doublons. Réessayez ou
+                      reconnectez-vous.
+                    </AlertDescription>
+                  </Alert>
+                ) : null}
+                {pendingDuplicateAck?.exists ? (
+                  <Alert variant="destructive">
+                    <AlertCircleIcon />
+                    <AlertTitle>Doublon</AlertTitle>
+                    <AlertDescription className="space-y-3">
+                      {pendingDuplicateAck.match ? (
+                        <p>
+                          <strong>
+                            {pendingDuplicateAck.match.name} (
+                            {pendingDuplicateAck.match.iso2}{" "}
+                            {pendingDuplicateAck.match.iso3
+                              ? ` / ${pendingDuplicateAck.match.iso3}`
+                              : ""}
+                            )
+                          </strong>
+                          <span>
+                            {" "}
+                            existe déjà. Veuillez choisir un autre pays.
+                          </span>
+                        </p>
+                      ) : (
+                        <p>Un pays correspondant existe déjà en base.</p>
+                      )}
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={acknowledgeDuplicateConflict}
+                      >
+                        Compris - vider le formulaire
+                      </Button>
+                    </AlertDescription>
+                  </Alert>
+                ) : null}
+              </div>
+            ) : null}
 
-          <FieldSet>
-            <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="new-country-continent">
-                  Continent
-                </FieldLabel>
-                <FieldContent>
-                  <Select
-                    value={continentId}
-                    onValueChange={setContinentId}
-                    name="continentId"
-                  >
-                    <SelectTrigger
-                      id="new-country-continent"
+            <FieldSet>
+              <FieldGroup>
+                <Field>
+                  <FieldLabel htmlFor="new-country-continent">
+                    Continent
+                  </FieldLabel>
+                  <FieldContent>
+                    <Select
+                      value={continentId}
+                      onValueChange={setContinentId}
                       name="continentId"
-                      className="w-full max-w-none"
                     >
-                      <SelectValue placeholder="Choisir un continent" />
-                    </SelectTrigger>
-                    <SelectContent
-                      position="popper"
-                      className="w-(--radix-select-trigger-width)"
-                    >
-                      {continents.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>
-                          {c.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FieldContent>
-              </Field>
+                      <SelectTrigger
+                        id="new-country-continent"
+                        name="continentId"
+                        className="w-full max-w-none"
+                      >
+                        <SelectValue placeholder="Choisir un continent" />
+                      </SelectTrigger>
+                      <SelectContent
+                        position="popper"
+                        className="w-(--radix-select-trigger-width)"
+                      >
+                        {continents.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>
+                            {c.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FieldContent>
+                </Field>
 
-              <Field>
-                <FieldLabel htmlFor="new-country-name">Nom</FieldLabel>
-                <FieldContent>
-                  <Input
-                    id="new-country-name"
-                    name="name"
-                    value={name}
-                    onFocus={() => setSearchDriver("name")}
-                    onChange={(ev) => {
-                      setSearchDriver("name");
-                      setName(ev.target.value);
-                    }}
-                    required
-                    maxLength={120}
-                    autoComplete="off"
-                    placeholder="Ex. France"
-                  />
-                </FieldContent>
-              </Field>
+                <Field>
+                  <FieldLabel htmlFor="new-country-name">Nom</FieldLabel>
+                  <FieldContent>
+                    <Input
+                      id="new-country-name"
+                      name="name"
+                      value={name}
+                      onFocus={() => setSearchDriver("name")}
+                      onChange={(ev) => {
+                        setSearchDriver("name");
+                        setName(ev.target.value);
+                      }}
+                      required
+                      maxLength={120}
+                      autoComplete="off"
+                      placeholder="Ex. France"
+                    />
+                  </FieldContent>
+                </Field>
 
-              <Field>
-                <FieldLabel htmlFor="new-country-iso2">Code ISO2</FieldLabel>
-                <FieldContent>
-                  <Input
-                    id="new-country-iso2"
-                    name="iso2"
-                    value={iso2}
-                    onFocus={() => setSearchDriver("iso")}
-                    onChange={(ev) => {
-                      setSearchDriver("iso");
-                      setiso2(ev.target.value.toUpperCase());
-                    }}
-                    required
-                    maxLength={2}
-                    minLength={2}
-                    autoComplete="off"
-                    placeholder="FR"
-                  />
-                </FieldContent>
-              </Field>
+                <Field>
+                  <FieldLabel htmlFor="new-country-iso2">Code ISO2</FieldLabel>
+                  <FieldContent>
+                    <Input
+                      id="new-country-iso2"
+                      name="iso2"
+                      value={iso2}
+                      onFocus={() => setSearchDriver("iso")}
+                      onChange={(ev) => {
+                        setSearchDriver("iso");
+                        setiso2(ev.target.value.toUpperCase());
+                      }}
+                      required
+                      maxLength={2}
+                      minLength={2}
+                      autoComplete="off"
+                      placeholder="FR"
+                    />
+                  </FieldContent>
+                </Field>
 
-              <Field>
-                <FieldLabel htmlFor="new-country-iso3">Code ISO3</FieldLabel>
-                <FieldContent>
-                  <Input
-                    id="new-country-iso3"
-                    name="iso3"
-                    value={iso3}
-                    onFocus={() => setSearchDriver("iso")}
-                    onChange={(ev) => {
-                      setSearchDriver("iso");
-                      setiso3(ev.target.value.toUpperCase());
-                    }}
-                    required
-                    maxLength={3}
-                    minLength={3}
-                    autoComplete="off"
-                    placeholder="FRA"
-                  />
-                </FieldContent>
-              </Field>
+                <Field>
+                  <FieldLabel htmlFor="new-country-iso3">Code ISO3</FieldLabel>
+                  <FieldContent>
+                    <Input
+                      id="new-country-iso3"
+                      name="iso3"
+                      value={iso3}
+                      onFocus={() => setSearchDriver("iso")}
+                      onChange={(ev) => {
+                        setSearchDriver("iso");
+                        setiso3(ev.target.value.toUpperCase());
+                      }}
+                      required
+                      maxLength={3}
+                      minLength={3}
+                      autoComplete="off"
+                      placeholder="FRA"
+                    />
+                  </FieldContent>
+                </Field>
 
-              <Field>
-                <FieldLabel htmlFor="new-country-slug">
-                  Slug (URL) - en anglais
-                </FieldLabel>
-                <FieldContent>
-                  <Input
-                    id="new-country-slug"
-                    name="slug"
-                    value={slug}
-                    onFocus={() => setSearchDriver("slug")}
-                    onChange={(ev) => {
-                      setSearchDriver("slug");
-                      setSlug(
-                        slugFromEnglishCommon(ev.target.value).slice(0, 150),
-                      );
-                    }}
-                    required
-                    maxLength={150}
-                    autoComplete="off"
-                    placeholder="france"
-                    className="font-mono lowercase"
-                  />
-                </FieldContent>
-              </Field>
-            </FieldGroup>
-          </FieldSet>
-        </CardContent>
-      </Card>
+                <Field>
+                  <FieldLabel htmlFor="new-country-slug">
+                    Slug (URL) - en anglais
+                  </FieldLabel>
+                  <FieldContent>
+                    <Input
+                      id="new-country-slug"
+                      name="slug"
+                      value={slug}
+                      onFocus={() => setSearchDriver("slug")}
+                      onChange={(ev) => {
+                        setSearchDriver("slug");
+                        setSlug(
+                          slugFromEnglishCommon(ev.target.value).slice(0, 150),
+                        );
+                      }}
+                      required
+                      maxLength={150}
+                      autoComplete="off"
+                      placeholder="france"
+                      className="font-mono lowercase"
+                    />
+                  </FieldContent>
+                </Field>
+              </FieldGroup>
+            </FieldSet>
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Géométrie</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {geoHint ? (
-            <p
-              className="text-sm text-amber-600 dark:text-amber-500"
-              role="status"
-            >
-              {geoHint}
-            </p>
-          ) : null}
-          <Field>
-            <FieldTitle>Type de géométrie</FieldTitle>
-            <FieldContent>
-              <Select
-                value={geomType}
-                onValueChange={onGeometryTypeSelect}
-                name="geometryType"
+        <Card>
+          <CardHeader>
+            <CardTitle>Géométrie</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {geoHint ? (
+              <p
+                className="text-sm text-amber-600 dark:text-amber-500"
+                role="status"
               >
-                <SelectTrigger
-                  id="new-country-geom-type"
+                {geoHint}
+              </p>
+            ) : null}
+            <Field>
+              <FieldTitle>Type de géométrie</FieldTitle>
+              <FieldContent>
+                <Select
+                  value={geomType}
+                  onValueChange={onGeometryTypeSelect}
                   name="geometryType"
-                  className="w-full max-w-none"
                 >
-                  <SelectValue placeholder="Type de géométrie" />
-                </SelectTrigger>
-                <SelectContent
-                  position="popper"
-                  className="w-(--radix-select-trigger-width)"
-                >
-                  <SelectItem value="Polygon">Polygon</SelectItem>
-                  <SelectItem value="MultiPolygon">MultiPolygon</SelectItem>
-                </SelectContent>
-              </Select>
-            </FieldContent>
-          </Field>
+                  <SelectTrigger
+                    id="new-country-geom-type"
+                    name="geometryType"
+                    className="w-full max-w-none"
+                  >
+                    <SelectValue placeholder="Type de géométrie" />
+                  </SelectTrigger>
+                  <SelectContent
+                    position="popper"
+                    className="w-(--radix-select-trigger-width)"
+                  >
+                    <SelectItem value="Polygon">Polygon</SelectItem>
+                    <SelectItem value="MultiPolygon">MultiPolygon</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FieldContent>
+            </Field>
 
-          <Field data-invalid={geometryJsonError ? true : undefined}>
-            <FieldTitle>Tracé sur le globe 3D</FieldTitle>
-            <FieldContent className="space-y-2">
-              <CountryGeometryGlobeDrawEditor
-                key={`new-${geomType}`}
-                geometryType={geomType}
-                geomJson={geomJson}
-                onGeomJsonChange={setGeomJson}
-                ariaLabel={`Nouveau pays - édition géométrie ${name || "pays"} sur le globe`}
-              />
-              <FieldError>{geometryJsonError}</FieldError>
-            </FieldContent>
-          </Field>
-        </CardContent>
-      </Card>
+            <Field data-invalid={geometryJsonError ? true : undefined}>
+              <FieldTitle>Tracé sur le globe 3D</FieldTitle>
+              <FieldContent className="space-y-2">
+                <CountryGeometryGlobeDrawEditor
+                  key={`new-${geomType}`}
+                  geometryType={geomType}
+                  geomJson={geomJson}
+                  onGeomJsonChange={setGeomJson}
+                  ariaLabel={`Nouveau pays - édition géométrie ${name || "pays"} sur le globe`}
+                />
+                <FieldError>{geometryJsonError}</FieldError>
+              </FieldContent>
+            </Field>
+          </CardContent>
+        </Card>
 
-      {submitError ? (
-        <p className="text-sm text-destructive" role="alert">
-          {submitError}
-        </p>
-      ) : null}
+        {submitError ? (
+          <p className="text-sm text-destructive" role="alert">
+            {submitError}
+          </p>
+        ) : null}
 
-      <div className="flex flex-wrap gap-2">
-        <Button
-          type="submit"
-          disabled={
-            saving ||
-            !!geometryJsonError ||
-            existsLoading ||
-            existsFetchError ||
-            !existsResult ||
-            existsResult.exists
-          }
-        >
-          {saving ? "Création…" : "Créer le pays"}
-        </Button>
-        <Button type="button" variant="outline" asChild>
-          <Link href="/admin/country">Annuler</Link>
-        </Button>
-      </div>
-    </form>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="submit"
+            disabled={
+              saving ||
+              !!geometryJsonError ||
+              existsLoading ||
+              existsFetchError ||
+              !existsResult ||
+              existsResult.exists
+            }
+          >
+            {saving ? "Création…" : "Créer le pays"}
+          </Button>
+          <Button type="button" variant="outline" asChild>
+            <Link href="/admin/country">Annuler</Link>
+          </Button>
+        </div>
+      </form>
+    </section>
   );
 }

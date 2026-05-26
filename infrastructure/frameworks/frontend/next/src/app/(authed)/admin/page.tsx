@@ -3,7 +3,7 @@ import { User, Camera, Earth, MapPin } from "lucide-react";
 
 export default function AdminPage() {
   return (
-    <div className="container mx-auto space-y-8">
+    <>
       <section id="information" className="space-y-8">
         <div className="flex items-center justify-between gap-3">
           <h1 className="text-2xl font-semibold">Admin Dashboard</h1>
@@ -147,6 +147,6 @@ export default function AdminPage() {
           </li>
         </ul>
       </section>
-    </div>
+    </>
   );
 }

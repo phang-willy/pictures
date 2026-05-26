@@ -13,8 +13,8 @@ export default async function AdminPostNewPage() {
   const cities = await serverFetchAllActiveCities(cookieHeader);
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-4">
+    <>
+      <section className="space-y-4">
         <Button variant="outline" asChild>
           <Link href="/admin/post">
             <span className="flex items-center gap-2">
@@ -24,8 +24,8 @@ export default async function AdminPostNewPage() {
           </Link>
         </Button>
         <h1 className="text-2xl font-semibold">Nouveau post</h1>
-      </div>
+      </section>
       <PostNewForm cities={cities} />
-    </div>
+    </>
   );
 }

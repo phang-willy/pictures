@@ -492,111 +492,113 @@ export function ImageAssetAdmin() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between gap-3">
+    <>
+      <section className="flex items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">Images</h1>
-      </div>
+      </section>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Ajouter une image</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={onUpload} className="grid gap-5">
-            <div className="grid gap-4">
-              <Field>
-                <FieldLabel htmlFor="image-title">Titre</FieldLabel>
-                <Input
-                  id="image-title"
-                  value={title}
-                  onChange={(event) => setTitle(event.target.value)}
-                  placeholder="Exemple : Tour Eiffel coucher de soleil"
-                  disabled={uploading}
-                />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="image-file">Image</FieldLabel>
-                <div
-                  role="button"
-                  tabIndex={0}
-                  aria-label="Glisser-déposer une image ou choisir un fichier"
-                  onClick={() => fileInputRef.current?.click()}
-                  onKeyDown={onChooseFileKeyDown}
-                  onDragOver={onDragOver}
-                  onDragLeave={() => setIsDragging(false)}
-                  onDrop={onDrop}
-                  className={cn(
-                    "flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-md border border-dashed px-5 py-6 text-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                    isDragging
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border bg-muted/30 hover:bg-muted/60",
-                    uploading && "pointer-events-none opacity-60",
-                  )}
-                >
+      <section>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Ajouter une image</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={onUpload} className="grid gap-5">
+              <div className="grid gap-4">
+                <Field>
+                  <FieldLabel htmlFor="image-title">Titre</FieldLabel>
                   <Input
-                    ref={fileInputRef}
-                    id="image-file"
-                    type="file"
-                    accept="image/*"
-                    className="sr-only"
-                    onChange={(event) =>
-                      selectUploadFile(event.target.files?.[0])
-                    }
+                    id="image-title"
+                    value={title}
+                    onChange={(event) => setTitle(event.target.value)}
+                    placeholder="Exemple : Tour Eiffel coucher de soleil"
                     disabled={uploading}
                   />
-                  <UploadCloudIcon className="mb-3 size-7" />
-                  <span className="text-sm font-medium">
-                    Glisser-déposer une image
-                  </span>
-                  <span className="mt-1 text-xs text-muted-foreground">
-                    ou choisir un fichier
-                  </span>
-                </div>
-                {file ? (
-                  <div className="flex items-center gap-3 rounded-md border bg-background px-3 py-2 text-sm">
-                    <FileImageIcon className="size-4 shrink-0 text-muted-foreground" />
-                    <span className="min-w-0 flex-1 truncate">{file.name}</span>
-                    <span className="shrink-0 text-muted-foreground">
-                      {formatBytes(file.size)}
-                    </span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-sm"
-                      className="size-7 shrink-0"
-                      onClick={clearSelectedFile}
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="image-file">Image</FieldLabel>
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    aria-label="Glisser-déposer une image ou choisir un fichier"
+                    onClick={() => fileInputRef.current?.click()}
+                    onKeyDown={onChooseFileKeyDown}
+                    onDragOver={onDragOver}
+                    onDragLeave={() => setIsDragging(false)}
+                    onDrop={onDrop}
+                    className={cn(
+                      "flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-md border border-dashed px-5 py-6 text-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                      isDragging
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-muted/30 hover:bg-muted/60",
+                      uploading && "pointer-events-none opacity-60",
+                    )}
+                  >
+                    <Input
+                      ref={fileInputRef}
+                      id="image-file"
+                      type="file"
+                      accept="image/*"
+                      className="sr-only"
+                      onChange={(event) =>
+                        selectUploadFile(event.target.files?.[0])
+                      }
                       disabled={uploading}
-                      aria-label="Retirer le fichier"
-                    >
-                      <XIcon className="size-4" />
-                    </Button>
+                    />
+                    <UploadCloudIcon className="mb-3 size-7" />
+                    <span className="text-sm font-medium">
+                      Glisser-déposer une image
+                    </span>
+                    <span className="mt-1 text-xs text-muted-foreground">
+                      ou choisir un fichier
+                    </span>
                   </div>
-                ) : null}
-              </Field>
-            </div>
-            {uploadError ? (
-              <p className="text-sm text-destructive" role="alert">
-                {uploadError}
-              </p>
-            ) : null}
-            <div className="w-full">
-              <Button type="submit" disabled={uploading}>
-                <ImagePlusIcon className="size-4" />
-                <div>
-                  {uploading ? (
-                    <div className="flex min-h-screen w-full items-center justify-center text-muted-foreground">
-                      <span>Upload en cours</span>
-                      <LoaderCircle className="ml-2 h-4 w-4 animate-spin" />
+                  {file ? (
+                    <div className="flex items-center gap-3 rounded-md border bg-background px-3 py-2 text-sm">
+                      <FileImageIcon className="size-4 shrink-0 text-muted-foreground" />
+                      <span className="min-w-0 flex-1 truncate">{file.name}</span>
+                      <span className="shrink-0 text-muted-foreground">
+                        {formatBytes(file.size)}
+                      </span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        className="size-7 shrink-0"
+                        onClick={clearSelectedFile}
+                        disabled={uploading}
+                        aria-label="Retirer le fichier"
+                      >
+                        <XIcon className="size-4" />
+                      </Button>
                     </div>
-                  ) : (
-                    "Uploader"
-                  )}
-                </div>
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+                  ) : null}
+                </Field>
+              </div>
+              {uploadError ? (
+                <p className="text-sm text-destructive" role="alert">
+                  {uploadError}
+                </p>
+              ) : null}
+              <div className="w-full">
+                <Button type="submit" disabled={uploading}>
+                  <ImagePlusIcon className="size-4" />
+                  <div>
+                    {uploading ? (
+                      <div className="flex min-h-screen w-full items-center justify-center text-muted-foreground">
+                        <span>Upload en cours</span>
+                        <LoaderCircle className="ml-2 h-4 w-4 animate-spin" />
+                      </div>
+                    ) : (
+                      "Uploader"
+                    )}
+                  </div>
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </section>
 
       <ApiDataTable
         title="Médiathèque"
@@ -693,6 +695,6 @@ export function ImageAssetAdmin() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

@@ -264,181 +264,183 @@ export function CityEditForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Champs</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {existsFetchError ? (
-            <Alert variant="destructive" className="mb-4">
-              <AlertCircleIcon />
-              <AlertTitle>Erreur</AlertTitle>
-              <AlertDescription>
-                Impossible de vérifier les doublons. Réessayez ou
-                reconnectez-vous.
-              </AlertDescription>
-            </Alert>
-          ) : null}
-          {existsResult?.exists ? (
-            <Alert variant="destructive" className="mb-4">
-              <AlertCircleIcon />
-              <AlertTitle>Conflit</AlertTitle>
-              <AlertDescription className="space-y-2">
-                {existsResult.match && existsResult.match.id !== city.id ? (
-                  <p>
-                    <strong>{existsResult.match.name}</strong> (slug:{" "}
-                    {existsResult.match.slug}) utilise déjà l&apos;un des champs
-                    : {existsResult.conflicts.join(", ")}.
-                  </p>
-                ) : (
-                  <p>
-                    Champs en conflit : {existsResult.conflicts.join(", ")}.
-                  </p>
-                )}
-              </AlertDescription>
-            </Alert>
-          ) : null}
-          <FieldSet>
-            <FieldGroup>
+    <section>
+      <form onSubmit={onSubmit} className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Champs</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {existsFetchError ? (
+              <Alert variant="destructive" className="mb-4">
+                <AlertCircleIcon />
+                <AlertTitle>Erreur</AlertTitle>
+                <AlertDescription>
+                  Impossible de vérifier les doublons. Réessayez ou
+                  reconnectez-vous.
+                </AlertDescription>
+              </Alert>
+            ) : null}
+            {existsResult?.exists ? (
+              <Alert variant="destructive" className="mb-4">
+                <AlertCircleIcon />
+                <AlertTitle>Conflit</AlertTitle>
+                <AlertDescription className="space-y-2">
+                  {existsResult.match && existsResult.match.id !== city.id ? (
+                    <p>
+                      <strong>{existsResult.match.name}</strong> (slug:{" "}
+                      {existsResult.match.slug}) utilise déjà l&apos;un des champs
+                      : {existsResult.conflicts.join(", ")}.
+                    </p>
+                  ) : (
+                    <p>
+                      Champs en conflit : {existsResult.conflicts.join(", ")}.
+                    </p>
+                  )}
+                </AlertDescription>
+              </Alert>
+            ) : null}
+            <FieldSet>
+              <FieldGroup>
+                <Field>
+                  <FieldLabel htmlFor="city-country">Pays</FieldLabel>
+                  <FieldContent>
+                    <Select value={countryId} onValueChange={setCountryId}>
+                      <SelectTrigger
+                        id="city-country"
+                        className="w-full max-w-none"
+                      >
+                        <SelectValue placeholder="Choisir un pays" />
+                      </SelectTrigger>
+                      <SelectContent className="w-(--radix-select-trigger-width)">
+                        {countries.map((country) => (
+                          <SelectItem key={country.id} value={country.id}>
+                            <CountryFlag name={country.name} iso2={country.iso2} />
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FieldContent>
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="city-name">Nom</FieldLabel>
+                  <FieldContent>
+                    <Input
+                      id="city-name"
+                      value={name}
+                      onChange={(event) => {
+                        const next = event.target.value;
+                        setName(next);
+                        setSlug(slugify(next).slice(0, 150));
+                      }}
+                      required
+                      maxLength={120}
+                    />
+                  </FieldContent>
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="city-slug">Slug</FieldLabel>
+                  <FieldContent>
+                    <Input
+                      id="city-slug"
+                      value={slug}
+                      onChange={(event) =>
+                        setSlug(slugify(event.target.value).slice(0, 150))
+                      }
+                      required
+                      maxLength={150}
+                      className="font-mono lowercase"
+                    />
+                  </FieldContent>
+                </Field>
+              </FieldGroup>
+            </FieldSet>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Position</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Field>
+              <FieldTitle>Point unique</FieldTitle>
+              <FieldContent>
+                <CityPointOsmEditor
+                  latitude={latitude}
+                  longitude={longitude}
+                  onPointChange={({ latitude: lat, longitude: lng }) => {
+                    setLatitude(lat);
+                    setLongitude(lng);
+                  }}
+                  ariaLabel={`Point de ${name || city.name}`}
+                />
+              </FieldContent>
+            </Field>
+            <div className="grid gap-3 sm:grid-cols-2">
               <Field>
-                <FieldLabel htmlFor="city-country">Pays</FieldLabel>
-                <FieldContent>
-                  <Select value={countryId} onValueChange={setCountryId}>
-                    <SelectTrigger
-                      id="city-country"
-                      className="w-full max-w-none"
-                    >
-                      <SelectValue placeholder="Choisir un pays" />
-                    </SelectTrigger>
-                    <SelectContent className="w-(--radix-select-trigger-width)">
-                      {countries.map((country) => (
-                        <SelectItem key={country.id} value={country.id}>
-                          <CountryFlag name={country.name} iso2={country.iso2} />
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FieldContent>
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="city-name">Nom</FieldLabel>
+                <FieldLabel htmlFor="city-latitude">Latitude</FieldLabel>
                 <FieldContent>
                   <Input
-                    id="city-name"
-                    value={name}
-                    onChange={(event) => {
-                      const next = event.target.value;
-                      setName(next);
-                      setSlug(slugify(next).slice(0, 150));
-                    }}
-                    required
-                    maxLength={120}
-                  />
-                </FieldContent>
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="city-slug">Slug</FieldLabel>
-                <FieldContent>
-                  <Input
-                    id="city-slug"
-                    value={slug}
+                    id="city-latitude"
+                    type="number"
+                    step="any"
+                    value={latitude ?? ""}
                     onChange={(event) =>
-                      setSlug(slugify(event.target.value).slice(0, 150))
+                      setLatitude(
+                        event.target.value === ""
+                          ? null
+                          : Number(event.target.value),
+                      )
                     }
-                    required
-                    maxLength={150}
-                    className="font-mono lowercase"
                   />
                 </FieldContent>
               </Field>
-            </FieldGroup>
-          </FieldSet>
-        </CardContent>
-      </Card>
+              <Field>
+                <FieldLabel htmlFor="city-longitude">Longitude</FieldLabel>
+                <FieldContent>
+                  <Input
+                    id="city-longitude"
+                    type="number"
+                    step="any"
+                    value={longitude ?? ""}
+                    onChange={(event) =>
+                      setLongitude(
+                        event.target.value === ""
+                          ? null
+                          : Number(event.target.value),
+                      )
+                    }
+                  />
+                </FieldContent>
+              </Field>
+            </div>
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Position</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Field>
-            <FieldTitle>Point unique</FieldTitle>
-            <FieldContent>
-              <CityPointOsmEditor
-                latitude={latitude}
-                longitude={longitude}
-                onPointChange={({ latitude: lat, longitude: lng }) => {
-                  setLatitude(lat);
-                  setLongitude(lng);
-                }}
-                ariaLabel={`Point de ${name || city.name}`}
-              />
-            </FieldContent>
-          </Field>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Field>
-              <FieldLabel htmlFor="city-latitude">Latitude</FieldLabel>
-              <FieldContent>
-                <Input
-                  id="city-latitude"
-                  type="number"
-                  step="any"
-                  value={latitude ?? ""}
-                  onChange={(event) =>
-                    setLatitude(
-                      event.target.value === ""
-                        ? null
-                        : Number(event.target.value),
-                    )
-                  }
-                />
-              </FieldContent>
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="city-longitude">Longitude</FieldLabel>
-              <FieldContent>
-                <Input
-                  id="city-longitude"
-                  type="number"
-                  step="any"
-                  value={longitude ?? ""}
-                  onChange={(event) =>
-                    setLongitude(
-                      event.target.value === ""
-                        ? null
-                        : Number(event.target.value),
-                    )
-                  }
-                />
-              </FieldContent>
-            </Field>
-          </div>
-        </CardContent>
-      </Card>
+        {submitError ? (
+          <p className="text-sm text-destructive">{submitError}</p>
+        ) : null}
 
-      {submitError ? (
-        <p className="text-sm text-destructive">{submitError}</p>
-      ) : null}
-
-      <div className="flex flex-wrap gap-2">
-        <Button
-          type="submit"
-          disabled={
-            saving ||
-            !canSubmit ||
-            existsLoading ||
-            existsFetchError ||
-            !existsResult ||
-            existsResult.exists
-          }
-        >
-          {saving ? "Enregistrement…" : "Enregistrer"}
-        </Button>
-        <Button type="button" variant="outline" asChild>
-          <Link href={`/admin/city/view/${city.id}`}>Voir le détail</Link>
-        </Button>
-      </div>
-    </form>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="submit"
+            disabled={
+              saving ||
+              !canSubmit ||
+              existsLoading ||
+              existsFetchError ||
+              !existsResult ||
+              existsResult.exists
+            }
+          >
+            {saving ? "Enregistrement…" : "Enregistrer"}
+          </Button>
+          <Button type="button" variant="outline" asChild>
+            <Link href={`/admin/city/view/${city.id}`}>Voir le détail</Link>
+          </Button>
+        </div>
+      </form>
+    </section>
   );
 }

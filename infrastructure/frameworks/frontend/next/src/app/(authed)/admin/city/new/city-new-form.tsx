@@ -283,194 +283,196 @@ export function CityNewForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Identification</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {existsFetchError || pendingDuplicateAck?.exists ? (
-            <div className="space-y-2 text-sm">
-              {existsFetchError ? (
-                <Alert variant="destructive">
-                  <AlertCircleIcon />
-                  <AlertTitle>Erreur</AlertTitle>
-                  <AlertDescription>
-                    Impossible de vérifier les doublons. Réessayez ou
-                    reconnectez-vous.
-                  </AlertDescription>
-                </Alert>
-              ) : null}
-              {pendingDuplicateAck?.exists ? (
-                <Alert variant="destructive">
-                  <AlertCircleIcon />
-                  <AlertTitle>Doublon</AlertTitle>
-                  <AlertDescription className="space-y-3">
-                    {pendingDuplicateAck.match ? (
-                      <p>
-                        <strong>{pendingDuplicateAck.match.name}</strong>
-                        <span>
-                          {" "}
-                          (slug: {pendingDuplicateAck.match.slug}) existe déjà
-                          dans ce pays.
-                        </span>
-                      </p>
-                    ) : (
-                      <p>Une ville correspondante existe déjà dans ce pays.</p>
-                    )}
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="sm"
-                      onClick={acknowledgeDuplicateConflict}
-                    >
-                      Compris - vider le formulaire
-                    </Button>
-                  </AlertDescription>
-                </Alert>
-              ) : null}
+    <section>
+      <form onSubmit={onSubmit} className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Identification</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {existsFetchError || pendingDuplicateAck?.exists ? (
+              <div className="space-y-2 text-sm">
+                {existsFetchError ? (
+                  <Alert variant="destructive">
+                    <AlertCircleIcon />
+                    <AlertTitle>Erreur</AlertTitle>
+                    <AlertDescription>
+                      Impossible de vérifier les doublons. Réessayez ou
+                      reconnectez-vous.
+                    </AlertDescription>
+                  </Alert>
+                ) : null}
+                {pendingDuplicateAck?.exists ? (
+                  <Alert variant="destructive">
+                    <AlertCircleIcon />
+                    <AlertTitle>Doublon</AlertTitle>
+                    <AlertDescription className="space-y-3">
+                      {pendingDuplicateAck.match ? (
+                        <p>
+                          <strong>{pendingDuplicateAck.match.name}</strong>
+                          <span>
+                            {" "}
+                            (slug: {pendingDuplicateAck.match.slug}) existe déjà
+                            dans ce pays.
+                          </span>
+                        </p>
+                      ) : (
+                        <p>Une ville correspondante existe déjà dans ce pays.</p>
+                      )}
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={acknowledgeDuplicateConflict}
+                      >
+                        Compris - vider le formulaire
+                      </Button>
+                    </AlertDescription>
+                  </Alert>
+                ) : null}
+              </div>
+            ) : null}
+            <FieldSet>
+              <FieldGroup>
+                <Field>
+                  <FieldLabel htmlFor="new-city-country">Pays</FieldLabel>
+                  <FieldContent>
+                    <Select value={countryId} onValueChange={setCountryId}>
+                      <SelectTrigger
+                        id="new-city-country"
+                        className="w-full max-w-none"
+                      >
+                        <SelectValue placeholder="Choisir un pays" />
+                      </SelectTrigger>
+                      <SelectContent className="w-(--radix-select-trigger-width)">
+                        {countries.map((country) => (
+                          <SelectItem key={country.id} value={country.id}>
+                            <CountryFlag name={country.name} iso2={country.iso2} />
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FieldContent>
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="new-city-name">Nom</FieldLabel>
+                  <FieldContent>
+                    <Input
+                      id="new-city-name"
+                      value={name}
+                      onChange={(event) => {
+                        const next = event.target.value;
+                        setName(next);
+                        setSlug(slugify(next));
+                      }}
+                      required
+                      maxLength={120}
+                      autoComplete="off"
+                    />
+                  </FieldContent>
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="new-city-slug">Slug</FieldLabel>
+                  <FieldContent>
+                    <Input
+                      id="new-city-slug"
+                      value={slug}
+                      onChange={(event) => setSlug(slugify(event.target.value))}
+                      required
+                      maxLength={150}
+                      autoComplete="off"
+                      className="font-mono lowercase"
+                    />
+                  </FieldContent>
+                </Field>
+              </FieldGroup>
+            </FieldSet>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Position</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Field>
+              <FieldTitle>Point unique</FieldTitle>
+              <FieldContent className="space-y-2">
+                <CityPointOsmEditor
+                  latitude={latitude}
+                  longitude={longitude}
+                  onPointChange={({ latitude: lat, longitude: lng }) => {
+                    setLatitude(lat);
+                    setLongitude(lng);
+                  }}
+                  ariaLabel={`Nouveau point pour ${name || "la ville"}`}
+                />
+              </FieldContent>
+            </Field>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field>
+                <FieldLabel htmlFor="new-city-latitude">Latitude</FieldLabel>
+                <FieldContent>
+                  <Input
+                    id="new-city-latitude"
+                    type="number"
+                    step="any"
+                    value={latitude ?? ""}
+                    onChange={(event) =>
+                      setLatitude(
+                        event.target.value === ""
+                          ? null
+                          : Number(event.target.value),
+                      )
+                    }
+                  />
+                </FieldContent>
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="new-city-longitude">Longitude</FieldLabel>
+                <FieldContent>
+                  <Input
+                    id="new-city-longitude"
+                    type="number"
+                    step="any"
+                    value={longitude ?? ""}
+                    onChange={(event) =>
+                      setLongitude(
+                        event.target.value === ""
+                          ? null
+                          : Number(event.target.value),
+                      )
+                    }
+                  />
+                </FieldContent>
+              </Field>
             </div>
-          ) : null}
-          <FieldSet>
-            <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="new-city-country">Pays</FieldLabel>
-                <FieldContent>
-                  <Select value={countryId} onValueChange={setCountryId}>
-                    <SelectTrigger
-                      id="new-city-country"
-                      className="w-full max-w-none"
-                    >
-                      <SelectValue placeholder="Choisir un pays" />
-                    </SelectTrigger>
-                    <SelectContent className="w-(--radix-select-trigger-width)">
-                      {countries.map((country) => (
-                        <SelectItem key={country.id} value={country.id}>
-                          <CountryFlag name={country.name} iso2={country.iso2} />
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FieldContent>
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="new-city-name">Nom</FieldLabel>
-                <FieldContent>
-                  <Input
-                    id="new-city-name"
-                    value={name}
-                    onChange={(event) => {
-                      const next = event.target.value;
-                      setName(next);
-                      setSlug(slugify(next));
-                    }}
-                    required
-                    maxLength={120}
-                    autoComplete="off"
-                  />
-                </FieldContent>
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="new-city-slug">Slug</FieldLabel>
-                <FieldContent>
-                  <Input
-                    id="new-city-slug"
-                    value={slug}
-                    onChange={(event) => setSlug(slugify(event.target.value))}
-                    required
-                    maxLength={150}
-                    autoComplete="off"
-                    className="font-mono lowercase"
-                  />
-                </FieldContent>
-              </Field>
-            </FieldGroup>
-          </FieldSet>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Position</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Field>
-            <FieldTitle>Point unique</FieldTitle>
-            <FieldContent className="space-y-2">
-              <CityPointOsmEditor
-                latitude={latitude}
-                longitude={longitude}
-                onPointChange={({ latitude: lat, longitude: lng }) => {
-                  setLatitude(lat);
-                  setLongitude(lng);
-                }}
-                ariaLabel={`Nouveau point pour ${name || "la ville"}`}
-              />
-            </FieldContent>
-          </Field>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Field>
-              <FieldLabel htmlFor="new-city-latitude">Latitude</FieldLabel>
-              <FieldContent>
-                <Input
-                  id="new-city-latitude"
-                  type="number"
-                  step="any"
-                  value={latitude ?? ""}
-                  onChange={(event) =>
-                    setLatitude(
-                      event.target.value === ""
-                        ? null
-                        : Number(event.target.value),
-                    )
-                  }
-                />
-              </FieldContent>
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="new-city-longitude">Longitude</FieldLabel>
-              <FieldContent>
-                <Input
-                  id="new-city-longitude"
-                  type="number"
-                  step="any"
-                  value={longitude ?? ""}
-                  onChange={(event) =>
-                    setLongitude(
-                      event.target.value === ""
-                        ? null
-                        : Number(event.target.value),
-                    )
-                  }
-                />
-              </FieldContent>
-            </Field>
-          </div>
-        </CardContent>
-      </Card>
+        {submitError ? (
+          <p className="text-sm text-destructive">{submitError}</p>
+        ) : null}
 
-      {submitError ? (
-        <p className="text-sm text-destructive">{submitError}</p>
-      ) : null}
-
-      <div className="flex flex-wrap gap-2">
-        <Button
-          type="submit"
-          disabled={
-            saving ||
-            !canSubmit ||
-            existsLoading ||
-            existsFetchError ||
-            !existsResult ||
-            existsResult.exists
-          }
-        >
-          {saving ? "Création…" : "Créer la ville"}
-        </Button>
-        <Button type="button" variant="outline" asChild>
-          <Link href="/admin/city">Annuler</Link>
-        </Button>
-      </div>
-    </form>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="submit"
+            disabled={
+              saving ||
+              !canSubmit ||
+              existsLoading ||
+              existsFetchError ||
+              !existsResult ||
+              existsResult.exists
+            }
+          >
+            {saving ? "Création…" : "Créer la ville"}
+          </Button>
+          <Button type="button" variant="outline" asChild>
+            <Link href="/admin/city">Annuler</Link>
+          </Button>
+        </div>
+      </form>
+    </section>
   );
 }

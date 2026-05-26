@@ -36,8 +36,8 @@ export default async function AdminCountryEditPage({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-3">
+    <>
+      <section className="space-y-3">
         <Button variant="outline" asChild>
           <Link href="/admin/country">
             <span className="flex items-center gap-2">
@@ -49,8 +49,8 @@ export default async function AdminCountryEditPage({
         <h1 className="text-2xl font-semibold flex items-center gap-2">
           Modifier : <CountryFlag name={country.name} iso2={country.iso2} />
         </h1>
-      </div>
+      </section>
       <CountryEditForm country={country} continents={continents} />{" "}
-    </div>
+    </>
   );
 }

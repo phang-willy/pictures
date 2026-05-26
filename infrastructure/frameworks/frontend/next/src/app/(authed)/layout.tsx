@@ -21,14 +21,14 @@ export default function AuthedLayout({ children }: { children: ReactNode }) {
     <AuthedProvider>
       <SidebarProvider>
         <AppSidebar />
-        <div className="flex flex-col h-full w-full relative">
-          <header className="w-full border-b sticky top-0 left-0 right-0 bg-white dark:bg-black">
+        <div id="container" className="relative flex h-full min-w-0 flex-1 flex-col">
+          <header className="sticky top-0 right-0 left-0 w-full shrink-0 border-b bg-white dark:bg-black">
             <div className="flex items-center justify-between p-4 container mx-auto">
               <SidebarTrigger />
               <ModeToggle />
             </div>
           </header>
-          <main className="flex-1">{children}</main>
+          <main className="min-w-0 flex-1">{children}</main>
         </div>
       </SidebarProvider>
     </AuthedProvider>
