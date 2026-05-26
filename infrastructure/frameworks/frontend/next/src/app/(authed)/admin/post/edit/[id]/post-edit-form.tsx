@@ -247,232 +247,234 @@ export function PostEditForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Champs</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {existsFetchError ? (
-            <Alert variant="destructive" className="mb-4">
-              <AlertCircleIcon />
-              <AlertTitle>Erreur</AlertTitle>
-              <AlertDescription>
-                Impossible de vérifier les doublons. Réessayez ou
-                reconnectez-vous.
-              </AlertDescription>
-            </Alert>
-          ) : null}
-          {existsResult?.exists ? (
-            <Alert variant="destructive" className="mb-4">
-              <AlertCircleIcon />
-              <AlertTitle>Conflit</AlertTitle>
-              <AlertDescription className="space-y-2">
-                {existsResult.match && existsResult.match.id !== post.id ? (
-                  <p>
-                    <strong>{existsResult.match.name}</strong> (slug:{" "}
-                    {existsResult.match.slug}) utilise déjà l&apos;un des champs
-                    : {existsResult.conflicts.join(", ")}.
-                  </p>
-                ) : (
-                  <p>
-                    Champs en conflit : {existsResult.conflicts.join(", ")}.
-                  </p>
-                )}
-              </AlertDescription>
-            </Alert>
-          ) : null}
-          <FieldSet>
-            <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="post-city">Ville</FieldLabel>
-                <FieldContent>
-                  <Select value={cityId} onValueChange={setCityId}>
-                    <SelectTrigger
-                      id="post-city"
-                      className="w-full max-w-none"
-                    >
-                      <SelectValue placeholder="Choisir une ville" />
-                    </SelectTrigger>
-                    <SelectContent className="w-(--radix-select-trigger-width) max-h-72">
-                      {cities.map((city) => (
-                        <SelectItem key={city.id} value={city.id}>
-                          <span className="flex items-center gap-2">
-                            <CountryFlag
-                              name={city.country.name}
-                              iso2={city.country.iso2}
-                              show_name={false}
-                            />
-                            <span className="text-muted-foreground">
-                              ({city.country.iso2})
+    <section>
+      <form onSubmit={onSubmit} className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Champs</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {existsFetchError ? (
+              <Alert variant="destructive" className="mb-4">
+                <AlertCircleIcon />
+                <AlertTitle>Erreur</AlertTitle>
+                <AlertDescription>
+                  Impossible de vérifier les doublons. Réessayez ou
+                  reconnectez-vous.
+                </AlertDescription>
+              </Alert>
+            ) : null}
+            {existsResult?.exists ? (
+              <Alert variant="destructive" className="mb-4">
+                <AlertCircleIcon />
+                <AlertTitle>Conflit</AlertTitle>
+                <AlertDescription className="space-y-2">
+                  {existsResult.match && existsResult.match.id !== post.id ? (
+                    <p>
+                      <strong>{existsResult.match.name}</strong> (slug:{" "}
+                      {existsResult.match.slug}) utilise déjà l&apos;un des champs
+                      : {existsResult.conflicts.join(", ")}.
+                    </p>
+                  ) : (
+                    <p>
+                      Champs en conflit : {existsResult.conflicts.join(", ")}.
+                    </p>
+                  )}
+                </AlertDescription>
+              </Alert>
+            ) : null}
+            <FieldSet>
+              <FieldGroup>
+                <Field>
+                  <FieldLabel htmlFor="post-city">Ville</FieldLabel>
+                  <FieldContent>
+                    <Select value={cityId} onValueChange={setCityId}>
+                      <SelectTrigger
+                        id="post-city"
+                        className="w-full max-w-none"
+                      >
+                        <SelectValue placeholder="Choisir une ville" />
+                      </SelectTrigger>
+                      <SelectContent className="w-(--radix-select-trigger-width) max-h-72">
+                        {cities.map((city) => (
+                          <SelectItem key={city.id} value={city.id}>
+                            <span className="flex items-center gap-2">
+                              <CountryFlag
+                                name={city.country.name}
+                                iso2={city.country.iso2}
+                                show_name={false}
+                              />
+                              <span className="text-muted-foreground">
+                                ({city.country.iso2})
+                              </span>
+                              <span>{city.name}</span>
                             </span>
-                            <span>{city.name}</span>
-                          </span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FieldContent>
-              </Field>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FieldContent>
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="post-name">Nom</FieldLabel>
+                  <FieldContent>
+                    <Input
+                      id="post-name"
+                      value={name}
+                      onChange={(event) => {
+                        const next = event.target.value;
+                        setName(next);
+                        setSlug(slugify(next).slice(0, 255));
+                      }}
+                      required
+                      maxLength={255}
+                    />
+                  </FieldContent>
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="post-slug">Slug</FieldLabel>
+                  <FieldContent>
+                    <Input
+                      id="post-slug"
+                      value={slug}
+                      onChange={(event) =>
+                        setSlug(slugify(event.target.value).slice(0, 255))
+                      }
+                      required
+                      maxLength={255}
+                      className="font-mono lowercase"
+                    />
+                  </FieldContent>
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="post-short-description">
+                    Description (court)
+                  </FieldLabel>
+                  <FieldContent className="space-y-1">
+                    <textarea
+                      id="post-short-description"
+                      value={shortDescription}
+                      onChange={(event) =>
+                        setShortDescription(
+                          event.target.value.slice(
+                            0,
+                            POST_SHORT_DESCRIPTION_MAX_LEN,
+                          ),
+                        )
+                      }
+                      rows={4}
+                      maxLength={POST_SHORT_DESCRIPTION_MAX_LEN}
+                      placeholder={`${POST_SHORT_DESCRIPTION_MIN_LEN}-${POST_SHORT_DESCRIPTION_MAX_LEN} caractères si renseignée …`}
+                      className={cn(
+                        "min-h-18 w-full resize-y rounded-lg border border-input bg-card px-2.5 py-2 text-base outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30",
+                        shortDescriptionOk ? "" : "border-destructive",
+                      )}
+                    />
+                    <p className="text-muted-foreground text-xs">
+                      {shortDescription.length}/{POST_SHORT_DESCRIPTION_MAX_LEN}{" "}
+                      - vide autorisé ; sinon entre {POST_SHORT_DESCRIPTION_MIN_LEN}{" "}
+                      et {POST_SHORT_DESCRIPTION_MAX_LEN} caractères
+                    </p>
+                  </FieldContent>
+                </Field>
+                <Field>
+                  <FieldLabel>Contenu</FieldLabel>
+                  <FieldContent>
+                    <Tiptap
+                      value={content}
+                      onChange={setContent}
+                      className="min-h-30 rounded-lg border border-input bg-card px-2.5 py-2"
+                    />
+                  </FieldContent>
+                </Field>
+              </FieldGroup>
+            </FieldSet>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Position (carte 3D)</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Field>
+              <FieldTitle>Point sur le globe</FieldTitle>
+              <FieldContent>
+                <CityPointOsmEditor
+                  latitude={latitude}
+                  longitude={longitude}
+                  onPointChange={({ latitude: lat, longitude: lng }) => {
+                    setLatitude(lat);
+                    setLongitude(lng);
+                  }}
+                  ariaLabel={`Point de ${name || post.name}`}
+                />
+              </FieldContent>
+            </Field>
+            <div className="grid gap-3 sm:grid-cols-2">
               <Field>
-                <FieldLabel htmlFor="post-name">Nom</FieldLabel>
+                <FieldLabel htmlFor="post-latitude">Latitude</FieldLabel>
                 <FieldContent>
                   <Input
-                    id="post-name"
-                    value={name}
-                    onChange={(event) => {
-                      const next = event.target.value;
-                      setName(next);
-                      setSlug(slugify(next).slice(0, 255));
-                    }}
-                    required
-                    maxLength={255}
-                  />
-                </FieldContent>
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="post-slug">Slug</FieldLabel>
-                <FieldContent>
-                  <Input
-                    id="post-slug"
-                    value={slug}
+                    id="post-latitude"
+                    type="number"
+                    step="any"
+                    value={latitude ?? ""}
                     onChange={(event) =>
-                      setSlug(slugify(event.target.value).slice(0, 255))
-                    }
-                    required
-                    maxLength={255}
-                    className="font-mono lowercase"
-                  />
-                </FieldContent>
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="post-short-description">
-                  Description (court)
-                </FieldLabel>
-                <FieldContent className="space-y-1">
-                  <textarea
-                    id="post-short-description"
-                    value={shortDescription}
-                    onChange={(event) =>
-                      setShortDescription(
-                        event.target.value.slice(
-                          0,
-                          POST_SHORT_DESCRIPTION_MAX_LEN,
-                        ),
+                      setLatitude(
+                        event.target.value === ""
+                          ? null
+                          : Number(event.target.value),
                       )
                     }
-                    rows={4}
-                    maxLength={POST_SHORT_DESCRIPTION_MAX_LEN}
-                    placeholder={`${POST_SHORT_DESCRIPTION_MIN_LEN}-${POST_SHORT_DESCRIPTION_MAX_LEN} caractères si renseignée …`}
-                    className={cn(
-                      "min-h-18 w-full resize-y rounded-lg border border-input bg-card px-2.5 py-2 text-base outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30",
-                      shortDescriptionOk ? "" : "border-destructive",
-                    )}
                   />
-                  <p className="text-muted-foreground text-xs">
-                    {shortDescription.length}/{POST_SHORT_DESCRIPTION_MAX_LEN}{" "}
-                    - vide autorisé ; sinon entre {POST_SHORT_DESCRIPTION_MIN_LEN}{" "}
-                    et {POST_SHORT_DESCRIPTION_MAX_LEN} caractères
-                  </p>
                 </FieldContent>
               </Field>
               <Field>
-                <FieldLabel>Contenu</FieldLabel>
+                <FieldLabel htmlFor="post-longitude">Longitude</FieldLabel>
                 <FieldContent>
-                  <Tiptap
-                    value={content}
-                    onChange={setContent}
-                    className="min-h-30 rounded-lg border border-input bg-card px-2.5 py-2"
+                  <Input
+                    id="post-longitude"
+                    type="number"
+                    step="any"
+                    value={longitude ?? ""}
+                    onChange={(event) =>
+                      setLongitude(
+                        event.target.value === ""
+                          ? null
+                          : Number(event.target.value),
+                      )
+                    }
                   />
                 </FieldContent>
               </Field>
-            </FieldGroup>
-          </FieldSet>
-        </CardContent>
-      </Card>
+            </div>
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Position (carte 3D)</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Field>
-            <FieldTitle>Point sur le globe</FieldTitle>
-            <FieldContent>
-              <CityPointOsmEditor
-                latitude={latitude}
-                longitude={longitude}
-                onPointChange={({ latitude: lat, longitude: lng }) => {
-                  setLatitude(lat);
-                  setLongitude(lng);
-                }}
-                ariaLabel={`Point de ${name || post.name}`}
-              />
-            </FieldContent>
-          </Field>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Field>
-              <FieldLabel htmlFor="post-latitude">Latitude</FieldLabel>
-              <FieldContent>
-                <Input
-                  id="post-latitude"
-                  type="number"
-                  step="any"
-                  value={latitude ?? ""}
-                  onChange={(event) =>
-                    setLatitude(
-                      event.target.value === ""
-                        ? null
-                        : Number(event.target.value),
-                    )
-                  }
-                />
-              </FieldContent>
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="post-longitude">Longitude</FieldLabel>
-              <FieldContent>
-                <Input
-                  id="post-longitude"
-                  type="number"
-                  step="any"
-                  value={longitude ?? ""}
-                  onChange={(event) =>
-                    setLongitude(
-                      event.target.value === ""
-                        ? null
-                        : Number(event.target.value),
-                    )
-                  }
-                />
-              </FieldContent>
-            </Field>
-          </div>
-        </CardContent>
-      </Card>
+        {submitError ? (
+          <p className="text-sm text-destructive">{submitError}</p>
+        ) : null}
 
-      {submitError ? (
-        <p className="text-sm text-destructive">{submitError}</p>
-      ) : null}
-
-      <div className="flex flex-wrap gap-2">
-        <Button
-          type="submit"
-          disabled={
-            saving ||
-            !canSubmit ||
-            existsLoading ||
-            existsFetchError ||
-            !existsResult ||
-            existsResult.exists
-          }
-        >
-          {saving ? "Enregistrement…" : "Enregistrer"}
-        </Button>
-        <Button type="button" variant="outline" asChild>
-          <Link href={`/admin/post/view/${post.id}`}>Voir le détail</Link>
-        </Button>
-      </div>
-    </form>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="submit"
+            disabled={
+              saving ||
+              !canSubmit ||
+              existsLoading ||
+              existsFetchError ||
+              !existsResult ||
+              existsResult.exists
+            }
+          >
+            {saving ? "Enregistrement…" : "Enregistrer"}
+          </Button>
+          <Button type="button" variant="outline" asChild>
+            <Link href={`/admin/post/view/${post.id}`}>Voir le détail</Link>
+          </Button>
+        </div>
+      </form>
+    </section>
   );
 }

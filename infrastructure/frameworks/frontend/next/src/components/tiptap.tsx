@@ -254,7 +254,7 @@ const Tiptap = ({ value, onChange, className }: TiptapProps) => {
       <div className="flex items-center justify-between gap-2">
         <div className="flex flex-wrap gap-2">
           <Select value={headingValue} onValueChange={onHeadingChange}>
-            <SelectTrigger size="sm" className="w-[140px]">
+            <SelectTrigger size="sm" className="w-35">
               <SelectValue placeholder="Style" />
             </SelectTrigger>
             <SelectContent>
@@ -335,7 +335,7 @@ const Tiptap = ({ value, onChange, className }: TiptapProps) => {
             </Button>
           </ButtonGroup>
           <Select value={listValue} onValueChange={onListChange}>
-            <SelectTrigger size="sm" className="w-[140px]" disabled={!editor}>
+            <SelectTrigger size="sm" className="w-35" disabled={!editor}>
               <SelectValue placeholder="Liste" />
             </SelectTrigger>
             <SelectContent>
@@ -442,9 +442,9 @@ const Tiptap = ({ value, onChange, className }: TiptapProps) => {
       <EditorContent
         editor={editor}
         className={cn(
-          'min-h-[120px] rounded-lg border border-input bg-card px-2.5 py-2',
+          'min-h-30 rounded-lg border border-input bg-card px-2.5 py-2',
           'prose prose-sm max-w-none dark:prose-invert',
-          '[&_.ProseMirror]:min-h-[90px] [&_.ProseMirror]:outline-none',
+          '[&_.ProseMirror]:min-h-22.5 [&_.ProseMirror]:outline-none',
           '[&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-6',
           '[&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-6',
           '[&_.ProseMirror_h1]:text-2xl [&_.ProseMirror_h1]:font-semibold',

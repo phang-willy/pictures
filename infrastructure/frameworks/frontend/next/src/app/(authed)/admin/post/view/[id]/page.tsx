@@ -31,8 +31,8 @@ export default async function AdminPostViewPage({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-3">
+    <>
+      <section className="space-y-3">
         <Button variant="outline" asChild>
           <Link href="/admin/post">
             <span className="flex items-center gap-2">
@@ -42,89 +42,93 @@ export default async function AdminPostViewPage({
           </Link>
         </Button>
         <h1 className="text-2xl font-semibold">{post.name}</h1>
-      </div>
+      </section>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Informations</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <dl>
-            <DetailRow label="ID" value={post.id} />
-            <DetailRow
-              label="Ville"
-              value={
-                <span className="inline-flex flex-wrap items-center gap-2">
-                  <CountryFlag
-                    name={post.city.country.name}
-                    iso2={post.city.country.iso2}
-                    show_name={false}
-                  />
-                  <span className="text-muted-foreground">
-                    ({post.city.country.iso2})
+      <section>
+        <Card>
+          <CardHeader>
+            <CardTitle>Informations</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <dl>
+              <DetailRow label="ID" value={post.id} />
+              <DetailRow
+                label="Ville"
+                value={
+                  <span className="inline-flex flex-wrap items-center gap-2">
+                    <CountryFlag
+                      name={post.city.country.name}
+                      iso2={post.city.country.iso2}
+                      show_name={false}
+                    />
+                    <span className="text-muted-foreground">
+                      ({post.city.country.iso2})
+                    </span>
+                    <span>{post.city.name}</span>
                   </span>
-                  <span>{post.city.name}</span>
-                </span>
-              }
-            />
-            <DetailRow label="Nom" value={post.name} />
-            <DetailRow label="Slug" value={post.slug} />
-            <DetailRow
-              layout="stacked"
-              label="Description (court)"
-              value={
-                post.description?.trim() ? (
-                  <span className="whitespace-pre-wrap">{post.description}</span>
-                ) : (
-                  "-"
-                )
-              }
-            />
-            <DetailRow
-              layout="stacked"
-              label="Contenu"
-              value={
-                post.content?.trim() ? (
-                  <PostContentHtml html={post.content} />
-                ) : (
-                  "-"
-                )
-              }
-            />
-            <DetailRow label="Latitude" value={post.latitude.toFixed(6)} />
-            <DetailRow label="Longitude" value={post.longitude.toFixed(6)} />
-            <DetailRow
-              label="Créé le"
-              value={formatDate(post.createdAt, { mode: "date-hour" })}
-            />
-            <DetailRow
-              label="Mis à jour le"
-              value={formatDate(post.updatedAt, { mode: "date-hour" })}
-            />
-            <DetailRow
-              label="Désactivé le"
-              value={
-                post.deactivatedAt
-                  ? formatDate(post.deactivatedAt, { mode: "date-hour" })
-                  : "-"
-              }
-            />
-          </dl>
-        </CardContent>
-      </Card>
+                }
+              />
+              <DetailRow label="Nom" value={post.name} />
+              <DetailRow label="Slug" value={post.slug} />
+              <DetailRow
+                layout="stacked"
+                label="Description (court)"
+                value={
+                  post.description?.trim() ? (
+                    <span className="whitespace-pre-wrap">{post.description}</span>
+                  ) : (
+                    "-"
+                  )
+                }
+              />
+              <DetailRow
+                layout="stacked"
+                label="Contenu"
+                value={
+                  post.content?.trim() ? (
+                    <PostContentHtml html={post.content} />
+                  ) : (
+                    "-"
+                  )
+                }
+              />
+              <DetailRow label="Latitude" value={post.latitude.toFixed(6)} />
+              <DetailRow label="Longitude" value={post.longitude.toFixed(6)} />
+              <DetailRow
+                label="Créé le"
+                value={formatDate(post.createdAt, { mode: "date-hour" })}
+              />
+              <DetailRow
+                label="Mis à jour le"
+                value={formatDate(post.updatedAt, { mode: "date-hour" })}
+              />
+              <DetailRow
+                label="Désactivé le"
+                value={
+                  post.deactivatedAt
+                    ? formatDate(post.deactivatedAt, { mode: "date-hour" })
+                    : "-"
+                }
+              />
+            </dl>
+          </CardContent>
+        </Card>
+      </section>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Carte 3D</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CityPointMap
-            latitude={post.latitude}
-            longitude={post.longitude}
-            ariaLabel={`Carte du post ${post.name}`}
-          />
-        </CardContent>
-      </Card>
-    </div>
+      <section>
+        <Card>
+          <CardHeader>
+            <CardTitle>Carte 3D</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CityPointMap
+              latitude={post.latitude}
+              longitude={post.longitude}
+              ariaLabel={`Carte du post ${post.name}`}
+            />
+          </CardContent>
+        </Card>
+      </section>
+    </>
   );
 }

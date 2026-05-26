@@ -26,6 +26,7 @@ import { ChevronRight, LogOutIcon, SettingsIcon, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthed } from "@/app/(authed)/authed-provider";
 import { appName } from "@/config/app-name";
+import Logo from "@/components/logo";
 
 export function AppSidebar() {
   const { logout, user, isAdmin } = useAuthed();
@@ -39,6 +40,10 @@ export function AppSidebar() {
         url: "/admin",
         icon: SettingsIcon,
         items: [
+          {
+            title: 'Dashboard',
+            url: '/admin',
+          },
           {
             title: "Posts",
             url: "/admin/post",
@@ -55,10 +60,6 @@ export function AppSidebar() {
             title: "Villes",
             url: "/admin/city",
           },
-          {
-            title: 'Dashboard',
-            url: '/admin',
-          }
         ],
       },
     ],
@@ -67,9 +68,10 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="p-4 border-b">
-        <div className="flex items-center justify-between">
-          <Link href="/">
-            <h1 className="text-3xl font-bold">{appName}</h1>
+        <div className="flex items-center justify-between md:block">
+          <Link href="/" className="block p-2.5">
+            <Logo />
+            <h1 className="sr-only">{appName}</h1>
           </Link>
           {isMobile ? <SidebarTrigger /> : null}
         </div>
@@ -102,9 +104,15 @@ export function AppSidebar() {
                             <SidebarMenuSubItem key={subItem.title}>
                               <SidebarMenuButton
                                 asChild
-                                isActive={pathname === subItem.url}
+                                isActive={
+                                  pathname === subItem.url ||
+                                  (subItem.url !== "/admin" &&
+                                    pathname.startsWith(`${subItem.url}/`))
+                                }
                               >
-                                <a href={subItem.url}>{subItem.title}</a>
+                                <Link href={subItem.url} title={subItem.title}>
+                                  {subItem.title}
+                                </Link>
                               </SidebarMenuButton>
                             </SidebarMenuSubItem>
                           ))}
@@ -120,12 +128,18 @@ export function AppSidebar() {
       <SidebarFooter>
         <div className="flex flex-col gap-2">
           {user ? (
-            <Button variant="outline" className="w-full justify-start" asChild>
+            <SidebarMenuButton
+              asChild
+              variant="outline"
+              isActive={
+                pathname === "/profile" || pathname.startsWith("/profile/")
+              }
+            >
               <Link href="/profile" className="flex min-w-0 items-center gap-2">
                 <User className="size-4 shrink-0" aria-hidden />
                 <span className="truncate text-left text-sm">Profil</span>
               </Link>
-            </Button>
+            </SidebarMenuButton>
           ) : null}
           <Button
             variant="destructive"

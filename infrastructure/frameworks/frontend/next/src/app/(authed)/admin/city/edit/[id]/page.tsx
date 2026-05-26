@@ -42,8 +42,8 @@ export default async function AdminCityEditPage({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-3">
+    <>
+      <section className="space-y-3">
         <Button variant="outline" asChild>
           <Link href="/admin/city">
             <span className="flex items-center gap-2">
@@ -53,8 +53,8 @@ export default async function AdminCityEditPage({
           </Link>
         </Button>
         <h1 className="text-2xl font-semibold">Modifier : {city.name}</h1>
-      </div>
+      </section>
       <CityEditForm city={city} countries={countries} />
-    </div>
+    </>
   );
 }

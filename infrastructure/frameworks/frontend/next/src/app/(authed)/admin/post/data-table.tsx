@@ -242,8 +242,8 @@ export function PostAdmin() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between gap-3">
+    <>
+      <section id="information" className="flex items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">Liste des posts</h1>
         <Button asChild>
           <Link href="/admin/post/new">
@@ -253,7 +253,7 @@ export function PostAdmin() {
             </span>
           </Link>
         </Button>
-      </div>
+      </section>
 
       <ApiDataTable
         title="Posts actifs"
@@ -395,6 +395,6 @@ export function PostAdmin() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

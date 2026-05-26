@@ -13,5 +13,5 @@ export const metadata: Metadata = {
 };
 
 export default function ProfileLayout({ children }: { children: ReactNode }) {
-  return children;
+  return <div className="container mx-auto p-4 space-y-8">{children}</div>;
 }

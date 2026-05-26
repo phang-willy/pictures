@@ -17,8 +17,8 @@ export default async function AdminCountryNewPage() {
   );
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-4">
+    <>
+      <section className="space-y-4">
         <Button variant="outline" asChild>
           <Link href="/admin/country">
             <span className="flex items-center gap-2">
@@ -28,9 +28,9 @@ export default async function AdminCountryNewPage() {
           </Link>
         </Button>
         <h1 className="text-2xl font-semibold">Nouveau pays</h1>
-      </div>
+      </section>
 
       <CountryNewForm continents={continents} />
-    </div>
+    </>
   );
 }

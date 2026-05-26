@@ -275,224 +275,226 @@ export function CountryEditForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Champs</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {existsFetchError ? (
-            <Alert variant="destructive" className="mb-4">
-              <AlertCircleIcon />
-              <AlertTitle>Erreur</AlertTitle>
-              <AlertDescription>
-                Impossible de vérifier les doublons. Réessayez ou
-                reconnectez-vous.
-              </AlertDescription>
-            </Alert>
-          ) : null}
-          {existsResult?.exists ? (
-            <Alert variant="destructive" className="mb-4">
-              <AlertCircleIcon />
-              <AlertTitle>Conflit</AlertTitle>
-              <AlertDescription className="space-y-2">
-                {existsResult.match && existsResult.match.id !== country.id ? (
-                  <p>
-                    <strong>
-                      {existsResult.match.name} ({existsResult.match.iso2}
-                      {existsResult.match.iso3
-                        ? ` / ${existsResult.match.iso3}`
-                        : ""}
-                      )
-                    </strong>{" "}
-                    utilise déjà l’un des champs :{" "}
-                    {existsResult.conflicts.join(", ")}.
-                  </p>
-                ) : (
-                  <p>
-                    Champs en conflit : {existsResult.conflicts.join(", ")}.
-                  </p>
-                )}
-              </AlertDescription>
-            </Alert>
-          ) : null}
-          <FieldSet>
-            <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="country-name">Nom</FieldLabel>
-                <FieldContent>
-                  <Input
-                    id="country-name"
-                    name="name"
-                    value={name}
-                    onChange={(ev) => setName(ev.target.value)}
-                    required
-                    maxLength={120}
-                    autoComplete="off"
-                  />
-                </FieldContent>
-              </Field>
+    <section>
+      <form onSubmit={onSubmit} className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Champs</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {existsFetchError ? (
+              <Alert variant="destructive" className="mb-4">
+                <AlertCircleIcon />
+                <AlertTitle>Erreur</AlertTitle>
+                <AlertDescription>
+                  Impossible de vérifier les doublons. Réessayez ou
+                  reconnectez-vous.
+                </AlertDescription>
+              </Alert>
+            ) : null}
+            {existsResult?.exists ? (
+              <Alert variant="destructive" className="mb-4">
+                <AlertCircleIcon />
+                <AlertTitle>Conflit</AlertTitle>
+                <AlertDescription className="space-y-2">
+                  {existsResult.match && existsResult.match.id !== country.id ? (
+                    <p>
+                      <strong>
+                        {existsResult.match.name} ({existsResult.match.iso2}
+                        {existsResult.match.iso3
+                          ? ` / ${existsResult.match.iso3}`
+                          : ""}
+                        )
+                      </strong>{" "}
+                      utilise déjà l’un des champs :{" "}
+                      {existsResult.conflicts.join(", ")}.
+                    </p>
+                  ) : (
+                    <p>
+                      Champs en conflit : {existsResult.conflicts.join(", ")}.
+                    </p>
+                  )}
+                </AlertDescription>
+              </Alert>
+            ) : null}
+            <FieldSet>
+              <FieldGroup>
+                <Field>
+                  <FieldLabel htmlFor="country-name">Nom</FieldLabel>
+                  <FieldContent>
+                    <Input
+                      id="country-name"
+                      name="name"
+                      value={name}
+                      onChange={(ev) => setName(ev.target.value)}
+                      required
+                      maxLength={120}
+                      autoComplete="off"
+                    />
+                  </FieldContent>
+                </Field>
 
-              <Field>
-                <FieldLabel htmlFor="country-iso2">Code ISO 2</FieldLabel>
-                <FieldContent>
-                  <Input
-                    id="country-iso2"
-                    name="iso2"
-                    value={iso2}
-                    onChange={(ev) => setiso2(ev.target.value.toUpperCase())}
-                    required
-                    maxLength={2}
-                    minLength={2}
-                    autoComplete="off"
-                  />
-                </FieldContent>
-              </Field>
+                <Field>
+                  <FieldLabel htmlFor="country-iso2">Code ISO 2</FieldLabel>
+                  <FieldContent>
+                    <Input
+                      id="country-iso2"
+                      name="iso2"
+                      value={iso2}
+                      onChange={(ev) => setiso2(ev.target.value.toUpperCase())}
+                      required
+                      maxLength={2}
+                      minLength={2}
+                      autoComplete="off"
+                    />
+                  </FieldContent>
+                </Field>
 
-              <Field>
-                <FieldLabel htmlFor="country-iso3">Code ISO 3</FieldLabel>
-                <FieldContent>
-                  <Input
-                    id="country-iso3"
-                    name="iso3"
-                    value={iso3}
-                    onChange={(ev) => setiso3(ev.target.value.toUpperCase())}
-                    maxLength={3}
-                    placeholder="Optionnel"
-                    autoComplete="off"
-                  />
-                </FieldContent>
-              </Field>
+                <Field>
+                  <FieldLabel htmlFor="country-iso3">Code ISO 3</FieldLabel>
+                  <FieldContent>
+                    <Input
+                      id="country-iso3"
+                      name="iso3"
+                      value={iso3}
+                      onChange={(ev) => setiso3(ev.target.value.toUpperCase())}
+                      maxLength={3}
+                      placeholder="Optionnel"
+                      autoComplete="off"
+                    />
+                  </FieldContent>
+                </Field>
 
-              <Field>
-                <FieldLabel htmlFor="country-slug">Slug</FieldLabel>
-                <FieldContent>
-                  <Input
-                    id="country-slug"
-                    name="slug"
-                    value={slug}
-                    onChange={(ev) =>
-                      setSlug(ev.target.value.trim().toLowerCase())
-                    }
-                    required
-                    maxLength={150}
-                    autoComplete="off"
-                    className="font-mono lowercase"
-                  />
-                </FieldContent>
-              </Field>
+                <Field>
+                  <FieldLabel htmlFor="country-slug">Slug</FieldLabel>
+                  <FieldContent>
+                    <Input
+                      id="country-slug"
+                      name="slug"
+                      value={slug}
+                      onChange={(ev) =>
+                        setSlug(ev.target.value.trim().toLowerCase())
+                      }
+                      required
+                      maxLength={150}
+                      autoComplete="off"
+                      className="font-mono lowercase"
+                    />
+                  </FieldContent>
+                </Field>
 
-              <Field>
-                <FieldLabel htmlFor="country-continent">Continent</FieldLabel>
-                <FieldContent>
-                  <Select
-                    value={continentId}
-                    onValueChange={setContinentId}
-                    name="continentId"
-                  >
-                    <SelectTrigger
-                      id="country-continent"
+                <Field>
+                  <FieldLabel htmlFor="country-continent">Continent</FieldLabel>
+                  <FieldContent>
+                    <Select
+                      value={continentId}
+                      onValueChange={setContinentId}
                       name="continentId"
-                      className="w-full max-w-none"
-                      size="default"
                     >
-                      <SelectValue placeholder="Choisir un continent" />
-                    </SelectTrigger>
-                    <SelectContent
-                      position="popper"
-                      className="w-(--radix-select-trigger-width)"
-                    >
-                      {continents.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>
-                          {c.name} ({c.code})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FieldContent>
-              </Field>
-            </FieldGroup>
-          </FieldSet>
-        </CardContent>
-      </Card>
+                      <SelectTrigger
+                        id="country-continent"
+                        name="continentId"
+                        className="w-full max-w-none"
+                        size="default"
+                      >
+                        <SelectValue placeholder="Choisir un continent" />
+                      </SelectTrigger>
+                      <SelectContent
+                        position="popper"
+                        className="w-(--radix-select-trigger-width)"
+                      >
+                        {continents.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>
+                            {c.name} ({c.code})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FieldContent>
+                </Field>
+              </FieldGroup>
+            </FieldSet>
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Géométrie</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Field>
-            <FieldTitle>Type</FieldTitle>
-            <FieldContent>
-              <Select
-                value={geomType}
-                onValueChange={onGeometryTypeSelect}
-                name="geomType"
-              >
-                <SelectTrigger
-                  id="country-geom-type"
+        <Card>
+          <CardHeader>
+            <CardTitle>Géométrie</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Field>
+              <FieldTitle>Type</FieldTitle>
+              <FieldContent>
+                <Select
+                  value={geomType}
+                  onValueChange={onGeometryTypeSelect}
                   name="geomType"
-                  className="w-full max-w-none"
-                  aria-invalid={geometryJsonError ? true : undefined}
                 >
-                  <SelectValue placeholder="Type de géométrie" />
-                </SelectTrigger>
-                <SelectContent
-                  position="popper"
-                  className="w-(--radix-select-trigger-width)"
-                >
-                  <SelectItem value="Polygon">Polygon</SelectItem>
-                  <SelectItem value="MultiPolygon">MultiPolygon</SelectItem>
-                </SelectContent>
-              </Select>
-            </FieldContent>
-          </Field>
+                  <SelectTrigger
+                    id="country-geom-type"
+                    name="geomType"
+                    className="w-full max-w-none"
+                    aria-invalid={geometryJsonError ? true : undefined}
+                  >
+                    <SelectValue placeholder="Type de géométrie" />
+                  </SelectTrigger>
+                  <SelectContent
+                    position="popper"
+                    className="w-(--radix-select-trigger-width)"
+                  >
+                    <SelectItem value="Polygon">Polygon</SelectItem>
+                    <SelectItem value="MultiPolygon">MultiPolygon</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FieldContent>
+            </Field>
 
-          <Field data-invalid={geometryJsonError ? true : undefined}>
-            <FieldTitle>Tracé sur le globe 3D</FieldTitle>
-            <FieldContent className="space-y-2">
-              <CountryGeometryGlobeDrawEditor
-                key={`${country.id}-${geomType}`}
-                geometryType={geomType}
-                geomJson={geomJson}
-                onGeomJsonChange={setGeomJson}
-                ariaLabel={`Édition géométrie ${name || country.name} sur le globe`}
-              />
-              <FieldError>{geometryJsonError}</FieldError>
-            </FieldContent>
-          </Field>
-        </CardContent>
-      </Card>
+            <Field data-invalid={geometryJsonError ? true : undefined}>
+              <FieldTitle>Tracé sur le globe 3D</FieldTitle>
+              <FieldContent className="space-y-2">
+                <CountryGeometryGlobeDrawEditor
+                  key={`${country.id}-${geomType}`}
+                  geometryType={geomType}
+                  geomJson={geomJson}
+                  onGeomJsonChange={setGeomJson}
+                  ariaLabel={`Édition géométrie ${name || country.name} sur le globe`}
+                />
+                <FieldError>{geometryJsonError}</FieldError>
+              </FieldContent>
+            </Field>
+          </CardContent>
+        </Card>
 
-      {submitError ? (
-        <p className="text-sm text-destructive" role="alert">
-          {submitError}
-        </p>
-      ) : null}
-      {success ? (
-        <p className="text-sm text-muted-foreground">
-          Modifications enregistrées.
-        </p>
-      ) : null}
+        {submitError ? (
+          <p className="text-sm text-destructive" role="alert">
+            {submitError}
+          </p>
+        ) : null}
+        {success ? (
+          <p className="text-sm text-muted-foreground">
+            Modifications enregistrées.
+          </p>
+        ) : null}
 
-      <div className="flex flex-wrap gap-2">
-        <Button
-          type="submit"
-          disabled={
-            saving ||
-            !!geometryJsonError ||
-            existsLoading ||
-            existsFetchError ||
-            !existsResult ||
-            existsResult.exists
-          }
-        >
-          {saving ? "Enregistrement…" : "Enregistrer"}
-        </Button>
-        <Button type="button" variant="outline" asChild>
-          <Link href={`/admin/country/view/${country.id}`}>Voir le détail</Link>
-        </Button>
-      </div>
-    </form>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="submit"
+            disabled={
+              saving ||
+              !!geometryJsonError ||
+              existsLoading ||
+              existsFetchError ||
+              !existsResult ||
+              existsResult.exists
+            }
+          >
+            {saving ? "Enregistrement…" : "Enregistrer"}
+          </Button>
+          <Button type="button" variant="outline" asChild>
+            <Link href={`/admin/country/view/${country.id}`}>Voir le détail</Link>
+          </Button>
+        </div>
+      </form>
+    </section>
   );
 }

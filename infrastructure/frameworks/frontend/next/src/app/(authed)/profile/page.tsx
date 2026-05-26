@@ -5,10 +5,13 @@ import { ProfileInfoCard } from "@/app/(authed)/profile/profile-info-card";
 
 const ProfilePage = () => {
   return (
-    <section className="w-full container mx-auto px-4 py-8 space-y-8">
+    <>
+      <section id="information" className="flex items-center justify-between gap-3">
+        <h1 className="text-2xl font-semibold">Profil</h1>
+      </section>
       <ProfileInfoCard />
       <ProfileChangePasswordCard />
-    </section>
+    </>
   );
 };
 

@@ -30,8 +30,8 @@ export default async function AdminCityViewPage({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-3">
+    <>
+      <section className="space-y-3">
         <Button variant="outline" asChild>
           <Link href="/admin/city">
             <span className="flex items-center gap-2">
@@ -41,57 +41,59 @@ export default async function AdminCityViewPage({
           </Link>
         </Button>
         <h1 className="text-2xl font-semibold">{city.name}</h1>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Informations</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <dl>
-            <DetailRow label="ID" value={city.id} />
-            <DetailRow
-              label="Pays"
-              value={
-                <CountryFlag name={city.country.name} iso2={city.country.iso2} />
-              }
+      </section>
+      <section>
+        <Card>
+          <CardHeader>
+            <CardTitle>Informations</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <dl>
+              <DetailRow label="ID" value={city.id} />
+              <DetailRow
+                label="Pays"
+                value={
+                  <CountryFlag name={city.country.name} iso2={city.country.iso2} />
+                }
+              />
+              <DetailRow label="Nom" value={city.name} />
+              <DetailRow label="Slug" value={city.slug} />
+              <DetailRow label="Latitude" value={city.latitude.toFixed(6)} />
+              <DetailRow label="Longitude" value={city.longitude.toFixed(6)} />
+              <DetailRow
+                label="Créé le"
+                value={formatDate(city.createdAt, { mode: "date-hour" })}
+              />
+              <DetailRow
+                label="Mis à jour le"
+                value={formatDate(city.updatedAt, { mode: "date-hour" })}
+              />
+              <DetailRow
+                label="Désactivé le"
+                value={
+                  city.deactivatedAt
+                    ? formatDate(city.deactivatedAt, { mode: "date-hour" })
+                    : "-"
+                }
+              />
+            </dl>
+          </CardContent>
+        </Card>
+      </section>
+      <section>
+        <Card>
+          <CardHeader>
+            <CardTitle>Carte</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CityPointMap
+              latitude={city.latitude}
+              longitude={city.longitude}
+              ariaLabel={`Carte de la ville ${city.name}`}
             />
-            <DetailRow label="Nom" value={city.name} />
-            <DetailRow label="Slug" value={city.slug} />
-            <DetailRow label="Latitude" value={city.latitude.toFixed(6)} />
-            <DetailRow label="Longitude" value={city.longitude.toFixed(6)} />
-            <DetailRow
-              label="Créé le"
-              value={formatDate(city.createdAt, { mode: "date-hour" })}
-            />
-            <DetailRow
-              label="Mis à jour le"
-              value={formatDate(city.updatedAt, { mode: "date-hour" })}
-            />
-            <DetailRow
-              label="Désactivé le"
-              value={
-                city.deactivatedAt
-                  ? formatDate(city.deactivatedAt, { mode: "date-hour" })
-                  : "-"
-              }
-            />
-          </dl>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Carte</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CityPointMap
-            latitude={city.latitude}
-            longitude={city.longitude}
-            ariaLabel={`Carte de la ville ${city.name}`}
-          />
-        </CardContent>
-      </Card>
-    </div>
+          </CardContent>
+        </Card>
+      </section>
+    </>
   );
 }

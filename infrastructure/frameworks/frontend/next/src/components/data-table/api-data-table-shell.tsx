@@ -75,7 +75,7 @@ export function ApiDataTableToolbar(_props: ToolbarProps) {
   } = _props;
 
   return (
-    <div className="flex flex-col md:flex-row items-center justify-between gap-2">
+    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
       {showSearch && searchField ? (
         <Input
           placeholder={searchField.placeholder}
@@ -83,7 +83,7 @@ export function ApiDataTableToolbar(_props: ToolbarProps) {
           name={searchField.name}
           value={searchInput}
           onChange={(event) => onSearchInputChange(event.target.value)}
-          className={searchField.className ?? "max-w-md"}
+          className={searchField.className ?? "md:max-w-md"}
           disabled={searchDisabled}
         />
       ) : null}

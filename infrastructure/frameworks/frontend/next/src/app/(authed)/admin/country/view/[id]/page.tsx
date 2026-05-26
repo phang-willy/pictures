@@ -32,8 +32,8 @@ export default async function AdminCountryViewPage({
   const continentLabel = `${country.continent.name} (${country.continent.code})`;
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-3">
+    <>
+      <section className="space-y-3">
         <Button variant="outline" asChild>
           <Link href="/admin/country">
             <span className="flex items-center gap-2">
@@ -43,56 +43,60 @@ export default async function AdminCountryViewPage({
           </Link>
         </Button>
         <h1 className="text-2xl font-semibold">{country.name}</h1>
-      </div>
+      </section>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Informations</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <dl>
-            <DetailRow label="ID" value={country.id} />
-            <DetailRow label="Continent" value={continentLabel} />
-            <DetailRow
-              label="Nom"
-              value={<CountryFlag name={country.name} iso2={country.iso2} />}
-            />
-            <DetailRow label="Slug" value={country.slug} />
-            <DetailRow label="ISO 2" value={country.iso2} />
-            <DetailRow label="ISO 3" value={country.iso3 ?? "-"} />
-            <DetailRow
-              label="Créé le"
-              value={formatDate(country.createdAt, { mode: "date-hour" })}
-            />
-            <DetailRow
-              label="Mis à jour le"
-              value={formatDate(country.updatedAt, { mode: "date-hour" })}
-            />
-            <DetailRow
-              label="Désactivé le"
-              value={
-                country.deactivatedAt
-                  ? formatDate(country.deactivatedAt, { mode: "date-hour" })
-                  : "-"
-              }
-            />
-          </dl>
-        </CardContent>
-      </Card>
+      <section>
+        <Card>
+          <CardHeader>
+            <CardTitle>Informations</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <dl>
+              <DetailRow label="ID" value={country.id} />
+              <DetailRow label="Continent" value={continentLabel} />
+              <DetailRow
+                label="Nom"
+                value={<CountryFlag name={country.name} iso2={country.iso2} />}
+              />
+              <DetailRow label="Slug" value={country.slug} />
+              <DetailRow label="ISO 2" value={country.iso2} />
+              <DetailRow label="ISO 3" value={country.iso3 ?? "-"} />
+              <DetailRow
+                label="Créé le"
+                value={formatDate(country.createdAt, { mode: "date-hour" })}
+              />
+              <DetailRow
+                label="Mis à jour le"
+                value={formatDate(country.updatedAt, { mode: "date-hour" })}
+              />
+              <DetailRow
+                label="Désactivé le"
+                value={
+                  country.deactivatedAt
+                    ? formatDate(country.deactivatedAt, { mode: "date-hour" })
+                    : "-"
+                }
+              />
+            </dl>
+          </CardContent>
+        </Card>
+      </section>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Carte</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <AdminGeometryMap
-            instanceId={country.id}
-            geometry={country.geometry}
-            ariaLabel={`Carte du pays ${country.name}`}
-            featureProperties={{ countryId: country.id, name: country.name }}
-          />
-        </CardContent>
-      </Card>
-    </div>
+      <section>
+        <Card>
+          <CardHeader>
+            <CardTitle>Carte</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <AdminGeometryMap
+              instanceId={country.id}
+              geometry={country.geometry}
+              ariaLabel={`Carte du pays ${country.name}`}
+              featureProperties={{ countryId: country.id, name: country.name }}
+            />
+          </CardContent>
+        </Card>
+      </section>
+    </>
   );
 }

@@ -237,8 +237,8 @@ export function CityAdmin() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between gap-3">
+    <>
+      <section className="flex items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">Liste des villes</h1>
         <Button asChild>
           <Link href="/admin/city/new">
@@ -248,7 +248,7 @@ export function CityAdmin() {
             </span>
           </Link>
         </Button>
-      </div>
+      </section>
 
       <ApiDataTable
         title="Villes actives"
@@ -390,6 +390,6 @@ export function CityAdmin() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

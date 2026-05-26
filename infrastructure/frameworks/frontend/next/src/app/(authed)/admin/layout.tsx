@@ -13,5 +13,5 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
-  return <div className="container mx-auto p-4">{children}</div>;
+  return <div className="container mx-auto p-4 space-y-8">{children}</div>;
 }

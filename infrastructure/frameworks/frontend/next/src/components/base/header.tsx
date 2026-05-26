@@ -1,10 +1,10 @@
 "use client";
 
 import { appName } from "@/config/app-name";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ModeToggle } from "@/components/toggle-theme";
+import Logo from "@/components/logo";
 
 const navItems = [
   {
@@ -35,14 +35,7 @@ export default function BaseHeader() {
       <div className="container mx-auto flex items-center justify-between gap-4 p-4 xl:h-full">
         <div className="flex items-center gap-4">
           <Link href="/" className="block p-2">
-            <Image
-              src="/logo.webp"
-              alt={`Logo - ${appName}`}
-              width={16}
-              height={16}
-              className="h-4 w-4"
-              loading="lazy"
-            />
+            <Logo />
             <span className="sr-only">{appName}</span>
           </Link>
           {navItems.map((item) => {
